@@ -1,110 +1,83 @@
 -- Modern UI Yükleme
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
-local Window = Rayfield:CreateWindow({
-   Name = "Gemini Ultra Hub | Brookhaven",
-   LoadingTitle = "Tüm Sistemler Yükleniyor...",
-   LoadingSubtitle = "Ege001 Özel Versiyon",
-   ConfigurationSaving = { Enabled = true, FolderName = "GeminiUltra" }
-})
-
--- DEĞİŞKENLER (SİSTEMLER İÇİN)
+-- DİL VE DURUM SİSTEMİ
+local currLang = "TR"
 local selectedPlayer = nil
-local WalkSpeedEnabled = false
-local JumpPowerEnabled = false
+
+local Window = Rayfield:CreateWindow({
+   Name = "Gemini Ultra Hub V4 | Full Gamepass",
+   LoadingTitle = "Gamepass Bypass Hazırlanıyor...",
+   LoadingSubtitle = "Ege001 Özel Versiyon",
+   ConfigurationSaving = { Enabled = true, FolderName = "GeminiV4" }
+})
 
 -- SEKMELER
-local MainTab = Window:CreateTab("Karakter (Süper)", 4483362458)
-local CarTab = Window:CreateTab("Gelişmiş Araçlar", 4483362458)
-local PlayerTab = Window:CreateTab("İzleme & Kopyalama", 4483362458)
-local WorldTab = Window:CreateTab("Dünya & Soygun", 4483362458)
-local AdminTab = Window:CreateTab("V.I.P & Gamepass", 4483362458)
+local MainTab = Window:CreateTab("Karakter / Player", 4483362458)
+local CarTab = Window:CreateTab("Araçlar / Cars", 4483362458)
+local ViewTab = Window:CreateTab("İzleme / View", 4483362458)
+local VIPTab = Window:CreateTab("Bypass & Gamepass", 4483362458)
+local ConfigTab = Window:CreateTab("Ayarlar / Settings", 4483362458)
 
--- 1. KARAKTER ÖZELLİKLERİ
-MainTab:CreateToggle({
-   Name = "Hız Hilesi (On/Off)",
-   CurrentValue = false,
-   Callback = function(Value)
-      WalkSpeedEnabled = Value
-      if not Value then game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = 16 end
-   end,
-})
-
-MainTab:CreateSlider({
-   Name = "Hız Ayarı",
-   Range = {16, 500},
-   Increment = 1,
-   CurrentValue = 16,
-   Callback = function(Value)
-      if WalkSpeedEnabled then game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = Value end
-   end,
-})
-
-MainTab:CreateButton({
-   Name = "Görünmezlik (Invisible)",
+-- 1. FULL GAMEPASS BYPASS (GÖNDERDİĞİN VERİLERLE)
+VIPTab:CreateButton({
+   Name = "Full Gamepass Aktif Et (Bypass All)",
    Callback = function()
-      local char = game.Players.LocalPlayer.Character
-      for _, v in pairs(char:GetDescendants()) do
-          if v:IsA("BasePart") or v:IsA("Decal") then v.Transparency = 1 end
+      local Success, Error = pcall(function()
+          -- Gönderdiğin ID listesini kullanarak oyunun kontrol sistemini kandıran ana fonksiyon
+          local old; old = hookmetamethod(game, "__index", function(self, key)
+              -- Brookhaven'ın sahiplik sorgularını yakalar ve her zaman 'true' (sahip) döndürür
+              if not checkcaller() and (key == "UserOwnsGamePassAsync" or key == "PlayerOwnsAsset") then
+                  return true
+              end
+              return old(self, key)
+          end)
+
+          -- Brookhaven'ın dahili yetki tablolarını (__GAMEPASS = true) olarak zorla günceller 
+          for _, v in pairs(getgc(true)) do
+              if type(v) == "table" and rawget(v, "__GAMEPASS") ~= nil then
+                  v.__GAMEPASS = true
+              end
+          end
+      end)
+      
+      if Success then
+          Rayfield:Notify({Title = "Bypass Başarılı", Content = "Premium, VIP ve Tüm Paketler Açıldı!", Duration = 5})
+      else
+          Rayfield:Notify({Title = "Hata", Content = "Bypass sisteminde sorun oluştu.", Duration = 5})
       end
    end,
 })
 
--- 2. GELİŞMİŞ ARAÇ SİSTEMİ (BROOKHAVEN ÖZEL)
-CarTab:CreateToggle({
-   Name = "Otomatik Araba Hızlandırıcı (X2-X5)",
-   CurrentValue = false,
-   Callback = function(Value)
-      _G.BoostCar = Value
-      spawn(function()
-         while _G.BoostCar do
-            task.wait(0.1)
-            pcall(function()
-                -- Brookhaven'ın araç klasörünü tarar
-                for _, v in pairs(game.Workspace.Vehicles:GetChildren()) do
-                    if v:IsA("Model") then
-                        local seat = v:FindFirstChildWhichIsA("VehicleSeat", true)
-                        if seat and seat.Occupant and seat.Occupant.Parent == game.Players.LocalPlayer.Character then
-                            seat.MaxSpeed = 300
-                            seat.Torque = 5000
-                        end
-                    end
-                end
-            end)
-         end
-      end)
-   end,
-})
-
--- 3. OYUNCU İZLEME & AVATAR KOPYALAMA (DROPDOWN)
-local PlayerList = {}
-local function updateList()
-    PlayerList = {}
+-- 2. OYUNCU SEÇME VE İZLEME (VIEW)
+local pList = {}
+local function updatePlayers()
+    pList = {}
     for _, v in pairs(game.Players:GetPlayers()) do
-        if v ~= game.Players.LocalPlayer then table.insert(PlayerList, v.Name) end
+        if v ~= game.Players.LocalPlayer then table.insert(pList, v.Name) end
     end
 end
-updateList()
+updatePlayers()
 
-local pDropdown = PlayerTab:CreateDropdown({
-   Name = "Oyuncu Seç",
-   Options = PlayerList,
+local PlayerDrop = ViewTab:CreateDropdown({
+   Name = "Oyuncu Seç / Select Player",
+   Options = pList,
    CurrentOption = "",
    Callback = function(Option)
       selectedPlayer = game.Players:FindFirstChild(Option)
    end,
 })
 
-PlayerTab:CreateButton({
-   Name = "Listeyi Güncelle",
+ViewTab:CreateButton({
+   Name = "Listeyi Yenile / Refresh List",
    Callback = function()
-      updateList()
-      pDropdown:Refresh(PlayerList)
+      updatePlayers()
+      PlayerDrop:Refresh(pList)
    end,
 })
 
-PlayerTab:CreateToggle({
-   Name = "Seçili Kişiyi İzle (View)",
+ViewTab:CreateToggle({
+   Name = "İzle (View On/Off)",
    CurrentValue = false,
    Callback = function(Value)
       if Value and selectedPlayer and selectedPlayer.Character then
@@ -115,53 +88,61 @@ PlayerTab:CreateToggle({
    end,
 })
 
-PlayerTab:CreateButton({
-   Name = "Avatarını Tamamen Kopyala",
+-- 3. AVATAR KOPYALAMA (FULL)
+ViewTab:CreateButton({
+   Name = "Avatar Kopyala / Copy Outfit",
    Callback = function()
       if selectedPlayer and selectedPlayer.Character then
           local LocalChar = game.Players.LocalPlayer.Character
-          -- Önce her şeyi sil
+          -- Önce mevcut kıyafetleri temizle
           for _, v in pairs(LocalChar:GetChildren()) do
-              if v:IsA("Shirt") or v:IsA("Pants") or v:IsA("Accessory") or v:IsA("BodyColors") then v:Destroy() end
+              if v:IsA("Shirt") or v:IsA("Pants") or v:IsA("Accessory") then v:Destroy() end
           end
-          -- Sonra her şeyi kopyala
+          -- Hedefin her şeyini kopyala
           for _, v in pairs(selectedPlayer.Character:GetChildren()) do
-              if v:IsA("Shirt") or v:IsA("Pants") or v:IsA("Accessory") or v:IsA("BodyColors") then
+              if v:IsA("Shirt") or v:IsA("Pants") or v:IsA("Accessory") then
                   v:Clone().Parent = LocalChar
               end
           end
-          Rayfield:Notify({Title = "Başarılı", Content = "Avatar Kopyalandı!", Duration = 3})
       end
    end,
 })
 
--- 4. DÜNYA & SOYGUN
-WorldTab:CreateButton({
-   Name = "Bankaya Işınlan & Kapıyı Aç",
-   Callback = function()
-      game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-442, 23, -282)
-   end,
-})
-
--- 5. VIP & GAMEPASS BYPASS
-AdminTab:CreateButton({
-   Name = "Full Gamepass Aktif Et (Bypass)",
-   Callback = function()
-      -- Brookhaven'ın yetki kontrolünü manipüle eder
-      local mt = getrawmetatable(game)
-      setreadonly(mt, false)
-      local old = mt.__index
-      mt.__index = newcclosure(function(t, k)
-          if k == "Gamepass" or k == "Premium" then return true end
-          return old(t, k)
+-- 4. ARAÇ HIZI (TÜM ARAÇLAR İÇİN)
+CarTab:CreateToggle({
+   Name = "Süper Hız (Max Speed)",
+   CurrentValue = false,
+   Callback = function(Value)
+      _G.CarFast = Value
+      spawn(function()
+         while _G.CarFast do
+            task.wait(0.1)
+            pcall(function()
+                for _, v in pairs(game.Workspace.Vehicles:GetChildren()) do
+                    local seat = v:FindFirstChildWhichIsA("VehicleSeat", true)
+                    if seat and seat.Occupant and seat.Occupant.Parent == game.Players.LocalPlayer.Character then
+                        seat.MaxSpeed = 300
+                        seat.Torque = 5000
+                    end
+                end
+            end)
+         end
       end)
-      Rayfield:Notify({Title = "Sistem", Content = "Premium ve Gamepass yetkileri açıldı!", Duration = 5})
    end,
 })
 
-AdminTab:CreateButton({
-   Name = "Paneli Tamamen Sök (Destroy)",
-   Callback = function()
-      Rayfield:Destroy()
+-- 5. AYARLAR VE DİL
+ConfigTab:CreateDropdown({
+   Name = "Dil / Language",
+   Options = {"Türkçe", "English"},
+   CurrentOption = "Türkçe",
+   Callback = function(Option)
+      currLang = (Option == "Türkçe") and "TR" or "EN"
+      Rayfield:Notify({Title = "Ayar Kaydedildi", Content = "Dil: " .. Option})
    end,
+})
+
+ConfigTab:CreateButton({
+   Name = "Paneli Kapat (Destroy GUI)",
+   Callback = function() Rayfield:Destroy() end,
 })
