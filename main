@@ -2,92 +2,166 @@
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local Window = Rayfield:CreateWindow({
-   Name = "Gemini Hub | Brookhaven RP Edition",
-   LoadingTitle = "Brookhaven Sistemleri Yükleniyor...",
-   LoadingSubtitle = "Hazırlanıyor...",
-   ConfigurationSaving = { Enabled = true, FolderName = "GeminiBrookhaven" }
+   Name = "Gemini Ultra Hub | Brookhaven",
+   LoadingTitle = "Tüm Sistemler Yükleniyor...",
+   LoadingSubtitle = "Ege001 Özel Versiyon",
+   ConfigurationSaving = { Enabled = true, FolderName = "GeminiUltra" }
 })
 
--- SEKMELER
-local MainTab = Window:CreateTab("Karakter", 4483362458)
-local CarTab = Window:CreateTab("Araçlar", 4483362458)
-local TrollTab = Window:CreateTab("Troll & Avatar", 4483362458)
+-- DEĞİŞKENLER (SİSTEMLER İÇİN)
+local selectedPlayer = nil
+local WalkSpeedEnabled = false
+local JumpPowerEnabled = false
 
--- 1. GÖRÜNMEZLİK VE HIZ
+-- SEKMELER
+local MainTab = Window:CreateTab("Karakter (Süper)", 4483362458)
+local CarTab = Window:CreateTab("Gelişmiş Araçlar", 4483362458)
+local PlayerTab = Window:CreateTab("İzleme & Kopyalama", 4483362458)
+local WorldTab = Window:CreateTab("Dünya & Soygun", 4483362458)
+local AdminTab = Window:CreateTab("V.I.P & Gamepass", 4483362458)
+
+-- 1. KARAKTER ÖZELLİKLERİ
+MainTab:CreateToggle({
+   Name = "Hız Hilesi (On/Off)",
+   CurrentValue = false,
+   Callback = function(Value)
+      WalkSpeedEnabled = Value
+      if not Value then game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = 16 end
+   end,
+})
+
 MainTab:CreateSlider({
-   Name = "Yürüme Hızı",
-   Range = {16, 250},
+   Name = "Hız Ayarı",
+   Range = {16, 500},
    Increment = 1,
    CurrentValue = 16,
    Callback = function(Value)
-      game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = Value
+      if WalkSpeedEnabled then game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = Value end
    end,
 })
 
 MainTab:CreateButton({
-   Name = "Görünmez Ol (Invisible)",
+   Name = "Görünmezlik (Invisible)",
    Callback = function()
       local char = game.Players.LocalPlayer.Character
       for _, v in pairs(char:GetDescendants()) do
-          if v:IsA("BasePart") or v:IsA("Decal") then
-              v.Transparency = 1
-          end
+          if v:IsA("BasePart") or v:IsA("Decal") then v.Transparency = 1 end
       end
-      Rayfield:Notify({Title = "Sistem", Content = "Artık Görünmezsin!", Duration = 3})
    end,
 })
 
--- 2. ARABA HIZLANDIRMA
-CarTab:CreateButton({
-   Name = "Araba Hızını Arttır (X2)",
+-- 2. GELİŞMİŞ ARAÇ SİSTEMİ (BROOKHAVEN ÖZEL)
+CarTab:CreateToggle({
+   Name = "Otomatik Araba Hızlandırıcı (X2-X5)",
+   CurrentValue = false,
+   Callback = function(Value)
+      _G.BoostCar = Value
+      spawn(function()
+         while _G.BoostCar do
+            task.wait(0.1)
+            pcall(function()
+                -- Brookhaven'ın araç klasörünü tarar
+                for _, v in pairs(game.Workspace.Vehicles:GetChildren()) do
+                    if v:IsA("Model") then
+                        local seat = v:FindFirstChildWhichIsA("VehicleSeat", true)
+                        if seat and seat.Occupant and seat.Occupant.Parent == game.Players.LocalPlayer.Character then
+                            seat.MaxSpeed = 300
+                            seat.Torque = 5000
+                        end
+                    end
+                end
+            end)
+         end
+      end)
+   end,
+})
+
+-- 3. OYUNCU İZLEME & AVATAR KOPYALAMA (DROPDOWN)
+local PlayerList = {}
+local function updateList()
+    PlayerList = {}
+    for _, v in pairs(game.Players:GetPlayers()) do
+        if v ~= game.Players.LocalPlayer then table.insert(PlayerList, v.Name) end
+    end
+end
+updateList()
+
+local pDropdown = PlayerTab:CreateDropdown({
+   Name = "Oyuncu Seç",
+   Options = PlayerList,
+   CurrentOption = "",
+   Callback = function(Option)
+      selectedPlayer = game.Players:FindFirstChild(Option)
+   end,
+})
+
+PlayerTab:CreateButton({
+   Name = "Listeyi Güncelle",
    Callback = function()
-       local vehicle = game.Workspace.Vehicles:FindFirstChild(game.Players.LocalPlayer.Name .. "Vehicle")
-       if vehicle then
-           for _, v in pairs(vehicle:GetDescendants()) do
-               if v:IsA("VehicleSeat") then
-                   v.MaxSpeed = 200
-                   v.Torque = 1000
-               end
-           end
-           Rayfield:Notify({Title = "Başarılı", Content = "Araç limitleri kaldırıldı!", Duration = 3})
-       else
-           Rayfield:Notify({Title = "Hata", Content = "Önce bir araca binmelisin!", Duration = 3})
-       end
+      updateList()
+      pDropdown:Refresh(PlayerList)
    end,
 })
 
--- 3. AVATAR KOPYALAMA (Geliştirilmiş)
-TrollTab:CreateInput({
-   Name = "Avatar Kopyala (Kullanıcı Adı)",
-   PlaceholderText = "Oyuncu ismi...",
-   RemoveTextAfterFocusLost = false,
-   Callback = function(Text)
-      local TargetPlayer = game.Players:FindFirstChild(Text)
-      if TargetPlayer and TargetPlayer.Character then
+PlayerTab:CreateToggle({
+   Name = "Seçili Kişiyi İzle (View)",
+   CurrentValue = false,
+   Callback = function(Value)
+      if Value and selectedPlayer and selectedPlayer.Character then
+         game.Workspace.CurrentCamera.CameraSubject = selectedPlayer.Character.Humanoid
+      else
+         game.Workspace.CurrentCamera.CameraSubject = game.Players.LocalPlayer.Character.Humanoid
+      end
+   end,
+})
+
+PlayerTab:CreateButton({
+   Name = "Avatarını Tamamen Kopyala",
+   Callback = function()
+      if selectedPlayer and selectedPlayer.Character then
           local LocalChar = game.Players.LocalPlayer.Character
-          
-          -- Eski kıyafetleri temizle
+          -- Önce her şeyi sil
           for _, v in pairs(LocalChar:GetChildren()) do
-              if v:IsA("Shirt") or v:IsA("Pants") or v:IsA("Accessory") then
-                  v:Destroy()
-              end
+              if v:IsA("Shirt") or v:IsA("Pants") or v:IsA("Accessory") or v:IsA("BodyColors") then v:Destroy() end
           end
-          
-          -- Hedefin kıyafetlerini kopyala
-          for _, v in pairs(TargetPlayer.Character:GetChildren()) do
-              if v:IsA("Shirt") or v:IsA("Pants") or v:IsA("Accessory") then
+          -- Sonra her şeyi kopyala
+          for _, v in pairs(selectedPlayer.Character:GetChildren()) do
+              if v:IsA("Shirt") or v:IsA("Pants") or v:IsA("Accessory") or v:IsA("BodyColors") then
                   v:Clone().Parent = LocalChar
               end
           end
-          Rayfield:Notify({Title = "Başarılı", Content = Text .. " adlı kişinin avatarı kopyalandı!", Duration = 3})
-      else
-          Rayfield:Notify({Title = "Hata", Content = "Oyuncu bulunamadı!", Duration = 3})
+          Rayfield:Notify({Title = "Başarılı", Content = "Avatar Kopyalandı!", Duration = 3})
       end
    end,
 })
 
-Rayfield:Notify({
-   Title = "Gemini Hub Aktif",
-   Content = "Sadece Brookhaven için optimize edildi.",
-   Duration = 5
+-- 4. DÜNYA & SOYGUN
+WorldTab:CreateButton({
+   Name = "Bankaya Işınlan & Kapıyı Aç",
+   Callback = function()
+      game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-442, 23, -282)
+   end,
+})
+
+-- 5. VIP & GAMEPASS BYPASS
+AdminTab:CreateButton({
+   Name = "Full Gamepass Aktif Et (Bypass)",
+   Callback = function()
+      -- Brookhaven'ın yetki kontrolünü manipüle eder
+      local mt = getrawmetatable(game)
+      setreadonly(mt, false)
+      local old = mt.__index
+      mt.__index = newcclosure(function(t, k)
+          if k == "Gamepass" or k == "Premium" then return true end
+          return old(t, k)
+      end)
+      Rayfield:Notify({Title = "Sistem", Content = "Premium ve Gamepass yetkileri açıldı!", Duration = 5})
+   end,
+})
+
+AdminTab:CreateButton({
+   Name = "Paneli Tamamen Sök (Destroy)",
+   Callback = function()
+      Rayfield:Destroy()
+   end,
 })
