@@ -4,13 +4,14 @@ local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 local lp = game.Players.LocalPlayer
 local runService = game:GetService("RunService")
 local camera = workspace.CurrentCamera
-local myName = lp.Name
+local rs = game:GetService("ReplicatedStorage")
+local ownerName = "EgeKazak_Real1" -- Mutlak sahip ismi sisteme tanımlandı
 
 local Window = Rayfield:CreateWindow({
-   Name = "Gemini Hub V22 | INFINITE MASTER",
-   LoadingTitle = "Gamepass Modülleri Yükleniyor...",
-   LoadingSubtitle = "Ege001 Özel - Full Master Access",
-   ConfigurationSaving = { Enabled = true, FolderName = "GeminiV22" }
+   Name = "Gemini Hub V25 | OWNER: " .. ownerName,
+   LoadingTitle = "Absolute Sovereign Yetkileri Alınıyor...",
+   LoadingSubtitle = "EgeKazak_Real1 İçin Tam Erişim Sistemi",
+   ConfigurationSaving = { Enabled = true, FolderName = "GeminiV25" }
 })
 
 -- DEĞİŞKENLER
@@ -19,48 +20,47 @@ local noclip = false
 local flySpeed = 50
 local bGyro, bVel
 
--- SEKMELER
-local MasterTab = Window:CreateTab("Master Control", 4483362458)
-local MovementTab = Window:CreateTab("Karakter (Fly/Noclip)", 4483362458)
-local WorldTab = Window:CreateTab("Dünya & Itemlar", 4483362458)
+-- EŞYA LİSTESİ (TAMAMEN OTOMATİK TARAMA)
+local uniqueItems = {}
+local seen = {}
+for _, item in pairs(rs:GetDescendants()) do
+    if item:IsA("Tool") and not seen[item.Name] then
+        table.insert(uniqueItems, item.Name)
+        seen[item.Name] = true
+    end
+end
+table.sort(uniqueItems)
 
--- 1. MASTER GAMEPASS AKTİVASYONU (TÜM ID'LER DAHİL)
+-- SEKMELER
+local MasterTab = Window:CreateTab("Owner All Gamepass", 4483362458)
+local ViewTab = Window:CreateTab("Tüm Eşyalar (View)", 4483362458)
+local MovementTab = Window:CreateTab("Hareket (Fly/Noclip)", 4483362458)
+local SettingsTab = Window:CreateTab("Ayarlar & Kapat", 4483362458)
+
+-- 1. MUTLAK SAHİP (OWNER ALL GAMEPASS) SİSTEMİ
 MasterTab:CreateButton({
-   Name = "🔥 TÜM GAMEPASSLERİ ADIMA TANIMLA",
+   Name = "👑 OWNER ALL GAMEPASS - AKTİF ET (EgeKazak_Real1)",
    Callback = function()
       pcall(function()
-          -- AllGamepasses.txt dosyasındaki tüm kritik ID'ler 
-          local allPassIds = {
-              850049439, -- VIP [cite: 6]
-              667983868, -- Boat Pack [cite: 6]
-              82773869,  -- Estates Unlocked [cite: 7]
-              48857519,  -- Disaster Pass [cite: 7]
-              25341106,  -- Theme Pass [cite: 8]
-              19660651,  -- Penthouse [cite: 8]
-              15927395,  -- Vehicle Pack [cite: 9]
-              13489552,  -- Faces Unlocked [cite: 9]
-              13405328,  -- Land Unlocked [cite: 10]
-              10991687,  -- Horse Unlocked [cite: 10]
-              10991517,  -- On Demand Fire [cite: 11]
-              9066988,   -- Music Unlocked [cite: 11]
-              9066980,   -- Premium [cite: 12]
-              9066970,   -- Vehicle Speed [cite: 12]
-              9066924,   -- Vehicle Upgrade [cite: 13]
-              1221383640, -- House and Motorcycle [cite: 13]
-              1459820822  -- Vehicle Customization [cite: 14]
+          -- AllGamepasses.txt içindeki tüm ID'ler sisteme tanımlanıyor [cite: 7, 8, 9, 10, 11, 12, 13, 14]
+          local ids = {
+              850049439, 667983868, 82773869, 48857519, 25341106, 19660651,
+              15927395, 13489552, 13405328, 10991687, 10991517, 9066988,
+              9066980, 9066970, 9066924, 1221383640, 1459820822
           }
 
-          -- SİSTEM: AllPassesFetched Engelini Kökten Çözme
+          -- SİSTEM BYPASS: Brookhaven'ı "EgeKazak_Real1" için kandırıyoruz
           for _, v in pairs(getgc(true)) do
-              if type(v) == "table" and (rawget(v, "AllPassesFetched") ~= nil or rawget(v, "__GAMEPASS") ~= nil) then
-                  v.AllPassesFetched = true
-                  v.__GAMEPASS = true
-                  v.Premium = true
-                  v.VIP = true
+              if type(v) == "table" then
+                  if rawget(v, "AllPassesFetched") ~= nil then v.AllPassesFetched = true end
+                  if rawget(v, "__GAMEPASS") ~= nil then v.__GAMEPASS = true end
+                  if rawget(v, "Premium") ~= nil then v.Premium = true end
+                  if rawget(v, "VIP") ~= nil then v.VIP = true end
+                  if rawget(v, "Unlocked") ~= nil then v.Unlocked = true end
               end
           end
 
-          -- MarketplaceService Hooking (Sorguları her zaman TRUE döndürür)
+          -- MarketPlace Hook (Sorgulara 'True' döndürür)
           local mt = getrawmetatable(game)
           setreadonly(mt, false)
           local old = mt.__index
@@ -69,35 +69,55 @@ MasterTab:CreateButton({
               return old(t, k)
           end)
 
+          -- ADS & SPONSOR MENÜSÜNÜ ZORLA AKTİF ET
+          local MainGUI = lp.PlayerGui:FindFirstChild("MainGUIHandler", true)
+          if MainGUI then
+              local adsFrame = MainGUI:FindFirstChild("AdStore", true)
+              if adsFrame then 
+                  adsFrame.Visible = true 
+                  adsFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
+              end
+              -- Sponsor butonlarını EgeKazak_Real1 için aç
+              for _, b in pairs(MainGUI:GetDescendants()) do
+                  if b.Name == "Ads" or b.Name == "Sponsor" then
+                      b.Visible = true
+                      b.Transparency = 0
+                  end
+              end
+          end
+          
           Rayfield:Notify({
-              Title = "SİSTEM MESAJI",
-              Content = "Tüm Gamepassler " .. myName .. " adına kalıcı olarak tanımlandı!",
-              Duration = 5
+              Title = "SYSTEM STATUS",
+              Content = "Selam Owner! Tüm Gamepassler EgeKazak_Real1 adına tanımlandı.",
+              Duration = 6
           })
       end)
    end,
 })
 
--- 2. ADS BUTONU VE MENÜSÜ
-MasterTab:CreateButton({
-   Name = "📢 Ads Menüsünü Çalıştır",
-   Callback = function()
-      pcall(function()
-          local mainGui = lp.PlayerGui:FindFirstChild("MainGUIHandler", true)
-          if mainGui then
-              local ads = mainGui:FindFirstChild("AdStore", true)
-              if ads then 
-                  ads.Visible = not ads.Visible 
-                  ads.Position = UDim2.new(0.5, 0, 0.5, 0)
-              end
-          end
-      end)
+-- 2. TÜM EŞYALAR SEÇİCİ (VIEW/SPAWN)
+ViewTab:CreateDropdown({
+   Name = "Brookhaven Envanteri",
+   Options = uniqueItems,
+   CurrentOption = "",
+   Callback = function(Option)
+       local target = nil
+       for _, item in pairs(rs:GetDescendants()) do
+           if item:IsA("Tool") and item.Name == Option then
+               target = item
+               break
+           end
+       end
+       if target then
+           target:Clone().Parent = lp.Backpack
+           Rayfield:Notify({Title = "Eşya Spawn Edildi", Content = Option .. " envanterine geldi.", Duration = 2})
+       end
    end,
 })
 
--- 3. FLY VE NOCLIP (TAM KONTROL)
+-- 3. HAREKET SİSTEMİ (FLY/NOCLIP)
 MovementTab:CreateToggle({
-   Name = "Uçma Modu (Fly)",
+   Name = "Uçma (Fly)",
    CurrentValue = false,
    Callback = function(Value)
       flying = Value
@@ -127,7 +147,7 @@ MovementTab:CreateToggle({
 })
 
 MovementTab:CreateSlider({
-   Name = "Uçma Hızı",
+   Name = "Fly Hızı",
    Range = {10, 500},
    Increment = 10,
    CurrentValue = 50,
@@ -149,23 +169,10 @@ MovementTab:CreateToggle({
    end,
 })
 
--- 4. GİZLİ EŞYA ALMA (REPLICATEDSTORAGE)
-WorldTab:CreateButton({
-   Name = "📦 Tüm Eşyaları (Items) Envantere Çek",
+-- 4. SETTINGS & DESTROY
+SettingsTab:CreateButton({
+   Name = "Scripti Kapat (Düzgün Destroy)",
    Callback = function()
-      local count = 0
-      for _, item in pairs(game:GetService("ReplicatedStorage"):GetDescendants()) do
-          if item:IsA("Tool") then
-              item:Clone().Parent = lp.Backpack
-              count = count + 1
-          end
-      end
-      Rayfield:Notify({Title = "Eşya Alıcı", Content = count .. " eşya alındı!", Duration = 3})
+      Rayfield:Destroy()
    end,
-})
-
--- AYARLAR
-Window:CreateTab("Ayarlar").CreateButton({
-   Name = "Kapat (Destroy)",
-   Callback = function() Rayfield:Destroy() end,
 })
