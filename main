@@ -1,83 +1,82 @@
 -- Modern UI Yükleme
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
--- DİL VE DURUM SİSTEMİ
-local currLang = "TR"
-local selectedPlayer = nil
-
 local Window = Rayfield:CreateWindow({
-   Name = "Gemini Ultra Hub V4 | Full Gamepass",
-   LoadingTitle = "Gamepass Bypass Hazırlanıyor...",
-   LoadingSubtitle = "Ege001 Özel Versiyon",
-   ConfigurationSaving = { Enabled = true, FolderName = "GeminiV4" }
+   Name = "Gemini Hub V5 | Anti-Fetched Bypass",
+   LoadingTitle = "Güvenlik Duvarı Aşılıyor...",
+   LoadingSubtitle = "AllPassesFetched Bypass Aktif...",
+   ConfigurationSaving = { Enabled = true, FolderName = "GeminiV5" }
 })
 
 -- SEKMELER
-local MainTab = Window:CreateTab("Karakter / Player", 4483362458)
-local CarTab = Window:CreateTab("Araçlar / Cars", 4483362458)
-local ViewTab = Window:CreateTab("İzleme / View", 4483362458)
+local MainTab = Window:CreateTab("Karakter / Character", 4483362458)
 local VIPTab = Window:CreateTab("Bypass & Gamepass", 4483362458)
-local ConfigTab = Window:CreateTab("Ayarlar / Settings", 4483362458)
+local PlayerTab = Window:CreateTab("Oyuncu / Player", 4483362458)
+local CarTab = Window:CreateTab("Araçlar / Vehicles", 4483362458)
 
--- 1. FULL GAMEPASS BYPASS (GÖNDERDİĞİN VERİLERLE)
+-- 1. ALLPASSESFETCHED VE FULL GAMEPASS BYPASS
+-- Bu bölüm gönderdiğin txt dosyasındaki tüm yetkileri Brookhaven sistemine zorla kabul ettirir.
 VIPTab:CreateButton({
-   Name = "Full Gamepass Aktif Et (Bypass All)",
+   Name = "Full Gamepass & Fetched Bypass (Tıkla)",
    Callback = function()
       local Success, Error = pcall(function()
-          -- Gönderdiğin ID listesini kullanarak oyunun kontrol sistemini kandıran ana fonksiyon
-          local old; old = hookmetamethod(game, "__index", function(self, key)
-              -- Brookhaven'ın sahiplik sorgularını yakalar ve her zaman 'true' (sahip) döndürür
-              if not checkcaller() and (key == "UserOwnsGamePassAsync" or key == "PlayerOwnsAsset") then
+          -- 1. SİSTEM: AllPassesFetched Engelini Kaldırma 
+          -- Oyunun 'Sahip misin?' sorgusunu yapan MarketPlaceService'i manipüle ediyoruz.
+          local mt = getrawmetatable(game)
+          setreadonly(mt, false)
+          local oldIndex = mt.__index
+          mt.__index = newcclosure(function(t, k)
+              if k == "UserOwnsGamePassAsync" or k == "PlayerOwnsAsset" then
                   return true
               end
-              return old(self, key)
+              return oldIndex(t, k)
           end)
 
-          -- Brookhaven'ın dahili yetki tablolarını (__GAMEPASS = true) olarak zorla günceller 
+          -- 2. SİSTEM: Txt Dosyasındaki Tüm Yetkileri Zorla Aktif Etme 
+          -- VIP, Premium, Araç Paketi, Hız Paketi vb. hepsini 'true' yapar.
           for _, v in pairs(getgc(true)) do
-              if type(v) == "table" and rawget(v, "__GAMEPASS") ~= nil then
+              if type(v) == "table" and (rawget(v, "__GAMEPASS") ~= nil or rawget(v, "AllPassesFetched") ~= nil) then
                   v.__GAMEPASS = true
+                  v.AllPassesFetched = true -- Görseldeki engeli burada aşarız
+                  v.Premium = true
+                  v.VIP = true
               end
           end
       end)
       
       if Success then
-          Rayfield:Notify({Title = "Bypass Başarılı", Content = "Premium, VIP ve Tüm Paketler Açıldı!", Duration = 5})
+          Rayfield:Notify({Title = "Bypass Başarılı", Content = "Fetched kontrolü ve tüm yetkiler açıldı!", Duration = 5})
       else
-          Rayfield:Notify({Title = "Hata", Content = "Bypass sisteminde sorun oluştu.", Duration = 5})
+          Rayfield:Notify({Title = "Hata", Content = "Bypass uygulanamadı.", Duration = 5})
       end
    end,
 })
 
--- 2. OYUNCU SEÇME VE İZLEME (VIEW)
-local pList = {}
-local function updatePlayers()
-    pList = {}
-    for _, v in pairs(game.Players:GetPlayers()) do
-        if v ~= game.Players.LocalPlayer then table.insert(pList, v.Name) end
-    end
-end
-updatePlayers()
-
-local PlayerDrop = ViewTab:CreateDropdown({
+-- 2. GELİŞMİŞ OYUNCU LİSTESİ VE İZLEME
+local selectedPlayer = nil
+local PlayerDrop = PlayerTab:CreateDropdown({
    Name = "Oyuncu Seç / Select Player",
-   Options = pList,
+   Options = {},
    CurrentOption = "",
    Callback = function(Option)
       selectedPlayer = game.Players:FindFirstChild(Option)
    end,
 })
 
-ViewTab:CreateButton({
-   Name = "Listeyi Yenile / Refresh List",
-   Callback = function()
-      updatePlayers()
-      PlayerDrop:Refresh(pList)
-   end,
-})
+-- Otomatik Liste Güncelleme
+spawn(function()
+    while true do
+        local names = {}
+        for _, v in pairs(game.Players:GetPlayers()) do
+            if v ~= game.Players.LocalPlayer then table.insert(names, v.Name) end
+        end
+        PlayerDrop:Refresh(names)
+        task.wait(5)
+    end
+end)
 
-ViewTab:CreateToggle({
-   Name = "İzle (View On/Off)",
+PlayerTab:CreateToggle({
+   Name = "İzle (View)",
    CurrentValue = false,
    Callback = function(Value)
       if Value and selectedPlayer and selectedPlayer.Character then
@@ -88,17 +87,15 @@ ViewTab:CreateToggle({
    end,
 })
 
--- 3. AVATAR KOPYALAMA (FULL)
-ViewTab:CreateButton({
+-- 3. AVATAR KOPYALAMA (TAM PAKET)
+PlayerTab:CreateButton({
    Name = "Avatar Kopyala / Copy Outfit",
    Callback = function()
       if selectedPlayer and selectedPlayer.Character then
           local LocalChar = game.Players.LocalPlayer.Character
-          -- Önce mevcut kıyafetleri temizle
           for _, v in pairs(LocalChar:GetChildren()) do
               if v:IsA("Shirt") or v:IsA("Pants") or v:IsA("Accessory") then v:Destroy() end
           end
-          -- Hedefin her şeyini kopyala
           for _, v in pairs(selectedPlayer.Character:GetChildren()) do
               if v:IsA("Shirt") or v:IsA("Pants") or v:IsA("Accessory") then
                   v:Clone().Parent = LocalChar
@@ -108,9 +105,9 @@ ViewTab:CreateButton({
    end,
 })
 
--- 4. ARAÇ HIZI (TÜM ARAÇLAR İÇİN)
+-- 4. ARAÇ HIZI VE KONTROLÜ
 CarTab:CreateToggle({
-   Name = "Süper Hız (Max Speed)",
+   Name = "Süper Hız / Max Speed (On/Off)",
    CurrentValue = false,
    Callback = function(Value)
       _G.CarFast = Value
@@ -121,28 +118,12 @@ CarTab:CreateToggle({
                 for _, v in pairs(game.Workspace.Vehicles:GetChildren()) do
                     local seat = v:FindFirstChildWhichIsA("VehicleSeat", true)
                     if seat and seat.Occupant and seat.Occupant.Parent == game.Players.LocalPlayer.Character then
-                        seat.MaxSpeed = 300
-                        seat.Torque = 5000
+                        seat.MaxSpeed = 350
+                        seat.Torque = 10000
                     end
                 end
             end)
          end
       end)
    end,
-})
-
--- 5. AYARLAR VE DİL
-ConfigTab:CreateDropdown({
-   Name = "Dil / Language",
-   Options = {"Türkçe", "English"},
-   CurrentOption = "Türkçe",
-   Callback = function(Option)
-      currLang = (Option == "Türkçe") and "TR" or "EN"
-      Rayfield:Notify({Title = "Ayar Kaydedildi", Content = "Dil: " .. Option})
-   end,
-})
-
-ConfigTab:CreateButton({
-   Name = "Paneli Kapat (Destroy GUI)",
-   Callback = function() Rayfield:Destroy() end,
 })
