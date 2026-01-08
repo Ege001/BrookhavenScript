@@ -13,7 +13,7 @@ local MainTab = Window:CreateTab("Karakter", 4483362458)
 local CarTab = Window:CreateTab("Araçlar", 4483362458)
 local TrollTab = Window:CreateTab("Troll & Avatar", 4483362458)
 
--- 1. GÖRÜNMEZLİK VE HIZ (Karakter Sekmesi)
+-- 1. GÖRÜNMEZLİK VE HIZ
 MainTab:CreateSlider({
    Name = "Yürüme Hızı",
    Range = {16, 250},
@@ -28,7 +28,7 @@ MainTab:CreateButton({
    Name = "Görünmez Ol (Invisible)",
    Callback = function()
       local char = game.Players.LocalPlayer.Character
-      for i, v in pairs(char:GetDescendants()) do
+      for _, v in pairs(char:GetDescendants()) do
           if v:IsA("BasePart") or v:IsA("Decal") then
               v.Transparency = 1
           end
@@ -37,38 +37,46 @@ MainTab:CreateButton({
    end,
 })
 
--- 2. ARABA HIZLANDIRMA (Araçlar Sekmesi)
+-- 2. ARABA HIZLANDIRMA
 CarTab:CreateButton({
    Name = "Araba Hızını Arttır (X2)",
    Callback = function()
        local vehicle = game.Workspace.Vehicles:FindFirstChild(game.Players.LocalPlayer.Name .. "Vehicle")
        if vehicle then
-           for i, v in pairs(vehicle:GetDescendants()) do
+           for _, v in pairs(vehicle:GetDescendants()) do
                if v:IsA("VehicleSeat") then
                    v.MaxSpeed = 200
                    v.Torque = 1000
                end
            end
+           Rayfield:Notify({Title = "Başarılı", Content = "Araç limitleri kaldırıldı!", Duration = 3})
        else
            Rayfield:Notify({Title = "Hata", Content = "Önce bir araca binmelisin!", Duration = 3})
        end
    end,
 })
 
--- 3. AVATAR KOPYALAMA (Troll & Avatar Sekmesi)
+-- 3. AVATAR KOPYALAMA (Geliştirilmiş)
 TrollTab:CreateInput({
-   Name = "Avatarını Kopyala (Kullanıcı Adı)",
-   PlaceholderText = "Oyuncu ismi yaz...",
+   Name = "Avatar Kopyala (Kullanıcı Adı)",
+   PlaceholderText = "Oyuncu ismi...",
    RemoveTextAfterFocusLost = false,
    Callback = function(Text)
       local TargetPlayer = game.Players:FindFirstChild(Text)
       if TargetPlayer and TargetPlayer.Character then
           local LocalChar = game.Players.LocalPlayer.Character
-          -- Kıyafetleri kopyalama işlemi
-          for i, v in pairs(TargetPlayer.Character:GetChildren()) do
+          
+          -- Eski kıyafetleri temizle
+          for _, v in pairs(LocalChar:GetChildren()) do
               if v:IsA("Shirt") or v:IsA("Pants") or v:IsA("Accessory") then
-                  local clone = v:Clone()
-                  clone.Parent = LocalChar
+                  v:Destroy()
+              end
+          end
+          
+          -- Hedefin kıyafetlerini kopyala
+          for _, v in pairs(TargetPlayer.Character:GetChildren()) do
+              if v:IsA("Shirt") or v:IsA("Pants") or v:IsA("Accessory") then
+                  v:Clone().Parent = LocalChar
               end
           end
           Rayfield:Notify({Title = "Başarılı", Content = Text .. " adlı kişinin avatarı kopyalandı!", Duration = 3})
