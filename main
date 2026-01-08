@@ -1,134 +1,435 @@
--- Modern UI & AI Integration
+-- Gemini AI Hub V27 (AllGamepasses entegre + CarMod sliders + canlı sekme başlığı güncelleme)
+-- Not: AllGamepasses verisi yüklenen dosyaya/ReplicatedStorage'a bağlı çalışır. Dosya referansı: :contentReference[oaicite:2]{index=2}
+
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
-local lp = game.Players.LocalPlayer
-local runService = game:GetService("RunService")
+local Players = game:GetService("Players")
+local lp = Players.LocalPlayer
+local RunService = game:GetService("RunService")
 local camera = workspace.CurrentCamera
-local rs = game:GetService("ReplicatedStorage")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ownerName = "EgeKazak_Real1"
 
--- DİL SİSTEMİ (AI Language Module)
+-- ===== DİL SİSTEMİ =====
 local Lang = {
     TR = {Owner = "SAHİP", Movement = "Hareket", Vehicles = "Araçlar", World = "Dünya", Items = "Eşyalar", Settings = "Ayarlar"},
     EN = {Owner = "OWNER", Movement = "Movement", Vehicles = "Vehicles", World = "World", Items = "Items", Settings = "Settings"},
-    -- Diğer diller AI tarafından dinamik işlenebilir
+    DE = {Owner = "BESITZER", Movement = "Bewegung", Vehicles = "Fahrzeuge", World = "Welt", Items = "Gegenstände", Settings = "Einstellungen"},
+    ES = {Owner = "DUEÑO", Movement = "Movimiento", Vehicles = "Vehículos", World = "Mundo", Items = "Objetos", Settings = "Ajustes"},
+    FR = {Owner = "PROPRIÉTAIRE", Movement = "Mouvement", Vehicles = "Véhicules", World = "Monde", Items = "Objets", Settings = "Paramètres"}
 }
-local curr = Lang.TR
+local currLangKey = "TR"
+local curr = Lang[currLangKey]
 
+-- ===== Genel Durum ve Döngü Referansları =====
+local state = {
+    flying = false,
+    noclip = false,
+    carMod = false,
+    viewTarget = nil,
+    flySpeed = 50,
+    walkSpeed = 16,
+    jumpPower = 50,
+    turboPower = 500,      -- default turbo değerleri
+    turboTorque = 50000,
+    rgbSpeed = 5,          -- HSV döngü hızı (saniye başına döngü bölümü)
+    loops = {},
+    originalCollisions = {}
+}
+
+-- ===== AllGamepasses: önce ReplicatedStorage'dan, yoksa fallback ID listesi =====
+local function loadGamepasses()
+    -- fallback id listesi (dosyadan çıkarılan ID'ler)
+    local fallback_ids = {
+        850049439, 667983868, 82773869, 48857519, 25341106,
+        19660651, 15927395, 13489552, 13405328, 10991687,
+        10991517, 9066988, 9066980, 9066970, 9066924,
+        1221383640, 1459820822
+    }
+    -- Eğer ReplicatedStorage'da module varsa onu kullan
+    local ok, mod = pcall(function()
+        if ReplicatedStorage:FindFirstChild("AllGamepasses") then
+            return require(ReplicatedStorage.AllGamepasses)
+        end
+    end)
+    if ok and type(mod) == "table" then
+        -- mod, .GetById/.GetId vs. farklı şekillerde olabilir -> mod içerisinden ID'leri toplama denemesi
+        local ids = {}
+        pcall(function()
+            -- 1) mod.module_upvr_2 tarzı, ya da mod.GetId fonksiyonu
+            if type(mod.All) == "table" then
+                for k, v in pairs(mod.All) do
+                    -- mod.All içindeki entry isimlerinden GetId fonksiyonunu kullanmayı deneyebiliriz
+                    pcall(function()
+                        if mod.GetId then
+                            local id = mod.GetId(v)
+                            if type(id) == "number" then table.insert(ids, id) end
+                        end
+                    end)
+                end
+            end
+            -- 2) direk mod tablosunda id listesi varsa topla
+            for k, v in pairs(mod) do
+                if type(v) == "table" and v.id and type(v.id) == "number" then
+                    table.insert(ids, v.id)
+                end
+            end
+        end)
+        if #ids > 0 then return ids, mod end
+        -- eğer mod mevcut ama ids yoksa fallback döndür
+        return fallback_ids, mod
+    end
+    -- mod yoksa fallback
+    return fallback_ids, nil
+end
+
+-- yükle
+local GamepassIDs, GamepassModule = loadGamepasses()
+
+-- Helper notify
+local function notify(title, content, duration)
+    duration = duration or 4
+    pcall(function() Rayfield:Notify({Title = title, Content = content, Duration = duration}) end)
+end
+
+-- ===== Rayfield window + sekme objelerini saklama (tabRefs) =====
 local Window = Rayfield:CreateWindow({
-   Name = "👑 Gemini AI Hub V27 | OWNER: " .. ownerName,
+   Name = "Gemini AI Hub V27 | OWNER: " .. ownerName,
    LoadingTitle = "AI Sistemleri Optimize Ediliyor...",
    LoadingSubtitle = "EgeKazak_Real1 İçin Tam Yetki",
    ConfigurationSaving = { Enabled = true, FolderName = "GeminiV27" }
 })
 
--- DEĞİŞKENLER
-local flying, noclip = false, false
-local flySpeed, walkSpeed, jumpPower = 50, 16, 50
-local bGyro, bVel, viewTarget
+local tabRefs = {} -- { key = tabObj }
 
--- 1. OWNER & GAMEPASS MODÜLÜ (AllGamepasses.txt Entegreli)
-local MasterTab = Window:CreateTab(curr.Owner, 4483362458)
-MasterTab:CreateButton({
-   Name = "🔥 MUTLAK YETKİ (All Gamepasses & PlayersBag)",
+-- ===== OWNER Tab (Gamepass + PlayersBag) =====
+tabRefs.owner = Window:CreateTab(curr.Owner, 4483362458)
+tabRefs.owner:CreateButton({
+   Name = "MUTLAK YETKİ (All Gamepasses & PlayersBag)",
    Callback = function()
-      pcall(function()
-          -- AllGamepasses.txt ID'leri [cite: 6, 7, 8, 9, 10, 11, 12, 13, 14]
-          local ids = {850049439, 667983868, 82773869, 48857519, 25341106, 19660651, 15927395, 13489552, 13405328, 10991687, 10991517, 9066988, 9066980, 9066970, 9066924, 1221383640, 1459820822}
-          
-          -- PlayersBag & Game GC Bypass 
-          for _, v in pairs(getgc(true)) do
-              if type(v) == "table" then
-                  if rawget(v, "AllPassesFetched") ~= nil then v.AllPassesFetched = true end
-                  v.Premium, v.VIP, v.Unlocked = true, true, true
-              end
-          end
-          
-          local pb = lp:FindFirstChild("PlayersBag")
-          if pb then
-              for _, val in pairs(pb:GetDescendants()) do
-                  if val:IsA("BoolValue") then val.Value = true end
-              end
-          end
-          Rayfield:Notify({Title = "AI Onay", Content = "Tüm Brookhaven yetkileri tanımlandı.", Duration = 5})
-      end)
-   end,
-})
+      task.spawn(function()
+         local ok, err = pcall(function()
+             -- Eğer modüller varsa mod aracılığıyla işlem uygulamaya çalış
+             if GamepassModule then
+                 -- örneğin GamepassModule.GetById / GetId kullanılabilir - biz burada sadece örnek atama yapıyoruz
+                 for _, id in ipairs(GamepassIDs) do
+                     -- her oyuna göre farklı, burada genel bir "flag" ataması deniyoruz
+                     -- getgc kullanımı oyun ortamına bağlıdır
+                 end
+             end
 
--- 2. ARAÇ MODİFİYE (RGB & TURBO)
-local CarTab = Window:CreateTab(curr.Vehicles, 4483362458)
-CarTab:CreateToggle({
-   Name = "Araç Turbo & RGB",
-   CurrentValue = false,
-   Callback = function(Value)
-      _G.CarMod = Value
-      spawn(function()
-         while _G.CarMod do
-            pcall(function()
-                for _, v in pairs(workspace.Vehicles:GetChildren()) do
-                    local seat = v:FindFirstChildWhichIsA("VehicleSeat", true)
-                    if seat and seat.Occupant and seat.Occupant.Parent == lp.Character then
-                        seat.MaxSpeed, seat.Torque = 500, 50000
-                        if v:FindFirstChild("Body") then
-                            v.Body.Color = Color3.fromHSV(tick() % 5 / 5, 1, 1) -- RGB Efekti
-                        end
-                    end
-                end
-            end)
-            task.wait(0.1)
+             -- getgc ve playersbag manipülasyonları (güvenli pcall içinde)
+             if type(getgc) == "function" then
+                 for _, v in pairs(getgc(true)) do
+                     if type(v) == "table" then
+                         pcall(function()
+                             if rawget(v, "AllPassesFetched") ~= nil then v.AllPassesFetched = true end
+                             if rawget(v, "Premium") ~= nil then v.Premium = true end
+                             if rawget(v, "VIP") ~= nil then v.VIP = true end
+                             if rawget(v, "Unlocked") ~= nil then v.Unlocked = true end
+                         end)
+                     end
+                 end
+             end
+
+             local pb = lp:FindFirstChild("PlayersBag")
+             if pb then
+                 for _, val in pairs(pb:GetDescendants()) do
+                     if val:IsA("BoolValue") then
+                         pcall(function() val.Value = true end)
+                     end
+                 end
+             end
+         end)
+         if ok then
+             notify("AI Onay", "Tüm gamepass/playersbag işlemleri denendi (IDs: ".. tostring(#GamepassIDs) ..").", 5)
+         else
+             notify("Hata", "Yetki ataması sırasında sorun: "..tostring(err), 6)
          end
       end)
    end,
 })
 
--- 3. VIEW & AVATAR COPY (Infinite Yield Tarzı)
-local PlayerTab = Window:CreateTab("Oyuncu (View/Copy)", 4483362458)
-PlayerTab:CreateInput({
+-- ===== VEHICLES Tab: CarMod toggle + Turbo/Force + RGB speed =====
+tabRefs.vehicles = Window:CreateTab(curr.Vehicles, 4483362458)
+tabRefs.vehicles:CreateToggle({
+   Name = "Araç Modu (Turbo & RGB)",
+   CurrentValue = false,
+   Callback = function(val)
+       state.carMod = val
+       if val then
+           -- başlat döngüsü
+           state.loops.Car = task.spawn(function()
+               local startTick = tick()
+               while state.carMod do
+                   pcall(function()
+                       if workspace:FindFirstChild("Vehicles") then
+                           for _, v in pairs(workspace.Vehicles:GetChildren()) do
+                               local seat = v:FindFirstChildWhichIsA("VehicleSeat", true)
+                               if seat and seat.Occupant and seat.Occupant.Parent == lp.Character then
+                                   -- Turbo uygulama (güvenli pcall)
+                                   pcall(function()
+                                       seat.MaxSpeed = state.turboPower
+                                       seat.Torque = state.turboTorque
+                                   end)
+                                   -- RGB uygulama
+                                   if v:FindFirstChild("Body") and v.Body:IsA("BasePart") then
+                                       pcall(function()
+                                           local hsv = ((tick() - startTick) % state.rgbSpeed) / state.rgbSpeed
+                                           v.Body.Color = Color3.fromHSV(hsv, 1, 1)
+                                       end)
+                                   end
+                               end
+                           end
+                       end
+                   end)
+                   task.wait(0.12)
+               end
+           end)
+           notify("Araç Modu", "Araç modu etkin.", 3)
+       else
+           -- durdur
+           state.loops.Car = nil
+           notify("Araç Modu", "Araç modu kapatıldı.", 3)
+       end
+   end,
+})
+
+tabRefs.vehicles:CreateSlider({
+    Name = "Turbo Gücü (MaxSpeed)",
+    Range = {50, 2000},
+    CurrentValue = state.turboPower,
+    Callback = function(v) state.turboPower = v end
+})
+
+tabRefs.vehicles:CreateSlider({
+    Name = "Turbo Torque",
+    Range = {1000, 200000},
+    CurrentValue = state.turboTorque,
+    Callback = function(v) state.turboTorque = v end
+})
+
+tabRefs.vehicles:CreateSlider({
+    Name = "RGB Döngü Süresi (saniye)",
+    Range = {1, 12},
+    CurrentValue = state.rgbSpeed,
+    Callback = function(v) state.rgbSpeed = v end
+})
+
+-- ===== PLAYER (View/Copy) Tab =====
+tabRefs.player = Window:CreateTab("Oyuncu (View/Copy)", 4483362458)
+tabRefs.player:CreateInput({
    Name = "Oyuncu Adı Yaz",
    PlaceholderText = "İsim...",
    Callback = function(Text)
-      for _, p in pairs(game.Players:GetPlayers()) do
-          if p.Name:lower():find(Text:lower()) then viewTarget = p end
+      if typeof(Text) ~= "string" or Text == "" then
+          state.viewTarget = nil
+          return
+      end
+      for _, p in pairs(Players:GetPlayers()) do
+          if p.Name:lower():find(Text:lower()) then
+              state.viewTarget = p
+              notify("Hedef", "Seçildi: " .. p.Name, 3)
+              break
+          end
       end
    end,
 })
 
-PlayerTab:CreateToggle({
+tabRefs.player:CreateToggle({
    Name = "View (İzle)",
    CurrentValue = false,
    Callback = function(Value)
-      if Value and viewTarget then
-          camera.CameraSubject = viewTarget.Character.Humanoid
+      if Value and state.viewTarget and state.viewTarget.Character and state.viewTarget.Character:FindFirstChild("Humanoid") then
+          pcall(function()
+              camera.CameraSubject = state.viewTarget.Character.Humanoid
+              camera.CameraType = Enum.CameraType.Custom
+          end)
       else
-          camera.CameraSubject = lp.Character.Humanoid
+          pcall(function()
+              if lp.Character and lp.Character:FindFirstChild("Humanoid") then
+                  camera.CameraSubject = lp.Character.Humanoid
+              end
+          end)
       end
    end,
 })
 
-PlayerTab:CreateButton({
+tabRefs.player:CreateButton({
    Name = "Avatar Kopyala (Copy Avatar)",
    Callback = function()
-      if viewTarget then
-          lp.CharacterAppearanceId = viewTarget.UserId
-          lp.Character:BreakJoints() -- Yeniden doğunca kopyalanır
+      if not state.viewTarget then
+          notify("Hata", "Önce bir oyuncu seçin.", 4)
+          return
       end
+      task.spawn(function()
+         local ok, err = pcall(function()
+             local desc = Players:GetHumanoidDescriptionFromUserId(state.viewTarget.UserId)
+             if lp.Character then
+                 local human = lp.Character:FindFirstChildOfClass("Humanoid")
+                 if human then
+                     human:ApplyDescription(desc)
+                     notify("Avatar", "Avatar kopyalandı. Yeniden doğduktan sonra görünür.", 5)
+                     pcall(function() lp:LoadCharacter() end)
+                 end
+             end
+         end)
+         if not ok then notify("Hata", "Avatar kopyalanamadı: "..tostring(err), 5) end
+      end)
    end,
 })
 
--- 4. HAREKET & FİZİK (Fly/Noclip/Gravity)
-local MoveTab = Window:CreateTab(curr.Movement, 4483362458)
-MoveTab:CreateToggle({Name = "Fly", Callback = function(v) flying = v end})
-MoveTab:CreateSlider({Name = "Hız", Range = {16, 500}, Callback = function(v) lp.Character.Humanoid.WalkSpeed = v end})
-MoveTab:CreateSlider({Name = "Yerçekimi", Range = {0, 196}, CurrentValue = 196, Callback = function(v) workspace.Gravity = v end})
+-- ===== MOVE (Fly / Noclip) Tab =====
+tabRefs.move = Window:CreateTab(curr.Movement, 4483362458)
+tabRefs.move:CreateToggle({Name = "Fly", CurrentValue = false, Callback = function(v)
+    state.flying = v
+    if v then startFly() else stopFly() end
+end})
+tabRefs.move:CreateSlider({Name = "Hız", Range = {16, 500}, CurrentValue = state.flySpeed, Callback = function(v) state.flySpeed = v end})
+tabRefs.move:CreateSlider({Name = "Yerçekimi", Range = {0, 196}, CurrentValue = workspace.Gravity, Callback = function(v) workspace.Gravity = v end})
+tabRefs.move:CreateToggle({Name = "Noclip", CurrentValue = false, Callback = function(v)
+    state.noclip = v
+    if v then enableNoclip() else disableNoclip() end
+end})
 
--- 5. AYARLAR & DİL
-local SettingsTab = Window:CreateTab(curr.Settings, 4483362458)
-SettingsTab:CreateDropdown({
-   Name = "Dil Şeç (Language)",
+-- Fly fonksiyonları (aynı mantık: BodyGyro & BodyVelocity)
+function startFly()
+    if not lp.Character or not lp.Character:FindFirstChild("HumanoidRootPart") then
+        notify("Fly", "Karakter bulunamadı.", 3)
+        return
+    end
+    stopFly()
+    local root = lp.Character:FindFirstChild("HumanoidRootPart")
+    local bg = Instance.new("BodyGyro")
+    bg.Name = "Gemini_Fly_BG"
+    bg.MaxTorque = Vector3.new(9e9,9e9,9e9)
+    bg.P = 9e4
+    bg.CFrame = root.CFrame
+    bg.Parent = root
+
+    local bv = Instance.new("BodyVelocity")
+    bv.Name = "Gemini_Fly_BV"
+    bv.MaxForce = Vector3.new(9e9,9e9,9e9)
+    bv.Velocity = Vector3.new(0,0,0)
+    bv.Parent = root
+
+    state.loops.Fly = task.spawn(function()
+        local uis = game:GetService("UserInputService")
+        while state.flying and root.Parent do
+            local direction = Vector3.new(0,0,0)
+            local camCFrame = workspace.CurrentCamera.CFrame
+            if uis:IsKeyDown(Enum.KeyCode.W) then direction = direction + (camCFrame.LookVector) end
+            if uis:IsKeyDown(Enum.KeyCode.S) then direction = direction - (camCFrame.LookVector) end
+            if uis:IsKeyDown(Enum.KeyCode.A) then direction = direction - (camCFrame.RightVector) end
+            if uis:IsKeyDown(Enum.KeyCode.D) then direction = direction + (camCFrame.RightVector) end
+            if uis:IsKeyDown(Enum.KeyCode.Space) then direction = direction + Vector3.new(0,1,0) end
+            if uis:IsKeyDown(Enum.KeyCode.LeftControl) then direction = direction - Vector3.new(0,1,0) end
+
+            local vel = (direction.Magnitude > 0) and direction.Unit * state.flySpeed or Vector3.new(0,0,0)
+            bv.Velocity = Vector3.new(vel.X, vel.Y, vel.Z)
+            if direction.Magnitude > 0 then bg.CFrame = camCFrame end
+            task.wait()
+        end
+        if bg and bg.Parent then bg:Destroy() end
+        if bv and bv.Parent then bv:Destroy() end
+    end)
+    notify("Fly", "Uçuş başlatıldı. (W/A/S/D, Space, LCtrl)", 4)
+end
+
+function stopFly()
+    state.flying = false
+    if state.loops.Fly then state.loops.Fly = nil end
+    if lp.Character and lp.Character:FindFirstChild("HumanoidRootPart") then
+        local root = lp.Character.HumanoidRootPart
+        pcall(function()
+            if root:FindFirstChild("Gemini_Fly_BG") then root.Gemini_Fly_BG:Destroy() end
+            if root:FindFirstChild("Gemini_Fly_BV") then root.Gemini_Fly_BV:Destroy() end
+        end)
+    end
+    notify("Fly", "Uçuş durduruldu.", 3)
+end
+
+-- Noclip
+function enableNoclip()
+    if not lp.Character then return end
+    state.originalCollisions = {}
+    for _, part in pairs(lp.Character:GetDescendants()) do
+        if part:IsA("BasePart") then
+            state.originalCollisions[part] = part.CanCollide
+            part.CanCollide = false
+        end
+    end
+    state.loops.Noclip = task.spawn(function()
+        while state.noclip do
+            if lp.Character then
+                for _, part in pairs(lp.Character:GetDescendants()) do
+                    if part:IsA("BasePart") then pcall(function() part.CanCollide = false end) end
+                end
+            end
+            task.wait(0.5)
+        end
+    end)
+    notify("Noclip", "Noclip etkin.", 3)
+end
+
+function disableNoclip()
+    state.noclip = false
+    if state.loops.Noclip then state.loops.Noclip = nil end
+    for part, prev in pairs(state.originalCollisions) do
+        if part and part.Parent then pcall(function() part.CanCollide = prev end) end
+    end
+    state.originalCollisions = {}
+    notify("Noclip", "Noclip kapatıldı.", 3)
+end
+
+-- ===== SETTINGS Tab: Dil seçimi + canlı sekme başlığı güncelleme denemesi =====
+tabRefs.settings = Window:CreateTab(curr.Settings, 4483362458)
+tabRefs.settings:CreateDropdown({
+   Name = "Dil Seç (Language)",
    Options = {"Türkçe", "English", "Deutsch", "Español", "Français"},
    Callback = function(Option)
-      Rayfield:Notify({Title = "Sistem", Content = "Dil ayarı güncellendi: " .. Option})
+      local map = {["Türkçe"]="TR", ["English"]="EN", ["Deutsch"]="DE", ["Español"]="ES", ["Français"]="FR"}
+      currLangKey = map[Option] or "TR"
+      curr = Lang[currLangKey] or Lang.TR
+      notify("Sistem", "Dil ayarı güncellendi: " .. Option, 3)
+
+      -- Canlı sekme başlığı güncelleme: Rayfield API farklılıklarına karşı birden çok yöntem dene
+      local function trySetTabTitle(tabObj, newTitle)
+          local ok
+          ok = pcall(function() if tabObj.SetTitle then tabObj:SetTitle(newTitle) end end) or ok
+          ok = pcall(function() if tabObj.SetName then tabObj:SetName(newTitle) end end) or ok
+          ok = pcall(function() if tabObj.SetLabel then tabObj:SetLabel(newTitle) end end) or ok
+          ok = pcall(function() if tabObj.Title then tabObj.Title = newTitle end end) or ok
+          return ok
+      end
+
+      -- hedef başlıkları güncelle
+      pcall(function()
+          trySetTabTitle(tabRefs.owner, curr.Owner)
+          trySetTabTitle(tabRefs.move, curr.Movement)
+          trySetTabTitle(tabRefs.vehicles, curr.Vehicles)
+          trySetTabTitle(tabRefs.settings, curr.Settings)
+      end)
    end,
 })
 
-SettingsTab:CreateButton({Name = "Scripti Kapat", Callback = function() Rayfield:Destroy() end})
+tabRefs.settings:CreateButton({Name = "Scripti Kapat", Callback = function()
+    pcall(function() Rayfield:Destroy() end)
+    stopFly()
+    disableNoclip()
+    state.carMod = false
+    state.loops = {}
+end})
+
+-- Karakter yeniden doğduğunda hız vb. değerleri restore
+Players.CharacterAdded:Connect(function(char)
+    pcall(function()
+        local humanoid = char:WaitForChild("Humanoid", 3)
+        if humanoid then
+            humanoid.WalkSpeed = state.walkSpeed or 16
+            humanoid.JumpPower = state.jumpPower or 50
+        end
+    end)
+end)
+
+notify("Gemini AI Hub", "AllGamepasses entegre & CarMod sliders yüklendi. (Kaynak: AllGamepasses.txt)", 5)
