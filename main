@@ -30,7 +30,6 @@ local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Lighting = game:GetService("Lighting")
 local lp = Players.LocalPlayer
 local Camera = workspace.CurrentCamera
 
@@ -40,13 +39,66 @@ _G.FOV = 70
 _G.Noclip = false
 _G.Fly = false
 _G.FlySpeed = 50
+_G.Language = "TR" -- Varsayılan Dil
 
 local connections = {}
 
--- 3. RAYFIELD UI
+-- 3. DİL ÇEVİRİ SİSTEMİ (FULL)
+local Translations = {
+    ["TR"] = {
+        ["WinTitle"] = "👑 SOVEREIGN V46 | FULL",
+        ["MainTab"] = "🏠 Ana Panel",
+        ["MoveTab"] = "⚡ Hareket",
+        ["TPTab"] = "✈️ Işınlanma",
+        ["ExtraTab"] = "✨ Ekstralar",
+        ["ResetAll"] = "🔄 TÜM AYARLARI SIFIRLA",
+        ["AdsButton"] = "📢 REKLAM MENÜSÜNÜ TETİKLE",
+        ["DestroyButton"] = "🗑️ SCRIPTI TAMAMEN KALDIR",
+        ["Speed"] = "Yürüme Hızı",
+        ["Jump"] = "Zıplama Gücü",
+        ["Noclip"] = "Duvar Geçme (Noclip)",
+        ["Fly"] = "Uçma (Fly)",
+        ["FOV"] = "Görüş Açısı (FOV)",
+        ["Banks"] = "Banka Konumları",
+        ["Bank1"] = "💰 Banka 1 (Merkez)",
+        ["Bank2"] = "💰 Altın Banka",
+        ["Bank3"] = "💰 Elmas Banka",
+        ["Bank4"] = "💰 Bitcoin Banka",
+        ["LangTitle"] = "Dil Seçimi / Language",
+        ["NotifyReset"] = "Tüm ayarlar normale döndü."
+    },
+    ["EN"] = {
+        ["WinTitle"] = "👑 SOVEREIGN V46 | FULL",
+        ["MainTab"] = "🏠 Main Panel",
+        ["MoveTab"] = "⚡ Movement",
+        ["TPTab"] = "✈️ Teleport",
+        ["ExtraTab"] = "✨ Extras",
+        ["ResetAll"] = "🔄 RESET ALL SETTINGS",
+        ["AdsButton"] = "📢 TRIGGER ADS MENU",
+        ["DestroyButton"] = "🗑️ DESTROY SCRIPT",
+        ["Speed"] = "Walk Speed",
+        ["Jump"] = "Jump Power",
+        ["Noclip"] = "Noclip",
+        ["Fly"] = "Fly Mode",
+        ["FOV"] = "Field of View (FOV)",
+        ["Banks"] = "Bank Locations",
+        ["Bank1"] = "💰 Bank 1 (Main)",
+        ["Bank2"] = "💰 Gold Bank",
+        ["Bank3"] = "💰 Diamond Bank",
+        ["Bank4"] = "💰 Bitcoin Bank",
+        ["LangTitle"] = "Language Selection",
+        ["NotifyReset"] = "All settings reset to normal."
+    }
+}
+
+local function T(key)
+    return Translations[_G.Language][key] or key
+end
+
+-- 4. RAYFIELD UI
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 local Window = Rayfield:CreateWindow({
-   Name = "👑 SOVEREIGN V46 | FULL",
+   Name = T("WinTitle"),
    LoadingTitle = "Apex Ultimate Edition",
    LoadingSubtitle = "by EgeKazak_Real1",
    Theme = "DarkBlue",
@@ -54,14 +106,25 @@ local Window = Rayfield:CreateWindow({
 })
 
 -- SEKMELER
-local MainTab = Window:CreateTab("🏠 Ana Panel", 4483362458)
-local MoveTab = Window:CreateTab("⚡ Hareket", 4483362458)
-local TPTab = Window:CreateTab("✈️ Işınlanma", 4483362458)
-local ExtraTab = Window:CreateTab("✨ Ekstralar", 4483362458)
+local MainTab = Window:CreateTab(T("MainTab"), 4483362458)
+local MoveTab = Window:CreateTab(T("MoveTab"), 4483362458)
+local TPTab = Window:CreateTab(T("TPTab"), 4483362458)
+local ExtraTab = Window:CreateTab(T("ExtraTab"), 4483362458)
 
--- 4. ANA PANEL (ADS & RESET & DESTROY)
+-- 5. ANA PANEL
+MainTab:CreateDropdown({
+    Name = T("LangTitle"),
+    Options = {"TR", "EN"},
+    CurrentOption = _G.Language,
+    Callback = function(Option)
+        _G.Language = Option
+        Rayfield:Notify({Title = "Language", Content = "Dil değiştirildi: " .. Option, Duration = 2})
+        -- Not: Rayfield'da dinamik metin güncelleme kısıtlıdır, UI yeniden yüklendiğinde tam etki eder.
+    end,
+})
+
 MainTab:CreateButton({
-   Name = "📢 REKLAM MENÜSÜNÜ TETİKLE (ADS)",
+   Name = T("AdsButton"),
    Callback = function()
        pcall(function()
            for _, v in pairs(lp.PlayerGui:GetDescendants()) do
@@ -75,13 +138,12 @@ MainTab:CreateButton({
            end
            local rem = ReplicatedStorage:FindFirstChild("ShowAds", true) or ReplicatedStorage:FindFirstChild("OpenShop", true)
            if rem and rem:IsA("RemoteEvent") then rem:FireServer() end
-           Rayfield:Notify({Title = "İşlem Başarılı", Content = "Reklam/Mağaza menüleri zorlandı.", Duration = 3})
        end)
    end,
 })
 
 MainTab:CreateButton({
-    Name = "🔄 TÜM AYARLARI SIFIRLA (RESET ALL)",
+    Name = T("ResetAll"),
     Callback = function()
         _G.Speed = 16
         _G.Jump = 50
@@ -89,12 +151,12 @@ MainTab:CreateButton({
         Camera.FieldOfView = 70
         _G.Fly = false
         _G.Noclip = false
-        Rayfield:Notify({Title = "Sıfırlandı", Content = "Hız, Zıplama ve FOV normale döndü.", Duration = 3})
+        Rayfield:Notify({Title = "Reset", Content = T("NotifyReset"), Duration = 3})
     end,
 })
 
 MainTab:CreateButton({
-    Name = "🗑️ SCRIPTI TAMAMEN KALDIR (DESTROY)",
+    Name = T("DestroyButton"),
     Callback = function()
         pcall(function()
             _G.Speed = 16
@@ -109,102 +171,72 @@ MainTab:CreateButton({
     end,
 })
 
--- 5. HAREKET KONTROLLERİ (+ / - BUTONLU)
-MoveTab:CreateSection("Hız Kontrolü")
+-- 6. HAREKET KONTROLLERİ
 MoveTab:CreateSlider({
-   Name = "Yürüme Hızı",
+   Name = T("Speed"),
    Range = {16, 500},
    CurrentValue = _G.Speed,
    Callback = function(v) _G.Speed = v end,
 })
 
-MoveTab:CreateButton({
-    Name = "➕ Hızı Artır (+10)",
-    Callback = function() _G.Speed = _G.Speed + 10 end
-})
+MoveTab:CreateButton({ Name = "➕ Speed +10", Callback = function() _G.Speed = _G.Speed + 10 end })
+MoveTab:CreateButton({ Name = "➖ Speed -10", Callback = function() _G.Speed = math.max(16, _G.Speed - 10) end })
 
-MoveTab:CreateButton({
-    Name = "➖ Hızı Düşür (-10)",
-    Callback = function() _G.Speed = math.max(16, _G.Speed - 10) end
-})
-
-MoveTab:CreateSection("Zıplama Kontrolü")
 MoveTab:CreateSlider({
-    Name = "Zıplama Gücü",
+    Name = T("Jump"),
     Range = {50, 500},
     CurrentValue = _G.Jump,
     Callback = function(v) _G.Jump = v end,
 })
 
-MoveTab:CreateButton({
-    Name = "➕ Zıplama Artır (+10)",
-    Callback = function() _G.Jump = _G.Jump + 10 end
-})
+MoveTab:CreateButton({ Name = "➕ Jump +10", Callback = function() _G.Jump = _G.Jump + 10 end })
+MoveTab:CreateButton({ Name = "➖ Jump -10", Callback = function() _G.Jump = math.max(50, _G.Jump - 10) end })
 
-MoveTab:CreateButton({
-    Name = "➖ Zıplama Düşür (-10)",
-    Callback = function() _G.Jump = math.max(50, _G.Jump - 10) end
-})
+MoveTab:CreateSection(T("FOV"))
+MoveTab:CreateButton({ Name = "➕ FOV +5", Callback = function() _G.FOV = math.min(120, _G.FOV + 5); Camera.FieldOfView = _G.FOV end })
+MoveTab:CreateButton({ Name = "➖ FOV -5", Callback = function() _G.FOV = math.max(30, _G.FOV - 5); Camera.FieldOfView = _G.FOV end })
 
-MoveTab:CreateSection("Görüş Açısı (FOV)")
-MoveTab:CreateButton({
-    Name = "➕ FOV Artır (+5)",
-    Callback = function() 
-        _G.FOV = math.min(120, _G.FOV + 5)
-        Camera.FieldOfView = _G.FOV 
-    end
-})
+MoveTab:CreateToggle({ Name = T("Noclip"), Callback = function(v) _G.Noclip = v end })
+MoveTab:CreateToggle({ Name = T("Fly"), Callback = function(v) _G.Fly = v end })
 
-MoveTab:CreateButton({
-    Name = "➖ FOV Düşür (-5)",
-    Callback = function() 
-        _G.FOV = math.max(30, _G.FOV - 5)
-        Camera.FieldOfView = _G.FOV
-    end
-})
-
-MoveTab:CreateToggle({
-   Name = "Noclip (Duvar Geçme)",
-   Callback = function(v) _G.Noclip = v end,
-})
-
-MoveTab:CreateToggle({
-    Name = "Uçma (Fly)",
-    Callback = function(v) _G.Fly = v end,
-})
-
--- 6. IŞINLANMA (4 BANKA SİSTEMİ)
-TPTab:CreateSection("Banka Konumları")
+-- 7. IŞINLANMA (VERDİĞİN KOORDİNATLARLA)
+TPTab:CreateSection(T("Banks"))
 
 TPTab:CreateButton({
-    Name = "💰 Banka 1 (Ana Merkez)",
+    Name = T("Bank1"),
     Callback = function()
         if lp.Character then lp.Character:MoveTo(Vector3.new(-10.7, 15.4, 275.0)) end
     end,
 })
 
 TPTab:CreateButton({
-    Name = "💰 Banka 2 (Kuzey)",
+    Name = T("Bank2") .. " (Altın Bank)",
     Callback = function()
-        if lp.Character then lp.Character:MoveTo(Vector3.new(150.5, 15.4, -450.2)) end -- Örnek CFrame, kendi verilerinle güncelleyebilirsin
+        if lp.Character then 
+            lp.Character.HumanoidRootPart.CFrame = CFrame.new(-27.9, -51.3, 271.4) 
+        end
     end,
 })
 
 TPTab:CreateButton({
-    Name = "💰 Banka 3 (Batı)",
+    Name = T("Bank3") .. " (Elmas Banka)",
     Callback = function()
-        if lp.Character then lp.Character:MoveTo(Vector3.new(-600.2, 15.4, 120.5)) end
+        if lp.Character then 
+            lp.Character.HumanoidRootPart.CFrame = CFrame.new(-57.1, -50.8, 187.4) 
+        end
     end,
 })
 
 TPTab:CreateButton({
-    Name = "💰 Banka 4 (Küçük Şube)",
+    Name = T("Bank4") .. " (Bitcoin Banka)",
     Callback = function()
-        if lp.Character then lp.Character:MoveTo(Vector3.new(420.8, 15.4, 850.3)) end
+        if lp.Character then 
+            lp.Character.HumanoidRootPart.CFrame = CFrame.new(-133.8, -55.4, 231.8) 
+        end
     end,
 })
 
--- 7. DÖNGÜ SİSTEMİ
+-- 8. DÖNGÜ SİSTEMİ
 local hb = RunService.Heartbeat:Connect(function()
     pcall(function()
         local char = lp.Character
@@ -245,13 +277,13 @@ local hb = RunService.Heartbeat:Connect(function()
 end)
 table.insert(connections, hb)
 
--- 8. HUD
+-- 9. HUD
 local function CreateHUD()
     local sg = Instance.new("ScreenGui", lp.PlayerGui)
     sg.Name = "SOV_HUD"
     local f = Instance.new("Frame", sg)
     f.Position = UDim2.new(0, 10, 0, 10)
-    f.Size = UDim2.new(0, 180, 0, 90)
+    f.Size = UDim2.new(0, 180, 0, 95)
     f.BackgroundColor3 = Color3.new(0,0,0)
     f.BackgroundTransparency = 0.4
     Instance.new("UICorner", f)
@@ -266,10 +298,10 @@ local function CreateHUD()
     task.spawn(function()
         while task.wait(0.2) do
             if not sg.Parent then break end
-            l.Text = string.format("SOVEREIGN V46\nSPD: %d | JMP: %d\nFOV: %d\nFLY: %s", _G.Speed, _G.Jump, _G.FOV, tostring(_G.Fly))
+            l.Text = string.format("SOVEREIGN V46\nSPD: %d | JMP: %d\nFOV: %d\nFLY: %s\nLANG: %s", _G.Speed, _G.Jump, _G.FOV, tostring(_G.Fly), _G.Language)
         end
     end)
 end
 CreateHUD()
 
-Rayfield:Notify({Title = "Sovereign Güncellendi", Content = "Reset butonu ve 4 Banka TP eklendi.", Duration = 5})
+Rayfield:Notify({Title = "Sovereign Ultimate", Content = "Dil Desteği ve Yeni Bankalar Eklendi!", Duration = 5})
