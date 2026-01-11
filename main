@@ -1,216 +1,137 @@
 --[[
-    👑 SOVEREIGN V47 | APEX ULTIMATE (FIXED)
-    OWNER: EgeKazak_Real1
-    - Speed & Jump 1000 Limit (Heartbeat Force)
-    - Ads & Sponsor Menu Restore (Decompiled Logic)
-    - Cmdr SuperAdmin Unlocked
-    - Bank & Police Precise Coordinates
+👑 SOVEREIGN V48 | GOD-MODE FULL EDITION
+SAHİBİ: EgeKazak_Real1
+- Hız & Zıplama 1000 Limit (Sürekli Sabitleme)
+- Cmdr Admin Bypass (F2 & ' Tuşları Aktif)
+- Ads & Sponsor Menü Zorlama (Dosya Tabanlı Fix)
+- VIP Sahipliği Manipülasyonu
 ]]
 
--- 🌀 1. Gelişmiş Açılış Ekranı
-local function ShowIntro()
-    local sg = Instance.new("ScreenGui", game:GetService("CoreGui"))
-    local frame = Instance.new("Frame", sg)
-    frame.Size = UDim2.new(1, 0, 1, 0)
-    frame.BackgroundColor3 = Color3.fromRGB(2, 2, 8)
-    
-    local label = Instance.new("TextLabel", frame)
-    label.Size = UDim2.new(0, 800, 0, 100)
-    label.Position = UDim2.new(0.5, -400, 0.45, 0)
-    label.Text = "SOVEREIGN APEX V47\nEgeKazak_Real1 Özel Sürümü Hazırlanıyor..."
-    label.TextColor3 = Color3.fromRGB(0, 180, 255)
-    label.Font = Enum.Font.GothamBold
-    label.TextSize = 32
-    label.BackgroundTransparency = 1
-    
-    local barBG = Instance.new("Frame", frame)
-    barBG.Size = UDim2.new(0, 400, 0, 4)
-    barBG.Position = UDim2.new(0.5, -200, 0.6, 0)
-    barBG.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
-    
-    local bar = Instance.new("Frame", barBG)
-    bar.Size = UDim2.new(0, 0, 1, 0)
-    bar.BackgroundColor3 = Color3.fromRGB(0, 180, 255)
-    bar:TweenSize(UDim2.new(1, 0, 1, 0), "Out", "Quad", 2.5)
-    
-    task.wait(3)
-    sg:Destroy()
-end
-pcall(ShowIntro)
-
--- 👑 2. Ana Değişkenler ve Servisler
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 local lp = game.Players.LocalPlayer
 local rs = game:GetService("ReplicatedStorage")
 local runService = game:GetService("RunService")
 local uis = game:GetService("UserInputService")
 
--- Durum Değişkenleri
+-- Ayarlar
 _G.WalkSpeed = 16
 _G.JumpPower = 50
 _G.Noclip = false
 _G.InfJump = false
-_G.AutoAds = true
+_G.Gravity = 196.2
 
--- 👑 3. Ana Pencere
-local Window = Rayfield:CreateWindow({
-   Name = "👑 SOVEREIGN V47 | APEX",
-   LoadingTitle = "EgeKazak_Real1",
-   LoadingSubtitle = "Hız & VIP Kilitleri Kırıldı",
-   Theme = "DarkBlue",
-   ConfigurationSaving = { Enabled = false }
-})
-
--- --- [1. TAB: ANA SİSTEM] ---
-local MainTab = Window:CreateTab("🏠 Ana Sistem", 4483362458)
-
-MainTab:CreateButton({
-   Name = "📢 REKLAM / SPONSOR PANELİNİ ZORLA AÇ",
-   Callback = function()
-       pcall(function()
-           -- Gamepass.txt'deki sinyalleri taklit ederek menüyü tetikliyoruz
-           local gui = lp.PlayerGui:FindFirstChild("MainGUIHandler", true)
-           if gui then
-               local ads = gui:FindFirstChild("AdStore", true)
-               if ads then 
-                   ads.Visible = true 
-                   ads.Position = UDim2.new(0.5, 0, 0.5, 0)
-                   Rayfield:Notify({Title = "Sistem", Content = "Reklam Paneli Aktif Edildi!", Duration = 3})
-               end
-           end
-       end)
-   end,
-})
-
-MainTab:CreateButton({
-   Name = "⌨️ CMDR ADMIN PANELİNİ AÇ (F2)",
-   Callback = function()
-       pcall(function()
-           local cmdr = require(rs:WaitForChild("Packages"):WaitForChild("CmdrClient"))
-           cmdr:Show()
-       end)
-   end,
-})
-
-MainTab:CreateButton({
-   Name = "🔴 SCRIPT'İ TAMAMEN SİL (Destroy)",
-   Callback = function()
-       _G.WalkSpeed = 16
-       _G.JumpPower = 50
-       Rayfield:Destroy()
-   end,
-})
-
--- --- [2. TAB: HAREKET (SPEED & JUMP FIX)] ---
-local MoveTab = Window:CreateTab("⚡ Hareket", 4483362458)
-MoveTab:CreateSection("Hız & Zıplama (Max 1000)")
-
-MoveTab:CreateSlider({
-   Name = "Yürüme Hızı (WalkSpeed)",
-   Range = {16, 1000},
-   CurrentValue = 16,
-   Callback = function(Value)
-       _G.WalkSpeed = Value
-   end,
-})
-
-MoveTab:CreateSlider({
-   Name = "Zıplama Gücü (JumpPower)",
-   Range = {50, 1000},
-   CurrentValue = 50,
-   Callback = function(Value)
-       _G.JumpPower = Value
-   end,
-})
-
-MoveTab:CreateToggle({
-   Name = "Duvar Geçme (Noclip)",
-   Callback = function(Value)
-       _G.Noclip = Value
-   end,
-})
-
-MoveTab:CreateToggle({
-   Name = "Sonsuz Zıplama (Inf Jump)",
-   Callback = function(Value)
-       _G.InfJump = Value
-   end,
-})
-
--- --- [3. TAB: IŞINLANMA (NOKTA ATIŞI)] ---
-local TPTab = Window:CreateTab("✈️ Işınlanma", 4483362458)
-
-TPTab:CreateButton({
-    Name = "💰 BANKA (YENİ KONUM FIX)",
-    Callback = function()
-        lp.Character.HumanoidRootPart.CFrame = CFrame.new(-10.7334747, 15.4523478, 275.049194)
-    end,
-})
-
-TPTab:CreateButton({
-    Name = "🏢 POLİS MERKEZİ",
-    Callback = function()
-        lp.Character.HumanoidRootPart.CFrame = CFrame.new(-119.57766, 2.72700167, 12.2390404)
-    end,
-})
-
--- --- [4. TAB: EŞYALAR] ---
-local ToolTab = Window:CreateTab("📦 Eşyalar", 4483362458)
-
-ToolTab:CreateButton({
-   Name = "💵 MONEY GUN (VIP) AL",
-   Callback = function()
-       pcall(function()
-           local remote = rs:FindFirstChild("ItemRemote", true)
-           if remote then remote:FireServer("MoneyGun") end
-           local tool = rs:FindFirstChild("MoneyGun", true)
-           if tool then tool:Clone().Parent = lp.Backpack end
-       end)
-   end,
-})
-
--- --- [ 🛠️ SÜREKLİ DÖNGÜSÜEL SİSTEMLER ] ---
-
--- Hız ve Zıplama Sabitleyici (Oyunun 16'ya çekmesini engeller)
-runService.Heartbeat:Connect(function()
-    pcall(function()
-        if lp.Character and lp.Character:FindFirstChild("Humanoid") then
-            local hum = lp.Character.Humanoid
-            hum.WalkSpeed = _G.WalkSpeed
-            hum.JumpPower = _G.JumpPower
-            hum.UseJumpPower = true -- Bazı oyunlarda JumpHeight yerine JumpPower kullanımı zorunludur
-        end
-        
-        -- Noclip Uygulaması
-        if _G.Noclip and lp.Character then
-            for _, part in pairs(lp.Character:GetDescendants()) do
-                if part:IsA("BasePart") then
-                    part.CanCollide = false
-                end
-            end
-        end
-    end)
-end)
-
--- Sonsuz Zıplama Sinyali
-uis.JumpRequest:Connect(function()
-    if _G.InfJump and lp.Character and lp.Character:FindFirstChild("Humanoid") then
-        lp.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
-    end
-end)
-
--- VIP ve Reklam Verilerini Arka Planda Güncelle
+-- 🛠️ [CMDR ADMIN BYPASS]
 task.spawn(function()
-    while task.wait(5) do
-        pcall(function()
-            -- ShowGamepass.txt'deki IsOwned mantığını kandır
-            local sgp = require(rs.Modules.Client.UI.ShowGamepass)
-            if sgp then 
-                sgp.IsOwned = function() return true end 
-                sgp.IsPlayerOwned = function() return true end
-            end
-        end)
+pcall(function()
+local CmdrClient = require(rs:WaitForChild("Packages"):WaitForChild("CmdrClient"))
+CmdrClient:SetActivationKeys({Enum.KeyCode.F2, Enum.KeyCode.Quote})
+if CmdrClient.IsAdmin then
+CmdrClient.IsAdmin = function() return true end
+end
+if CmdrClient.Dispatcher then
+CmdrClient.Dispatcher.PermissionLevel = 10
+end
+end)
+end)
+
+-- 🛠️ [REKLAM TETİKLEYİCİ]
+local function ForceAds()
+pcall(function()
+local GamepassModule = require(rs.Modules.Client.Data.Gamepass)
+if GamepassModule.OnAdvertisementsEnabled then GamepassModule.OnAdvertisementsEnabled:Fire() end
+local mainGui = lp.PlayerGui:FindFirstChild("MainGUIHandler", true)
+if mainGui then
+local adStore = mainGui:FindFirstChild("AdStore", true)
+if adStore then
+adStore.Visible = true
+adStore.Position = UDim2.new(0.5, 0, 0.5, 0)
+end
+end
+end)
+end
+
+local Window = Rayfield:CreateWindow({
+Name = "👑 SOVEREIGN V48 | GOD-MODE",
+LoadingTitle = "EgeKazak_Real1 Executive",
+LoadingSubtitle = "Hız & Admin Kilitleri Kırıldı",
+Theme = "DarkBlue",
+ConfigurationSaving = { Enabled = false }
+})
+
+local MainTab = Window:CreateTab("🏠 Ana Panel", 4483362458)
+
+MainTab:CreateButton({
+Name = "📢 REKLAM SİSTEMİNİ TETİKLE",
+Callback = function() ForceAds() end,
+})
+
+MainTab:CreateButton({
+Name = "⌨️ CMDR PANELİNİ AÇ (F2)",
+Callback = function() pcall(function() require(rs.Packages.CmdrClient):Show() end) end,
+})
+
+local MoveTab = Window:CreateTab("⚡ Hareket", 4483362458)
+
+MoveTab:CreateSlider({
+Name = "Hız (WalkSpeed)", Range = {16, 1000}, CurrentValue = 16,
+Callback = function(v) _G.WalkSpeed = v end,
+})
+
+MoveTab:CreateSlider({
+Name = "Zıplama (JumpPower)", Range = {50, 1000}, CurrentValue = 50,
+Callback = function(v) _G.JumpPower = v end,
+})
+
+MoveTab:CreateToggle({
+Name = "Noclip", Callback = function(v) _G.Noclip = v end,
+})
+
+MoveTab:CreateToggle({
+Name = "Sonsuz Zıplama", Callback = function(v) _G.InfJump = v end,
+})
+
+local WorldTab = Window:CreateTab("🌍 Işınlanma", 4483362458)
+
+WorldTab:CreateButton({
+Name = "💰 BANKA (GÜNCEL KONUM)",
+Callback = function() lp.Character.HumanoidRootPart.CFrame = CFrame.new(-10.7334747, 15.4523478, 275.049194) end,
+})
+
+WorldTab:CreateButton({
+Name = "🏢 POLİS MERKEZİ",
+Callback = function() lp.Character.HumanoidRootPart.CFrame = CFrame.new(-119.57766, 2.72700167, 12.2390404) end,
+})
+
+-- 🛠️ [SÜREKLİ DÖNGÜ VE KORUMA]
+runService.Heartbeat:Connect(function()
+pcall(function()
+local hum = lp.Character.Humanoid
+hum.WalkSpeed = _G.WalkSpeed
+hum.JumpPower = _G.JumpPower
+hum.UseJumpPower = true
+workspace.Gravity = _G.Gravity
+
+    if _G.Noclip then
+        for _, part in pairs(lp.Character:GetDescendants()) do
+            if part:IsA("BasePart") then part.CanCollide = false end
+        end
     end
+end)
+
+
+end)
+
+lp.CharacterAdded:Connect(function(char)
+local hum = char:WaitForChild("Humanoid")
+hum:GetPropertyChangedSignal("WalkSpeed"):Connect(function()
+if hum.WalkSpeed ~= _G.WalkSpeed then hum.WalkSpeed = _G.WalkSpeed end
+end)
+end)
+
+uis.JumpRequest:Connect(function()
+if _G.InfJump and lp.Character then
+lp.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+end
 end)
 
 Rayfield:LoadConfiguration()
