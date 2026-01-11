@@ -1,17 +1,17 @@
--- Sovereign Elite V32 Loader
+-- Sovereign Elite V33 - Optimized by Gemini AI
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local lp = game.Players.LocalPlayer
-local camera = workspace.CurrentCamera
 local rs = game:GetService("ReplicatedStorage")
+local camera = workspace.CurrentCamera
 local runService = game:GetService("RunService")
 
--- PENCERE AYARLARI (Fotoğraftaki Lyra Hub Teması)
+-- PENCERE (Lyra Hub Tasarımı)
 local Window = Rayfield:CreateWindow({
-   Name = "👑 SOVEREIGN ELITE V32 | EgeKazak_Real1",
-   LoadingTitle = "Veri Motoru Başlatılıyor...",
-   LoadingSubtitle = "Hatalar Giderildi & Ads Eklendi",
-   ConfigurationSaving = { Enabled = true, FolderName = "SovereignEliteV32" },
+   Name = "👑 SOVEREIGN ELITE V33 | OWNER: EgeKazak_Real1",
+   LoadingTitle = "Ads & Data Bypass Yükleniyor...",
+   LoadingSubtitle = "Hatalar Giderildi, Reklamlar Açıldı",
+   ConfigurationSaving = { Enabled = true, FolderName = "SovereignEliteV33" },
    Theme = "DarkBlue" 
 })
 
@@ -19,73 +19,63 @@ local Window = Rayfield:CreateWindow({
 local flying, noclip, infJump = false, false, false
 local flySpeed, viewTarget = 50, nil
 
--- --- [KATEGORİLER] ---
+-- --- [1. ANA PANEL: DATA & REKLAM BYPASS] ---
 local MainTab = Window:CreateTab("🏠 Ana Panel", 4483362458)
-local PlayerTab = Window:CreateTab("👤 Oyuncu", 4483362458)
-local MovementTab = Window:CreateTab("⚡ Hareket", 4483362458)
-local VisualTab = Window:CreateTab("🌈 Görsel (RGB)", 4483362458)
-local ToolTab = Window:CreateTab("📦 Eşyalar", 4483362458)
-
--- --- [1. ANA PANEL: HATA DÜZELTME & ADS] ---
-MainTab:CreateSection("Sistem Bypass")
+MainTab:CreateSection("Sistem Kilitlerini Kır")
 
 MainTab:CreateButton({
-   Name = "🔓 FIX: 'Zaten Sahipsin' & Full Yetki",
+   Name = "🔓 REKLAM & DATA BYPASS (Ads Aktif Et)",
    Callback = function()
        pcall(function()
-           -- 1. PlayersBag Override
-           local pb = lp:FindFirstChild("PlayersBag")
-           if pb then
-               for _, v in pairs(pb:GetDescendants()) do
-                   if v:IsA("BoolValue") then v.Value = true
-                   elseif v:IsA("NumberValue") or v:IsA("IntValue") then v.Value = 1 end
-               end
-           end
-           
-           -- 2. Veri Kontrolcü Bypass (GlobalReplicatedData Fix)
+           -- 1. Reklam Uygunluk Bypass (Gamepass.txt analizi ile)
            for _, v in pairs(getgc(true)) do
-               if type(v) == "table" and rawget(v, "GetReplicatedData") then
-                   hookfunction(v.GetReplicatedData, function()
-                       return { profile = { gamepasses = { ["850049439"] = true, ["9066980"] = true } } } -- Örnek bypass
-                   end)
-               end
-           end
-           Rayfield:Notify({Title = "BAŞARILI", Content = "Hata düzeltildi ve yetkiler tanımlandı!", Duration = 5})
-       end)
-   end,
-})
-
-MainTab:CreateButton({
-   Name = "📢 ADS / SPONSOR BUTONUNU AKTİF ET",
-   Callback = function()
-       pcall(function()
-           local mainGui = lp.PlayerGui:FindFirstChild("MainGUIHandler", true)
-           if mainGui then
-               -- Menüyü bul ve tetikle
-               local adsMenu = mainGui:FindFirstChild("AdStore", true)
-               if adsMenu then 
-                   adsMenu.Visible = true 
-                   adsMenu.Position = UDim2.new(0.5, 0, 0.5, 0)
-               end
-               -- Butonu görünür yap
-               for _, b in pairs(mainGui:GetDescendants()) do
-                   if b.Name == "Ads" or b.Name == "Sponsor" then
-                       b.Visible = true
-                       b.Transparency = 0
-                       b.Size = UDim2.new(0, 50, 0, 50) -- Görünür boyut
+               if type(v) == "table" then
+                   if rawget(v, "CanPlayerViewAdvertisements") then
+                       v.CanPlayerViewAdvertisements = function() return true end -- Reklam izleme izni 
+                   end
+                   if rawget(v, "IsRewardedVideoAdReady") then
+                       v.IsRewardedVideoAdReady = function() return game:GetService("ReplicatedStorage").Packages.Promise.resolve(Enum.AdAvailabilityResult.IsAvailable) end -- Reklam hazır uyarısı 
                    end
                end
            end
-           Rayfield:Notify({Title = "BİLGİ", Content = "Ads butonu ve menüsü aktif edildi!", Duration = 3})
+
+           -- 2. PlayersBag & Ev Alma Fix (ShowGamepass.txt analizi ile)
+           -- "Zaten Sahipsin" hatasını engellemek için sadece gerekli değerleri tetikliyoruz
+           local pb = lp:FindFirstChild("PlayersBag")
+           if pb then
+               for _, v in pairs(pb:GetDescendants()) do
+                   if v:IsA("BoolValue") and v.Name ~= "HouseOwned" then -- Ev mülkiyetini bozmamak için [cite: 49]
+                       v.Value = true
+                   end
+               end
+           end
+           Rayfield:Notify({Title = "BAŞARILI", Content = "Reklamlar ve Yetkiler Aktif!", Duration = 5})
        end)
    end,
 })
 
--- --- [2. OYUNCU: VIEW & COPY] ---
-PlayerTab:CreateSection("Oyuncu Araçları")
+MainTab:CreateButton({
+   Name = "📢 Ads Menüsünü & Butonunu Zorla Getir",
+   Callback = function()
+       pcall(function()
+           local gui = lp.PlayerGui:FindFirstChild("MainGUIHandler", true)
+           if gui then
+               local ads = gui:FindFirstChild("AdStore", true)
+               if ads then ads.Visible = true; ads.Position = UDim2.new(0.5, 0, 0.5, 0) end
+               for _, b in pairs(gui:GetDescendants()) do
+                   if b.Name == "Ads" or b.Name == "Sponsor" then
+                       b.Visible = true; b.Transparency = 0
+                   end
+               end
+           end
+       end)
+   end,
+})
 
+-- --- [2. OYUNCU: VIEW & TROLL] ---
+local PlayerTab = Window:CreateTab("👤 Oyuncu", 4483362458)
 PlayerTab:CreateInput({
-   Name = "Oyuncu Adı Yaz", PlaceholderText = "Ege...",
+   Name = "Oyuncu Ara", PlaceholderText = "İsim...",
    Callback = function(t)
        for _, p in pairs(game.Players:GetPlayers()) do
            if p.Name:lower():find(t:lower()) then viewTarget = p end
@@ -94,81 +84,31 @@ PlayerTab:CreateInput({
 })
 
 PlayerTab:CreateToggle({
-   Name = "View Player (İzle)", CurrentValue = false,
-   Callback = function(v)
-       camera.CameraSubject = (v and viewTarget) and viewTarget.Character.Humanoid or lp.Character.Humanoid
-   end,
+   Name = "View Player (İzle)",
+   Callback = function(v) camera.CameraSubject = (v and viewTarget) and viewTarget.Character.Humanoid or lp.Character.Humanoid end,
 })
 
 PlayerTab:CreateButton({
-   Name = "Kişiyi Kopyala (Copy Avatar)",
-   Callback = function()
-       if viewTarget then lp.CharacterAppearanceId = viewTarget.UserId; lp.Character:BreakJoints() end
-   end,
+   Name = "Avatar Kopyala (Copy Appearance)",
+   Callback = function() if viewTarget then lp.CharacterAppearanceId = viewTarget.UserId; lp.Character:BreakJoints() end end,
 })
 
--- --- [3. HAREKET: FOTOĞRAFTAKİ ÖZELLİKLER] ---
-MovementTab:CreateSection("Hareket Ayarları")
+-- --- [3. HAREKET: LYRA HUB ÖZELLİKLERİ] ---
+local MoveTab = Window:CreateTab("⚡ Hareket", 4483362458)
+MoveTab:CreateSlider({Name = "WalkSpeed", Range = {16, 500}, Callback = function(v) lp.Character.Humanoid.WalkSpeed = v end})
+MoveTab:CreateSlider({Name = "JumpPower", Range = {50, 500}, Callback = function(v) lp.Character.Humanoid.JumpPower = v end})
+MoveTab:CreateToggle({Name = "Noclip", Callback = function(v) noclip = v end})
+runService.Stepped:Connect(function() if noclip and lp.Character then for _, p in pairs(lp.Character:GetDescendants()) do if p:IsA("BasePart") then p.CanCollide = false end end end end)
 
-MovementTab:CreateSlider({
-   Name = "WalkSpeed (Hız)", Range = {16, 500}, CurrentValue = 16,
-   Callback = function(v) lp.Character.Humanoid.WalkSpeed = v end,
-})
-
-MovementTab:CreateSlider({
-   Name = "JumpPower (Zıplama)", Range = {50, 500}, CurrentValue = 50,
-   Callback = function(v) lp.Character.Humanoid.JumpPower = v end,
-})
-
-MovementTab:CreateToggle({
-   Name = "Noclip (Duvar Geçme)",
-   Callback = function(v)
-       noclip = v
-       runService.Stepped:Connect(function()
-           if noclip and lp.Character then
-               for _, p in pairs(lp.Character:GetDescendants()) do
-                   if p:IsA("BasePart") then p.CanCollide = false end
-               end
-           end
-       end)
-   end,
-})
-
-MovementTab:CreateToggle({
-   Name = "Infinite Jump (Sınırsız)",
-   Callback = function(v) infJump = v end,
-})
-
-game:GetService("UserInputService").JumpRequest:Connect(function()
-    if infJump then lp.Character:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping") end
-end)
-
--- --- [4. GÖRSEL: RGB & RAINBOW] ---
-VisualTab:CreateSection("Renk Efektleri")
-
-VisualTab:CreateToggle({
-   Name = "RGB Araçlar & Rainbow Evler",
-   Callback = function(v)
-       _G.EliteV32 = v
-       spawn(function()
-           while _G.EliteV32 do
-               local c = Color3.fromHSV(tick() % 5 / 5, 1, 1)
-               for _, car in pairs(workspace.Vehicles:GetChildren()) do
-                   if car:FindFirstChild("Body") then car.Body.Color = c end
-               end
-               for _, h in pairs(workspace.Houses:GetChildren()) do
-                   local cp = h:FindFirstChild("HouseColor", true)
-                   if cp then cp.Color = c end
-               end
-               task.wait(0.1)
-           end
-       end)
-   end,
+-- --- [4. EŞYA SEÇİCİ] ---
+local ToolTab = Window:CreateTab("📦 Eşyalar", 4483362458)
+local toolList = {}
+for _, t in pairs(rs:GetDescendants()) do if t:IsA("Tool") then table.insert(toolList, t.Name) end end
+ToolTab:CreateDropdown({
+   Name = "Eşya Al", Options = toolList,
+   Callback = function(o) local t = rs:FindFirstChild(o, true); if t then t:Clone().Parent = lp.Backpack end end,
 })
 
 -- --- [AYARLAR] ---
 local SettingsTab = Window:CreateTab("⚙️ Ayarlar", 4483362458)
-SettingsTab:CreateButton({
-   Name = "🔴 SCRIPT DESTROY (TAM SİL)",
-   Callback = function() Rayfield:Destroy() end,
-})
+SettingsTab:CreateButton({Name = "🔴 SCRIPT DESTROY", Callback = function() Rayfield:Destroy() end})
