@@ -1,10 +1,29 @@
 --[[ 
-    👑 SOVEREIGN V46 | BROOKHAVEN ULTIMATE EDITION
+    👑 SOVEREIGN V46 | APEX ULTIMATE - BROOKHAVEN EDITION
     OWNER: EgeKazak_Real1
-    STATUS: FULL STABLE & ALL FEATURES ENABLED
+    FULL INTEGRATED STABLE VERSION
 ]]
 
--- 1. BAŞLATICI VE ANA DEĞİŞKENLER
+-- 1. GÜVENLİ YÜKLENME EKRANI
+local function SafeLoading()
+    local sg = Instance.new("ScreenGui", game.CoreGui)
+    local frame = Instance.new("Frame", sg)
+    frame.Size = UDim2.new(1, 0, 1, 0)
+    frame.BackgroundColor3 = Color3.fromRGB(5, 5, 10)
+    local txt = Instance.new("TextLabel", frame)
+    txt.Size = UDim2.new(0, 500, 0, 100)
+    txt.Position = UDim2.new(0.5, -250, 0.45, 0)
+    txt.Text = "SOVEREIGN APEX V46\nBrookhaven Sistemleri Zorlanıyor..."
+    txt.TextColor3 = Color3.fromRGB(0, 170, 255)
+    txt.Font = Enum.Font.GothamBold
+    txt.TextSize = 30
+    txt.BackgroundTransparency = 1
+    task.wait(1.5)
+    sg:Destroy()
+end
+pcall(SafeLoading)
+
+-- 2. SERVİSLER VE TEMELLER
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
@@ -12,59 +31,57 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local lp = Players.LocalPlayer
 local Camera = workspace.CurrentCamera
 
--- Güvenli Global Değerler
+-- RAYFIELD UI YÜKLEME
+local ok_ray, Rayfield = pcall(function()
+    return loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+end)
+
+-- VARSAYILAN DEĞERLER (BOZULMADAN)
 getgenv().Speed = 16
 getgenv().Jump = 50
+getgenv().FOV = (Camera and Camera.FieldOfView) or 70
 getgenv().Noclip = false
 getgenv().InfJump = false
-getgenv().AdsMessage = "SOVEREIGN V46"
+getgenv().AdsMessage = "SOVEREIGN V46 ON TOP!"
 
--- 2. RAYFIELD UI KÜTÜPHANESİ (FIXED LOAD)
-local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+-- SINIRLAR
+local MIN_SPEED, MAX_SPEED = 16, 1000
+local MIN_JUMP, MAX_JUMP = 50, 1000
 
 -- 3. ANA PENCERE
 local Window = Rayfield:CreateWindow({
-   Name = "👑 SOVEREIGN V46 | BROOKHAVEN",
-   LoadingTitle = "EgeKazak_Real1 Dashboard",
-   LoadingSubtitle = "Full Entegre & Ads System",
+   Name = "👑 SOVEREIGN V46 | APEX",
+   LoadingTitle = "EgeKazak_Real1 Özel Sürüm",
+   LoadingSubtitle = "Brookhaven Full Entegre",
    Theme = "DarkBlue",
    ConfigurationSaving = { Enabled = false }
 })
 
 -- SEKMELER
 local DashTab = Window:CreateTab("📊 Dashboard", 4483362458)
-local AdsTab = Window:CreateTab("📢 Ads & Panolar", 4483362458)
-local ItemTab = Window:CreateTab("📦 Eşyalar", 4483362458)
-local TPTab = Window:CreateTab("✈️ Konumlar", 4483362458)
+local AdsTab = Window:CreateTab("📢 Ads Menu", 4483362458)
 local MoveTab = Window:CreateTab("⚡ Hareket", 4483362458)
+local TPTab = Window:CreateTab("✈️ Işınlanma", 4483362458)
+local ToolTab = Window:CreateTab("📦 Eşyalar", 4483362458)
+local ViewerTab = Window:CreateTab("🔭 İzleyici", 4483362458)
 
--- 4. DASHBOARD (ANA SAYFA ÖZELLİKLERİ)
-DashTab:CreateSection("Sunucu Durumu")
+-- 4. DASHBOARD (ANA SAYAÇ VE TETİKLEYİCİ)
+DashTab:CreateSection("Sunucu Bilgileri")
 DashTab:CreateLabel("Kullanıcı: " .. lp.Name)
-DashTab:CreateLabel("ID: " .. lp.UserId)
 
 DashTab:CreateButton({
     Name = "🛠️ Tüm Eventleri Tetikle (Trigger All)",
     Callback = function()
         for _,v in pairs(game:GetDescendants()) do
             if v:IsA("RemoteEvent") and (v.Name:lower():find("click") or v.Name:lower():find("trigger")) then
-                v:FireServer()
+                pcall(function() v:FireServer() end)
             end
         end
-        Rayfield:Notify({Title="Başarılı", Content="Tüm RemoteEvent'ler zorlandı!", Duration=3})
+        Rayfield:Notify({Title="Tetiklendi", Content="Tüm etkileşimler zorlandı!", Duration=3})
     end
 })
 
-DashTab:CreateButton({
-    Name = "🏠 Başlangıca Işınlan (Spawn)",
-    Callback = function()
-        if lp.Character and lp.Character:FindFirstChild("HumanoidRootPart") then
-            lp.Character.HumanoidRootPart.CFrame = CFrame.new(-160, 3, 20)
-        end
-    end
-})
-
--- 5. ADS MENU & PANO MANİPÜLASYONU
+-- 5. ADS MENU (BYPASS & PANOLAR)
 AdsTab:CreateSection("Reklam Pano Kontrolü")
 
 AdsTab:CreateInput({
@@ -74,91 +91,38 @@ AdsTab:CreateInput({
 })
 
 AdsTab:CreateButton({
-   Name = "📢 Reklamı Yayınla (Update Ads)",
+   Name = "📢 Tüm Panoları Güncelle",
    Callback = function()
        pcall(function()
-           -- Brookhaven'ın farklı Remote isimlerini tarar
            local adsRemote = ReplicatedStorage:FindFirstChild("UpdateAds", true) 
                or ReplicatedStorage:FindFirstChild("AdsRemote", true)
-               or ReplicatedStorage:FindFirstChild("AdsEvent", true)
-           
            if adsRemote then
                adsRemote:FireServer(getgenv().AdsMessage)
-               Rayfield:Notify({Title="Ads", Content="Panolar güncellendi!", Duration=3})
-           else
-               Rayfield:Notify({Title="Hata", Content="Pano sistemi bulunamadı!", Duration=3})
+               Rayfield:Notify({Title="Başarılı", Content="Reklamlar güncellendi!", Duration=3})
            end
        end)
    end,
 })
 
--- 6. EŞYA SİSTEMİ (BROOKHAVEN SPECIAL)
-ItemTab:CreateSection("Tool & Envanter")
-
-ItemTab:CreateButton({
-    Name = "💵 Money Gun (Para Silahı)",
+AdsTab:CreateButton({
+    Name = "🚫 Reklamları Temizle",
     Callback = function()
-        pcall(function()
-            local remote = ReplicatedStorage:FindFirstChild("ItemRemote", true)
-            if remote then remote:FireServer("MoneyGun") end
-        end)
+        local adsRemote = ReplicatedStorage:FindFirstChild("UpdateAds", true)
+        if adsRemote then adsRemote:FireServer("") end
     end
 })
 
-ItemTab:CreateButton({
-    Name = "🔑 Tüm Anahtarlar (Keys)",
-    Callback = function()
-        local keys = {"HouseKey", "CarKey", "SafeKey", "KeyCard"}
-        local remote = ReplicatedStorage:FindFirstChild("ItemRemote", true)
-        if remote then
-            for _, k in pairs(keys) do remote:FireServer(k) end
-        end
-    end
-})
-
-ItemTab:CreateButton({
-    Name = "🛡️ Polis Ekipmanları",
-    Callback = function()
-        local remote = ReplicatedStorage:FindFirstChild("ItemRemote", true)
-        if remote then 
-            remote:FireServer("Handcuffs")
-            remote:FireServer("Taser")
-        end
-    end
-})
-
--- 7. KONUMLAR (IŞINLANMA)
-local locations = {
-    ["Banka Kasası"] = CFrame.new(-10, 15, 275),
-    ["Polis Karakolu"] = CFrame.new(-120, 3, 12),
-    ["Gizli Göl Evi"] = CFrame.new(-485, 23, 680),
-    ["Yat (Havuzlu)"] = CFrame.new(-380, 15, -420),
-    ["Hastane"] = CFrame.new(-150, 3, 50),
-    ["Uçak Pist"] = CFrame.new(-250, 20, -300)
-}
-
-for name, cf in pairs(locations) do
-    TPTab:CreateButton({
-        Name = "✈️ " .. name,
-        Callback = function()
-            if lp.Character and lp.Character:FindFirstChild("HumanoidRootPart") then
-                lp.Character.HumanoidRootPart.CFrame = cf
-            end
-        end
-    })
-end
-
--- 8. HAREKET KONTROLLERİ
+-- 6. HAREKET KONTROLLERİ (SLIDER & TOGGLE)
 MoveTab:CreateSlider({
-   Name = "Yürüme Hızı",
-   Range = {16, 500},
+   Name = "Hız (WalkSpeed)",
+   Range = {MIN_SPEED, MAX_SPEED},
    CurrentValue = 16,
    Callback = function(v) getgenv().Speed = v end,
 })
 
 MoveTab:CreateSlider({
-   Name = "Zıplama Gücü",
-   Range = {50, 500},
+   Name = "Zıplama (JumpPower)",
+   Range = {MIN_JUMP, MAX_JUMP},
    CurrentValue = 50,
    Callback = function(v) getgenv().Jump = v end,
 })
@@ -173,7 +137,50 @@ MoveTab:CreateToggle({
    Callback = function(v) getgenv().InfJump = v end,
 })
 
--- 9. SİSTEM DÖNGÜSÜ (BACKEND)
+-- 7. IŞINLANMA (BROOKHAVEN ÖZEL)
+local locs = {
+    ["Banka Kasası"] = CFrame.new(-10.7, 15.4, 275.0),
+    ["Polis Karakolu"] = CFrame.new(-120, 3, 12),
+    ["Gizli Göl Evi"] = CFrame.new(-485, 23, 680),
+    ["Yat (Lüks)"] = CFrame.new(-380.1, 15.2, -420.5),
+    ["Hastane"] = CFrame.new(-150, 3, 50),
+    ["Gizli Çatı Katı"] = CFrame.new(-150.2, 55.4, 180.3)
+}
+
+for name, cf in pairs(locs) do
+    TPTab:CreateButton({
+        Name = name,
+        Callback = function()
+            if lp.Character and lp.Character:FindFirstChild("HumanoidRootPart") then
+                lp.Character.HumanoidRootPart.CFrame = cf
+            end
+        end
+    })
+end
+
+-- 8. EŞYA TOPLAMA (ITEM REMOTE FIX)
+ToolTab:CreateButton({
+   Name = "💵 Money Gun (VIP) AL",
+   Callback = function()
+       pcall(function()
+           local remote = ReplicatedStorage:FindFirstChild("ItemRemote", true)
+           if remote then remote:FireServer("MoneyGun") end
+       end)
+   end,
+})
+
+ToolTab:CreateButton({
+    Name = "🔑 Tüm Anahtarları Al",
+    Callback = function()
+        local keys = {"HouseKey", "CarKey", "SafeKey"}
+        local remote = ReplicatedStorage:FindFirstChild("ItemRemote", true)
+        if remote then
+            for _, k in pairs(keys) do remote:FireServer(k) end
+        end
+    end
+})
+
+-- 9. SİSTEM DÖNGÜSÜ (ENFORCE)
 RunService.Heartbeat:Connect(function()
     pcall(function()
         if lp.Character and lp.Character:FindFirstChildOfClass("Humanoid") then
@@ -193,13 +200,37 @@ end)
 
 UserInputService.JumpRequest:Connect(function()
     if getgenv().InfJump and lp.Character and lp.Character:FindFirstChildOfClass("Humanoid") then
-        lp.Character:FindFirstChildOfClass("Humanoid"):ChangeState(Enum.HumanoidStateType.Jumping)
+        pcall(function() lp.Character:FindFirstChildOfClass("Humanoid"):ChangeState(Enum.HumanoidStateType.Jumping) end)
     end
 end)
 
--- BİTİŞ BİLDİRİMİ
+-- HUD OLUŞTURMA (SAYAÇ)
+local function CreateDashboardHUD()
+    local sg = Instance.new("ScreenGui", lp.PlayerGui)
+    sg.Name = "SOV_DASH"
+    local frame = Instance.new("Frame", sg)
+    frame.Size = UDim2.new(0, 180, 0, 60)
+    frame.Position = UDim2.new(0, 10, 0, 10)
+    frame.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
+    frame.BackgroundTransparency = 0.3
+    
+    local txt = Instance.new("TextLabel", frame)
+    txt.Size = UDim2.new(1, 0, 1, 0)
+    txt.TextColor3 = Color3.fromRGB(0, 170, 255)
+    txt.TextSize = 14
+    txt.Font = Enum.Font.GothamMedium
+    txt.BackgroundTransparency = 1
+    
+    task.spawn(function()
+        while task.wait(0.5) do
+            txt.Text = "Hız: " .. math.floor(getgenv().Speed) .. "\nOyuncu: " .. #Players:GetPlayers()
+        end
+    end)
+end
+pcall(CreateDashboardHUD)
+
 Rayfield:Notify({
-    Title = "Sovereign V46 Yüklendi",
-    Content = "EgeKazak_Real1 - Keyifli Oyunlar!",
+    Title = "Sovereign Apex Yüklendi",
+    Content = "Brookhaven için tüm özellikler hazır!",
     Duration = 5
 })
