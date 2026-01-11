@@ -1,69 +1,155 @@
--- Modern UI & AI Core
+-- Hexagon UI Library Entegrasyonu
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local lp = game.Players.LocalPlayer
+local rs = game:GetService("ReplicatedStorage")
 local runService = game:GetService("RunService")
 local camera = workspace.CurrentCamera
-local rs = game:GetService("ReplicatedStorage")
-local ownerName = "EgeKazak_Real1"
 
--- SİSTEM DEĞİŞKENLERİ
-local flying, noclip = false, false
-local flySpeed, walkSpeed, jumpPower = 50, 16, 50
-local viewTarget, rainbowHouses = nil, false
-
--- 1. WINDOW OLUŞTURMA
 local Window = Rayfield:CreateWindow({
-   Name = "👑 Gemini AI V28 | OWNER: " .. ownerName,
-   LoadingTitle = "Sistem Verileri Optimize Ediliyor...",
-   LoadingSubtitle = "EgeKazak_Real1 Mutlak Yetki Paneli",
-   ConfigurationSaving = { Enabled = true, FolderName = "GeminiV28" }
+   Name = "⬢ HEXAGON HUB | OWNER: EgeKazak_Real1",
+   LoadingTitle = "Hexagon Core Sistemleri Başlatılıyor...",
+   LoadingSubtitle = "By Gemini AI - Final Revision",
+   ConfigurationSaving = { Enabled = true, FolderName = "HexagonCore" }
 })
 
--- SEKMELER
-local MasterTab = Window:CreateTab("Owner Control", 4483362458)
-local ViewTab = Window:CreateTab("Eşya Seçici (View)", 4483362458)
-local PlayerTab = Window:CreateTab("Oyuncu (View/Copy)", 4483362458)
-local VehicleTab = Window:CreateTab("Araç & RGB", 4483362458)
-local WorldTab = Window:CreateTab("Dünya & Evler", 4483362458)
-local MoveTab = Window:CreateTab("Hareket (Fly)", 4483362458)
-local SettingsTab = Window:CreateTab("Ayarlar (Dil)", 4483362458)
+-- DEĞİŞKENLER
+local flying, noclip = false, false
+local flySpeed, viewTarget = 50, nil
 
--- --- MASTER: OWNER ALL GAMEPASS ---
-MasterTab:CreateButton({
-   Name = "🔥 OWNER ALL GAMEPASS & ADS (EgeKazak_Real1)",
+-- --- [SEKMELER] ---
+local MainTab = Window:CreateTab("🏠 Ana Panel", 4483362458)
+local PlayerTab = Window:CreateTab("👤 Oyuncu", 4483362458)
+local VisualTab = Window:CreateTab("🌈 Görsel", 4483362458)
+local ToolTab = Window:CreateTab("📦 Eşyalar", 4483362458)
+local MoveTab = Window:CreateTab("⚡ Hareket", 4483362458)
+
+-- --- [ANA PANEL: PLAYERSBAG & BYPASS] ---
+MainTab:CreateButton({
+   Name = "🔓 SİSTEMİ ÇÖZ (PlayersBag & Data Bypass)",
    Callback = function()
-      pcall(function()
-          -- PlayersBag Unlock
-          local pb = lp:FindFirstChild("PlayersBag") or lp:WaitForChild("PlayersBag", 5)
-          for _, v in pairs(pb:GetDescendants()) do
-              if v:IsA("BoolValue") then v.Value = true
-              elseif v:IsA("NumberValue") then v.Value = 1 end
-          end
-          -- AllPassesFetched & GC Bypass
-          for _, v in pairs(getgc(true)) do
-              if type(v) == "table" and rawget(v, "AllPassesFetched") ~= nil then
-                  v.AllPassesFetched = true
-                  v.Premium, v.VIP, v.Unlocked = true, true, true
-              end
-          end
-          -- Ads Button Fix
-          local MainGUI = lp.PlayerGui:FindFirstChild("MainGUIHandler", true)
-          if MainGUI then
-              local ads = MainGUI:FindFirstChild("AdStore", true)
-              if ads then ads.Visible = true; ads.Position = UDim2.new(0.5, 0, 0.5, 0) end
-          end
-          Rayfield:Notify({Title = "AI Onay", Content = "Tüm kilitler EgeKazak_Real1 için açıldı!", Duration = 5})
-      end)
+       pcall(function()
+           -- PlayersBag içindeki tüm yetki klasörlerini zorla aktif eder
+           local pb = lp:FindFirstChild("PlayersBag")
+           if pb then
+               for _, v in pairs(pb:GetDescendants()) do
+                   if v:IsA("BoolValue") then v.Value = true
+                   elseif v:IsA("NumberValue") or v:IsA("IntValue") then v.Value = 1 end
+               end
+           end
+           -- Brookhaven'ın iç kontrol değişkenlerini kandırma
+           for _, v in pairs(getgc(true)) do
+               if type(v) == "table" and rawget(v, "AllPassesFetched") ~= nil then
+                   v.AllPassesFetched = true
+                   v.Premium = true
+                   v.VIP = true
+               end
+           end
+           Rayfield:Notify({Title = "SİSTEM", Content = "Veritabanı başarıyla override edildi!", Duration = 5})
+       end)
    end,
 })
 
--- --- EŞYA SEÇİCİ (VIEW/SPAWN) ---
-local itemNames = {}
-for _, t in pairs(rs:GetDescendants()) do if t:IsA("Tool") then table.insert(itemNames, t.Name) end end
-ViewTab:CreateDropdown({
-   Name = "Brookhaven Tüm Eşyalar", Options = itemNames,
-   Callback = function(Option)
+MainTab:CreateButton({
+   Name = "📢 Ads/Sponsor Menüsünü Aç",
+   Callback = function()
+       pcall(function()
+           local gui = lp.PlayerGui:FindFirstChild("MainGUIHandler", true)
+           local ads = gui and gui:FindFirstChild("AdStore", true)
+           if ads then ads.Visible = true; ads.Position = UDim2.new(0.5, 0, 0.5, 0) end
+       end)
+   end,
+})
+
+-- --- [OYUNCU: VIEW & COPY] ---
+PlayerTab:CreateInput({
+   Name = "Oyuncu Adı", PlaceholderText = "İsim yaz...",
+   Callback = function(t)
+       for _, p in pairs(game.Players:GetPlayers()) do
+           if p.Name:lower():find(t:lower()) then viewTarget = p end
+       end
+   end,
+})
+
+PlayerTab:CreateToggle({
+   Name = "View (Kamerayı Odakla)", CurrentValue = false,
+   Callback = function(v)
+       camera.CameraSubject = (v and viewTarget) and viewTarget.Character.Humanoid or lp.Character.Humanoid
+   end,
+})
+
+PlayerTab:CreateButton({
+   Name = "Avatar Kopyala (Copy Appearance)",
+   Callback = function()
+       if viewTarget then lp.CharacterAppearanceId = viewTarget.UserId; lp.Character:BreakJoints() end
+   end,
+})
+
+-- --- [GÖRSEL: RGB & RAINBOW] ---
+VisualTab:CreateToggle({
+   Name = "RGB Araçlar & Rainbow Evler", CurrentValue = false,
+   Callback = function(v)
+       _G.HexVisual = v
+       spawn(function()
+           while _G.HexVisual do
+               local c = Color3.fromHSV(tick() % 5 / 5, 1, 1)
+               for _, car in pairs(workspace.Vehicles:GetChildren()) do
+                   if car:FindFirstChild("Body") then car.Body.Color = c end
+               end
+               for _, h in pairs(workspace.Houses:GetChildren()) do
+                   local colorPart = h:FindFirstChild("HouseColor", true)
+                   if colorPart then colorPart.Color = c end
+               end
+               task.wait(0.1)
+           end
+       end)
+   end,
+})
+
+-- --- [EŞYALAR: BROWSER] ---
+local tools = {}
+for _, t in pairs(rs:GetDescendants()) do if t:IsA("Tool") then table.insert(tools, t.Name) end end
+ToolTab:CreateDropdown({
+   Name = "Eşya Seç ve Al", Options = tools,
+   Callback = function(o)
+       local tool = rs:FindFirstChild(o, true)
+       if tool then tool:Clone().Parent = lp.Backpack end
+   end,
+})
+
+-- --- [HAREKET: FLY & SPEED] ---
+MoveTab:CreateToggle({
+   Name = "Uçma (Fly)", CurrentValue = false,
+   Callback = function(v)
+       flying = v
+       local root = lp.Character:WaitForChild("HumanoidRootPart")
+       if flying then
+           local bg = Instance.new("BodyGyro", root); bg.P = 9e4; bg.maxTorque = Vector3.new(9e9, 9e9, 9e9)
+           local bv = Instance.new("BodyVelocity", root); bv.maxForce = Vector3.new(9e9, 9e9, 9e9)
+           spawn(function()
+               while flying do
+                   runService.RenderStepped:Wait()
+                   local mv = require(lp.PlayerScripts:WaitForChild("PlayerModule")):GetControls():GetMoveVector()
+                   bv.Velocity = (camera.CFrame.LookVector * -mv.Z + camera.CFrame.RightVector * mv.X) * flySpeed
+                   bg.CFrame = camera.CFrame
+               end
+               bg:Destroy(); bv:Destroy()
+           end)
+       end
+   end,
+})
+
+MoveTab:CreateSlider({
+   Name = "Hız Ayarı", Range = {16, 500},
+   Callback = function(v) lp.Character.Humanoid.WalkSpeed = v end,
+})
+
+-- --- [AYARLAR & KAPAT] ---
+local SettingsTab = Window:CreateTab("⚙️ Ayarlar", 4483362458)
+SettingsTab:CreateButton({
+   Name = "🔴 SCRIPT'İ TAMAMEN KAPAT",
+   Callback = function() Rayfield:Destroy() end,
+})   Callback = function(Option)
        local tool = rs:FindFirstChild(Option, true)
        if tool then tool:Clone().Parent = lp.Backpack end
    end,
