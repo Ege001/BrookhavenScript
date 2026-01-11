@@ -1,32 +1,32 @@
 --[[
-    👑 SOVEREIGN V46 | APEX ULTIMATE (Kusursuz Versiyon)
+    👑 SOVEREIGN V46 | ELITE PLUS
     OWNER: EgeKazak_Real1
     MODDED: Gemini AI
-    AVATAR ID: 2433596482
+    FEATURES: Speed/Jump/FOV with +/- controls, Strict Ad Filter, Avatar Morph
 ]]
 
--- 1. LOADER (YÜKLEME EKRANI)
+-- 1. BAŞLANGIÇ EKRANI
 local function Startup()
-    local sg = Instance.new("ScreenGui", game:GetService("CoreGui"))
+    local sg = Instance.new("ScreenGui", game.CoreGui)
     local f = Instance.new("Frame", sg)
     f.Size = UDim2.new(1, 0, 1, 0)
-    f.BackgroundColor3 = Color3.fromRGB(15, 15, 25)
+    f.BackgroundColor3 = Color3.fromRGB(5, 5, 12)
     
     local t = Instance.new("TextLabel", f)
     t.Size = UDim2.new(1, 0, 0, 100)
     t.Position = UDim2.new(0, 0, 0.45, 0)
-    t.Text = "SOVEREIGN APEX V46\nLoading Systems..."
-    t.TextColor3 = Color3.fromRGB(0, 150, 255)
+    t.Text = "SOVEREIGN ELITE PLUS\nYükleniyor..."
+    t.TextColor3 = Color3.fromRGB(0, 200, 255)
     t.Font = Enum.Font.GothamBold
-    t.TextSize = 32
+    t.TextSize = 35
     t.BackgroundTransparency = 1
     
-    task.wait(1.2)
+    task.wait(1)
     sg:Destroy()
 end
 pcall(Startup)
 
--- 2. SERVİSLER & DEĞİŞKENLER
+-- 2. DEĞİŞKENLER
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
@@ -37,228 +37,128 @@ local Camera = workspace.CurrentCamera
 _G.Speed = 16
 _G.Jump = 50
 _G.FOV = 70
-_G.Noclip = false
+_G.SpeedEnabled = false
+_G.JumpEnabled = false
 _G.Fly = false
-_G.FlySpeed = 50
-_G.Language = "TR" -- Varsayılan
+_G.Noclip = false
 _G.InfiniteJump = false
 
-local connections = {}
-local UI_Elements = {} -- Dinamik dil güncellemeleri için referanslar
-
--- 3. ÇEVİRİ TABLOSU
-local Translations = {
-    ["TR"] = {
-        ["WinName"] = "👑 SOVEREIGN V46 | FULL",
-        ["MainTab"] = "🏠 Ana Panel",
-        ["MoveTab"] = "⚡ Hareket",
-        ["TPTab"] = "✈️ Işınlanma",
-        ["ExtraTab"] = "✨ Ekstralar",
-        ["ResetAll"] = "🔄 TÜM AYARLARI SIFIRLA",
-        ["AdsButton"] = "📢 REKLAM MENÜSÜNÜ TETİKLE",
-        ["Destroy"] = "🗑️ SCRIPTI KALDIR",
-        ["Speed"] = "Yürüme Hızı",
-        ["Jump"] = "Zıplama Gücü",
-        ["Noclip"] = "Duvar Geçme",
-        ["Fly"] = "Uçma Modu",
-        ["FOV"] = "Görüş Açısı (FOV)",
-        ["Bank1"] = "💰 Banka 1 (Merkez)",
-        ["Bank2"] = "💰 Altın Banka",
-        ["Bank3"] = "💰 Elmas Banka",
-        ["Bank4"] = "💰 Bitcoin Banka",
-        ["InfJump"] = "Sonsuz Zıplama",
-        ["Morph"] = "👗 KIZ AVATARINA DÖNÜŞ (ID)",
-        ["CopyPos"] = "Konumu Kopyala",
-        ["NotifyReset"] = "Tüm değerler sıfırlandı.",
-        ["NotifyMorph"] = "Avatar başarıyla değiştirildi!"
-    },
-    ["EN"] = {
-        ["WinName"] = "👑 SOVEREIGN V46 | FULL",
-        ["MainTab"] = "🏠 Main Panel",
-        ["MoveTab"] = "⚡ Movement",
-        ["TPTab"] = "✈️ Teleport",
-        ["ExtraTab"] = "✨ Extras",
-        ["ResetAll"] = "🔄 RESET ALL SETTINGS",
-        ["AdsButton"] = "📢 TRIGGER ADS MENU",
-        ["Destroy"] = "🗑️ REMOVE SCRIPT",
-        ["Speed"] = "Walk Speed",
-        ["Jump"] = "Jump Power",
-        ["Noclip"] = "Noclip",
-        ["Fly"] = "Flight Mode",
-        ["FOV"] = "Field of View (FOV)",
-        ["Bank1"] = "💰 Bank 1 (Main)",
-        ["Bank2"] = "💰 Gold Bank",
-        ["Bank3"] = "💰 Diamond Bank",
-        ["Bank4"] = "💰 Bitcoin Bank",
-        ["InfJump"] = "Infinite Jump",
-        ["Morph"] = "👗 MORPH TO GIRL AVATAR",
-        ["CopyPos"] = "Copy Position",
-        ["NotifyReset"] = "All settings reset.",
-        ["NotifyMorph"] = "Avatar changed successfully!"
-    }
-}
-
--- 4. DİL GÜNCELLEME MOTORU
-local function UpdateUI()
-    for key, obj in pairs(UI_Elements) do
-        pcall(function()
-            local text = Translations[_G.Language][key]
-            if text then
-                if obj.SetTitle then obj:SetTitle(text)
-                elseif obj.SetText then obj:SetText(text)
-                end
-            end
-        end)
-    end
-end
-
--- 5. RAYFIELD UI KURULUMU
+-- 3. RAYFIELD UI
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 local Window = Rayfield:CreateWindow({
-   Name = Translations[_G.Language]["WinName"],
+   Name = "👑 SOVEREIGN V46 | ELITE PLUS",
    LoadingTitle = "Apex Ultimate",
    LoadingSubtitle = "by EgeKazak_Real1",
    Theme = "DarkBlue",
    ConfigurationSaving = { Enabled = false }
 })
 
--- SEKMELER
 local MainTab = Window:CreateTab("🏠 Ana Panel", 4483362458)
 local MoveTab = Window:CreateTab("⚡ Hareket", 4483362458)
 local TPTab = Window:CreateTab("✈️ Işınlanma", 4483362458)
 local ExtraTab = Window:CreateTab("✨ Ekstralar", 4483362458)
 
--- 6. ANA PANEL ELEMANLARI
-MainTab:CreateDropdown({
-    Name = "Dil / Language",
-    Options = {"TR", "EN"},
-    CurrentOption = _G.Language,
-    Callback = function(v)
-        _G.Language = v
-        UpdateUI()
-    end,
-})
-
-local adsBtn = MainTab:CreateButton({
-    Name = Translations[_G.Language]["AdsButton"],
+-- 4. ANA PANEL (STRİCT ADS)
+MainTab:CreateButton({
+    Name = "📢 REKLAMLARI TETİKLE (Strict Ad Filter)",
     Callback = function()
         pcall(function()
-            -- TAMAMEN TEMİZLENMİŞ ADS FİLTRESİ
             for _, v in pairs(lp.PlayerGui:GetDescendants()) do
-                if v:IsA("Frame") or v:IsA("ScrollingFrame") or v:IsA("ImageLabel") then
+                if v:IsA("GuiObject") then
                     local n = v.Name:lower()
-                    -- Sadece reklam ve promo odaklıları aç, sistem menülerini ASLA açma
-                    local isAd = n:find("advert") or n:find("promo") or (n:find("ad") and #n <= 3)
-                    local isSystem = n:find("admin") or n:find("menu") or n:find("main") or n:find("sidebar") or n:find("inventory")
-                    
-                    if isAd and not isSystem then
+                    -- SADECE "Ad" veya "Frame" içerenleri hedefle, sistemleri engelle
+                    local isStrictAd = (n:find("ad") and not n:find("admin")) or (n:find("promo") and n:find("frame"))
+                    if isStrictAd then
                         v.Visible = true
-                        if v.Parent:IsA("GuiObject") then v.Parent.Visible = true end
                     end
                 end
             end
-            local rem = ReplicatedStorage:FindFirstChild("ShowAds", true) or ReplicatedStorage:FindFirstChild("TriggerAd", true)
-            if rem and rem:IsA("RemoteEvent") then rem:FireServer() end
         end)
     end,
 })
-UI_Elements["AdsButton"] = adsBtn
 
-local resBtn = MainTab:CreateButton({
-    Name = Translations[_G.Language]["ResetAll"],
+MainTab:CreateButton({
+    Name = "🔄 Tüm Ayarları Sıfırla",
     Callback = function()
-        _G.Speed = 16; _G.Jump = 50; _G.FOV = 70; Camera.FieldOfView = 70
-        _G.Fly = false; _G.Noclip = false; _G.InfiniteJump = false
-        Rayfield:Notify({Title = "Reset", Content = Translations[_G.Language]["NotifyReset"], Duration = 3})
+        _G.Speed = 16; _G.Jump = 50; _G.FOV = 70; _G.SpeedEnabled = false; _G.JumpEnabled = false
+        _G.Fly = false; _G.Noclip = false; Camera.FieldOfView = 70
     end,
 })
-UI_Elements["ResetAll"] = resBtn
 
--- 7. HAREKET SEKİSİ
-local sSlider = MoveTab:CreateSlider({
-    Name = Translations[_G.Language]["Speed"],
-    Range = {16, 500},
-    CurrentValue = _G.Speed,
-    Callback = function(v) _G.Speed = v end,
+-- 5. HAREKET (SAYI GİRİŞİ + ARTTIR/AZALT)
+MoveTab:CreateSection("Speed Control")
+MoveTab:CreateToggle({ Name = "Hız Aktif", CurrentValue = false, Callback = function(v) _G.SpeedEnabled = v end })
+MoveTab:CreateInput({
+    Name = "Hız Sayısı Gir", PlaceholderText = "16-500",
+    Callback = function(v) _G.Speed = tonumber(v) or 16 end,
 })
-UI_Elements["Speed"] = sSlider
+MoveTab:CreateButton({ Name = "Hız +5", Callback = function() _G.Speed = _G.Speed + 5 end })
+MoveTab:CreateButton({ Name = "Hız -5", Callback = function() _G.Speed = _G.Speed - 5 end })
 
-local jSlider = MoveTab:CreateSlider({
-    Name = Translations[_G.Language]["Jump"],
-    Range = {50, 500},
-    CurrentValue = _G.Jump,
-    Callback = function(v) _G.Jump = v end,
+MoveTab:CreateSection("Jump Control")
+MoveTab:CreateToggle({ Name = "Zıplama Aktif", CurrentValue = false, Callback = function(v) _G.JumpEnabled = v end })
+MoveTab:CreateInput({
+    Name = "Zıplama Sayısı Gir", PlaceholderText = "50-500",
+    Callback = function(v) _G.Jump = tonumber(v) or 50 end,
 })
-UI_Elements["Jump"] = jSlider
+MoveTab:CreateButton({ Name = "Zıplama +10", Callback = function() _G.Jump = _G.Jump + 10 end })
+MoveTab:CreateButton({ Name = "Zıplama -10", Callback = function() _G.Jump = _G.Jump - 10 end })
 
-local nTog = MoveTab:CreateToggle({ Name = Translations[_G.Language]["Noclip"], Callback = function(v) _G.Noclip = v end })
-UI_Elements["Noclip"] = nTog
+MoveTab:CreateSection("Flight")
+MoveTab:CreateToggle({ Name = "Uçma (Fly)", Callback = function(v) _G.Fly = v end })
+MoveTab:CreateToggle({ Name = "Duvar Geçme (Noclip)", Callback = function(v) _G.Noclip = v end })
 
-local fTog = MoveTab:CreateToggle({ Name = Translations[_G.Language]["Fly"], Callback = function(v) _G.Fly = v end })
-UI_Elements["Fly"] = fTog
+-- 6. IŞINLANMA
+TPTab:CreateButton({ Name = "💰 Banka 1", Callback = function() lp.Character:MoveTo(Vector3.new(-10.7, 15.4, 275.0)) end })
+TPTab:CreateButton({ Name = "💰 Altın Banka", Callback = function() lp.Character.HumanoidRootPart.CFrame = CFrame.new(-27.9, -51.3, 271.4) end })
+TPTab:CreateButton({ Name = "💰 Elmas Banka", Callback = function() lp.Character.HumanoidRootPart.CFrame = CFrame.new(-57.1, -50.8, 187.4) end })
 
--- 8. IŞINLANMA (BANKALAR)
-local b1 = TPTab:CreateButton({ Name = Translations[_G.Language]["Bank1"], Callback = function() lp.Character:MoveTo(Vector3.new(-10.7, 15.4, 275.0)) end })
-UI_Elements["Bank1"] = b1
-
-local b2 = TPTab:CreateButton({ Name = Translations[_G.Language]["Bank2"], Callback = function() lp.Character.HumanoidRootPart.CFrame = CFrame.new(-27.9, -51.3, 271.4) end })
-UI_Elements["Bank2"] = b2
-
-local b3 = TPTab:CreateButton({ Name = Translations[_G.Language]["Bank3"], Callback = function() lp.Character.HumanoidRootPart.CFrame = CFrame.new(-57.1, -50.8, 187.4) end })
-UI_Elements["Bank3"] = b3
-
-local b4 = TPTab:CreateButton({ Name = Translations[_G.Language]["Bank4"], Callback = function() lp.Character.HumanoidRootPart.CFrame = CFrame.new(-133.8, -55.4, 231.8) end })
-UI_Elements["Bank4"] = b4
-
--- 9. EKSTRALAR (İSTEDİĞİN MORPH BUTONU BURADA)
-local morphBtn = ExtraTab:CreateButton({
-    Name = Translations[_G.Language]["Morph"],
+-- 7. EKSTRALAR (MORPH & FOV +/-)
+ExtraTab:CreateSection("Avatar")
+ExtraTab:CreateButton({
+    Name = "👗 KIZ AVATARINA DÖNÜŞ (ID: 2433596482)",
     Callback = function()
-        local id = 2433596482 -- Kız Avatar ID
         pcall(function()
             local hum = lp.Character:FindFirstChildOfClass("Humanoid")
             if hum then
-                local desc = Players:GetHumanoidDescriptionFromUserId(id)
+                local desc = Players:GetHumanoidDescriptionFromUserId(2433596482)
                 hum:ApplyDescription(desc)
-                Rayfield:Notify({Title = "Avatar", Content = Translations[_G.Language]["NotifyMorph"], Duration = 3})
+                Rayfield:Notify({Title = "Başarılı", Content = "Dönüşüm Tamamlandı!", Duration = 2})
             end
         end)
     end,
 })
-UI_Elements["Morph"] = morphBtn
 
-local iJTog = ExtraTab:CreateToggle({ Name = Translations[_G.Language]["InfJump"], Callback = function(v) _G.InfiniteJump = v end })
-UI_Elements["InfJump"] = iJTog
-
-local fovS = ExtraTab:CreateSlider({
-    Name = Translations[_G.Language]["FOV"],
-    Range = {70, 120},
-    CurrentValue = _G.FOV,
-    Callback = function(v) _G.FOV = v; Camera.FieldOfView = v end,
+ExtraTab:CreateSection("Visuals")
+ExtraTab:CreateInput({
+    Name = "FOV Sayısı Gir", PlaceholderText = "70-120",
+    Callback = function(v) _G.FOV = tonumber(v) or 70; Camera.FieldOfView = _G.FOV end,
 })
-UI_Elements["FOV"] = fovS
+ExtraTab:CreateButton({ Name = "FOV +5", Callback = function() _G.FOV = _G.FOV + 5; Camera.FieldOfView = _G.FOV end })
+ExtraTab:CreateButton({ Name = "FOV -5", Callback = function() _G.FOV = _G.FOV - 5; Camera.FieldOfView = _G.FOV end })
 
--- 10. ANA DÖNGÜ (HATASIZ ÇALIŞTIRMA)
-local loop = RunService.Heartbeat:Connect(function()
+ExtraTab:CreateToggle({ Name = "Sonsuz Zıplama", Callback = function(v) _G.InfiniteJump = v end })
+
+-- 8. DÖNGÜ VE KONTROLLER
+RunService.Heartbeat:Connect(function()
     pcall(function()
         local char = lp.Character
-        local hum = char:FindFirstChildOfClass("Humanoid")
-        local hrp = char:FindFirstChild("HumanoidRootPart")
+        local hum = char and char:FindFirstChildOfClass("Humanoid")
+        local hrp = char and char:FindFirstChild("HumanoidRootPart")
         
         if hum then
-            hum.WalkSpeed = _G.Speed
-            hum.JumpPower = _G.Jump
-            hum.UseJumpPower = true
+            hum.WalkSpeed = _G.SpeedEnabled and _G.Speed or 16
+            hum.JumpPower = _G.JumpEnabled and _G.Jump or 50
         end
         
-        if _G.Noclip then
+        if _G.Noclip and char then
             for _, p in pairs(char:GetDescendants()) do if p:IsA("BasePart") then p.CanCollide = false end end
         end
         
         if _G.Fly and hrp then
             if not hrp:FindFirstChild("FlyBV") then
-                local bv = Instance.new("BodyVelocity", hrp); bv.Name = "FlyBV"; bv.MaxForce = Vector3.new(4e6, 4e6, 4e6)
-                local bg = Instance.new("BodyGyro", hrp); bg.Name = "FlyBG"; bg.MaxTorque = Vector3.new(4e6, 4e6, 4e6)
+                local bv = Instance.new("BodyVelocity", hrp); bv.Name = "FlyBV"; bv.MaxForce = Vector3.new(9e9,9e9,9e9)
+                local bg = Instance.new("BodyGyro", hrp); bg.Name = "FlyBG"; bg.MaxTorque = Vector3.new(9e9,9e9,9e9)
             end
             hrp.FlyBG.CFrame = Camera.CFrame
             local move = Vector3.new(0,0,0)
@@ -266,29 +166,29 @@ local loop = RunService.Heartbeat:Connect(function()
             if UserInputService:IsKeyDown(Enum.KeyCode.S) then move = move - Camera.CFrame.LookVector end
             if UserInputService:IsKeyDown(Enum.KeyCode.D) then move = move + Camera.CFrame.RightVector end
             if UserInputService:IsKeyDown(Enum.KeyCode.A) then move = move - Camera.CFrame.RightVector end
-            hrp.FlyBV.Velocity = move * _G.FlySpeed
+            hrp.FlyBV.Velocity = move * 60
+        elseif hrp and hrp:FindFirstChild("FlyBV") then
+            hrp.FlyBV:Destroy(); hrp.FlyBG:Destroy()
         end
     end)
 end)
 
 UserInputService.JumpRequest:Connect(function()
-    if _G.InfiniteJump then lp.Character:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping") end
+    if _G.InfiniteJump and lp.Character then lp.Character:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping") end
 end)
 
 -- HUD
 local function BuildHUD()
     local sg = Instance.new("ScreenGui", lp.PlayerGui)
-    sg.Name = "SOV_HUD"
-    local f = Instance.new("Frame", sg); f.Size = UDim2.new(0, 170, 0, 85); f.Position = UDim2.new(0, 10, 0, 10); f.BackgroundColor3 = Color3.new(0,0,0); f.BackgroundTransparency = 0.5
-    Instance.new("UICorner", f)
+    local f = Instance.new("Frame", sg); f.Size = UDim2.new(0, 150, 0, 60); f.Position = UDim2.new(0, 10, 0, 10); f.BackgroundColor3 = Color3.new(0,0,0); f.BackgroundTransparency = 0.5; Instance.new("UICorner", f)
     local l = Instance.new("TextLabel", f); l.Size = UDim2.new(1,0,1,0); l.BackgroundTransparency = 1; l.TextColor3 = Color3.new(1,1,1); l.Font = Enum.Font.Code; l.TextSize = 12
     task.spawn(function()
-        while task.wait(0.3) do
+        while task.wait(0.5) do
             if not sg.Parent then break end
-            l.Text = string.format("SOVEREIGN V46\nSPD: %d | JMP: %d\nFOV: %d | LANG: %s", _G.Speed, _G.Jump, _G.FOV, _G.Language)
+            l.Text = string.format("SOV ELITE PLUS\nS:%d | J:%d | F:%d", _G.Speed, _G.Jump, _G.FOV)
         end
     end)
 end
 BuildHUD()
 
-Rayfield:Notify({Title = "Sovereign Ultimate", Content = "Hazır! Avatar butonu eklendi.", Duration = 5})
+Rayfield:Notify({Title = "Sovereign Elite Plus", Content = "+/- Kontrolleri ve Strict Ads Hazır!", Duration = 5})
