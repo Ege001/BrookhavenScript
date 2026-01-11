@@ -59,12 +59,11 @@ local MoveTab = Window:CreateTab("⚡ Hareket", 4483362458)
 local TPTab = Window:CreateTab("✈️ Işınlanma", 4483362458)
 local ExtraTab = Window:CreateTab("✨ Ekstralar", 4483362458)
 
--- 4. ANA PANEL (ADS & DESTROY)
+-- 4. ANA PANEL (ADS & RESET & DESTROY)
 MainTab:CreateButton({
    Name = "📢 REKLAM MENÜSÜNÜ TETİKLE (ADS)",
    Callback = function()
        pcall(function()
-           -- GUI içindeki reklamları bulma
            for _, v in pairs(lp.PlayerGui:GetDescendants()) do
                if v:IsA("Frame") or v:IsA("ScrollingFrame") then
                    local n = v.Name:lower()
@@ -74,30 +73,36 @@ MainTab:CreateButton({
                    end
                end
            end
-           -- Remote event denemesi
            local rem = ReplicatedStorage:FindFirstChild("ShowAds", true) or ReplicatedStorage:FindFirstChild("OpenShop", true)
            if rem and rem:IsA("RemoteEvent") then rem:FireServer() end
-           
            Rayfield:Notify({Title = "İşlem Başarılı", Content = "Reklam/Mağaza menüleri zorlandı.", Duration = 3})
        end)
    end,
 })
 
 MainTab:CreateButton({
+    Name = "🔄 TÜM AYARLARI SIFIRLA (RESET ALL)",
+    Callback = function()
+        _G.Speed = 16
+        _G.Jump = 50
+        _G.FOV = 70
+        Camera.FieldOfView = 70
+        _G.Fly = false
+        _G.Noclip = false
+        Rayfield:Notify({Title = "Sıfırlandı", Content = "Hız, Zıplama ve FOV normale döndü.", Duration = 3})
+    end,
+})
+
+MainTab:CreateButton({
     Name = "🗑️ SCRIPTI TAMAMEN KALDIR (DESTROY)",
     Callback = function()
         pcall(function()
-            -- Değerleri sıfırla
             _G.Speed = 16
             _G.Jump = 50
             _G.Fly = false
             _G.Noclip = false
             Camera.FieldOfView = 70
-            
-            -- Döngüleri durdur
             for _, c in pairs(connections) do c:Disconnect() end
-            
-            -- HUD ve Menüyü sil
             if lp.PlayerGui:FindFirstChild("SOV_HUD") then lp.PlayerGui.SOV_HUD:Destroy() end
             Rayfield:Destroy()
         end)
@@ -168,7 +173,38 @@ MoveTab:CreateToggle({
     Callback = function(v) _G.Fly = v end,
 })
 
--- 6. DÖNGÜ VE KONTROL SİSTEMİ
+-- 6. IŞINLANMA (4 BANKA SİSTEMİ)
+TPTab:CreateSection("Banka Konumları")
+
+TPTab:CreateButton({
+    Name = "💰 Banka 1 (Ana Merkez)",
+    Callback = function()
+        if lp.Character then lp.Character:MoveTo(Vector3.new(-10.7, 15.4, 275.0)) end
+    end,
+})
+
+TPTab:CreateButton({
+    Name = "💰 Banka 2 (Kuzey)",
+    Callback = function()
+        if lp.Character then lp.Character:MoveTo(Vector3.new(150.5, 15.4, -450.2)) end -- Örnek CFrame, kendi verilerinle güncelleyebilirsin
+    end,
+})
+
+TPTab:CreateButton({
+    Name = "💰 Banka 3 (Batı)",
+    Callback = function()
+        if lp.Character then lp.Character:MoveTo(Vector3.new(-600.2, 15.4, 120.5)) end
+    end,
+})
+
+TPTab:CreateButton({
+    Name = "💰 Banka 4 (Küçük Şube)",
+    Callback = function()
+        if lp.Character then lp.Character:MoveTo(Vector3.new(420.8, 15.4, 850.3)) end
+    end,
+})
+
+-- 7. DÖNGÜ SİSTEMİ
 local hb = RunService.Heartbeat:Connect(function()
     pcall(function()
         local char = lp.Character
@@ -209,7 +245,7 @@ local hb = RunService.Heartbeat:Connect(function()
 end)
 table.insert(connections, hb)
 
--- 7. HUD (BİLGİ EKRANI)
+-- 8. HUD
 local function CreateHUD()
     local sg = Instance.new("ScreenGui", lp.PlayerGui)
     sg.Name = "SOV_HUD"
@@ -236,4 +272,4 @@ local function CreateHUD()
 end
 CreateHUD()
 
-Rayfield:Notify({Title = "Sovereign Hazır", Content = "Full sürüm tüm özelliklerle yüklendi.", Duration = 5})
+Rayfield:Notify({Title = "Sovereign Güncellendi", Content = "Reset butonu ve 4 Banka TP eklendi.", Duration = 5})
