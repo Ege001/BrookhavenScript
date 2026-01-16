@@ -101,7 +101,7 @@ Title.Size = UDim2.new(0.7,0,0.12,0)
 Title.Position = UDim2.new(0.5,0,0.1,0)
 Title.AnchorPoint = Vector2.new(0.5,0)
 Title.BackgroundTransparency = 1
-Title.Text = "Lyra Hub"
+Title.Text = "LYRA HUB"
 Title.Font = Enum.Font.GothamBlack
 Title.TextScaled = true
 Title.TextColor3 = ROXO_PRINCIPAL
@@ -155,7 +155,7 @@ Sub.Size = UDim2.new(0.6,0,0.05,0)
 Sub.Position = UDim2.new(0.5,0,0.6,0)
 Sub.AnchorPoint = Vector2.new(0.5,0)
 Sub.BackgroundTransparency = 1
-Sub.Text = "Brookhaven'e giriliyor..."
+Sub.Text = "Entrando no Brookhaven..."
 Sub.Font = Enum.Font.Gotham
 Sub.TextScaled = true
 Sub.TextColor3 = ROXO_MEDIO
@@ -195,11 +195,11 @@ task.wait(0.5)
 Sound:Stop()
 ScreenGui:Destroy()
 
-local redzlib = loadstring(game:HttpGet("https://raw.githubusercontent.com/kayrus999/kayrus99/refs/heads/main/kayrusLINDO"))()
+local redzlib = loadstring(game:HttpGet("https://raw.githubusercontent.com/kayrus999/kayrus99/refs/heads/ana/kayrusLINDO"))()
 
 local Window = redzlib:MakeWindow({
-  Title = "Lyra Hub",
-  SubTitle = "Yazan: Kayrus999 & Xicrinho",
+  Title = "LYRA HUB",
+  SubTitle = "By:Kayrus999 & Xicrinho",
   SaveFolder = "LinuxHub_Brookhaven"
 })
 
@@ -214,20 +214,20 @@ Window:AddMinimizeButton({
     },
 })
 
-local infoTab = Window:MakeTab({ "bilgiler", "info" })
+local infoTab = Window:MakeTab({ "Informaçoes", "info" })
 
 infoTab:AddDiscordInvite({
     Name = "Lyra Hub",
-    Description = "https://Discord.gg/YcM2DzZ4TM",
+    Description = "https://discord.gg/YcM2DzZ4TM",
     Logo = "rbxassetid://71841836891247",
-    Invite = "https://Discord.gg/YcM2DzZ4TM",
+    Invite = "https://discord.gg/YcM2DzZ4TM",
 })
 
-infoTab:AddSection({ "script bilgileri" })
+infoTab:AddSection({ "informaçoes do script" })
 infoTab:AddParagraph({ "Roblox Dos Donos: Apenas_eu362/murilo_12303" })
 infoTab:AddParagraph({ "você esta usando:", "Lyra Hub" })
 
-infoTab:AddSection({ "bilgiler" })
+infoTab:AddSection({ "Informaçoes" })
 
 local function createInfoBlock(tab, title, initial)
     local block
@@ -268,14 +268,14 @@ end
 local Players = game:GetService("Players")
 local localPlayer = Players.LocalPlayer
 
-local welcomeBlock = createInfoBlock(infoTab, "Lyra Hub'a Hoş Geldiniz. Bugün Tarih: ", getCurrentDate())
-infoTab:AddParagraph({"Kullanıcı Adınız: " .. (localPlayer.Name or "Desconhecido")})
-infoTab:AddParagraph({"ID'niz: " .. tostring(localPlayer.UserId or 0)})
+local welcomeBlock = createInfoBlock(infoTab, "Seja Bem Vindo Ao Lyra Hub Hoje E Dia: ", getCurrentDate())
+infoTab:AddParagraph({"Seu Nickname: " .. (localPlayer.Name or "Desconhecido")})
+infoTab:AddParagraph({"Seu ID: " .. tostring(localPlayer.UserId or 0)})
 
-local gameBlock    = createInfoBlock(infoTab, "Oyununuz: ", "Carregando...")
-local timerBlock   = createInfoBlock(infoTab, "Script Kullanım Süresi: ", "00:00:00")
-local fpsBlock     = createInfoBlock(infoTab, "FPS'iniz: ", "FPS: 0")
-local playersBlock = createInfoBlock(infoTab, "Sunucudaki Kişi Sayısı: ", tostring(#Players:GetPlayers()))
+local gameBlock    = createInfoBlock(infoTab, "Seu Jogo: ", "Carregando...")
+local timerBlock   = createInfoBlock(infoTab, "Tempo De Uso Do Script: ", "00:00:00")
+local fpsBlock     = createInfoBlock(infoTab, "Seu Fps: ", "FPS: 0")
+local playersBlock = createInfoBlock(infoTab, "Quantidade De Pessoas No Server: ", tostring(#Players:GetPlayers()))
 
 local RunService = game:GetService("RunService")
 local MarketplaceService = game:GetService("MarketplaceService")
@@ -293,32 +293,32 @@ local function getCurrentGameName()
     if success and gameInfo and gameInfo.Name then
         return gameInfo.Name
     else
-        return "Bilinmeyen Oyun"
+        return "Jogo Desconhecido"
     end
 end
 
 task.spawn(function()
     while true do
         task.wait(0.5)
-        setBlockText(welcomeBlock, "Lyra Hub'a Hoş Geldiniz. Bugün Tarih: ", getCurrentDate())
+        setBlockText(welcomeBlock, "Seja Bem Vindo Ao Lyra Hub Hoje É Dia: ", getCurrentDate())
         local e = os.clock() - startClock
         local h = math.floor(e/3600)
         local m = math.floor((e%3600)/60)
         local s = math.floor(e%60)
-        setBlockText(timerBlock, "Script Kullanım Süresi: ", string.format("%02d:%02d:%02d", h, m, s))
-        setBlockText(fpsBlock, "FPS'iniz: ", "FPS: " .. tostring(currentFPS))
-        setBlockText(playersBlock, "Sunucudaki Kişi Sayısı: ", tostring(#Players:GetPlayers()))
-        setBlockText(gameBlock, "Oyununuz: ", getCurrentGameName())
+        setBlockText(timerBlock, "Tempo De Uso Do Script: ", string.format("%02d:%02d:%02d", h, m, s))
+        setBlockText(fpsBlock, "Seu Fps: ", "FPS: " .. tostring(currentFPS))
+        setBlockText(playersBlock, "Quantidade De Pessoas No Server: ", tostring(#Players:GetPlayers()))
+        setBlockText(gameBlock, "Seu Jogo: ", getCurrentGameName())
     end
 end)
 
 local function refreshPlayers()
-    setBlockText(playersBlock, "Sunucudaki Kişi Sayısı: ", tostring(#Players:GetPlayers()))
+    setBlockText(playersBlock, "Quantidade De Pessoas No Server: ", tostring(#Players:GetPlayers()))
 end
 Players.PlayerAdded:Connect(refreshPlayers)
 Players.PlayerRemoving:Connect(refreshPlayers)
 
-infoTab:AddParagraph({"Kullandığınız Executor: " .. identifyexecutor()})
+infoTab:AddParagraph({"Seu Executor: " .. identifyexecutor()})
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -345,7 +345,7 @@ Tab:AddButton({
     Name = "Naruto",
     Desc = "Naruto FE.",
     Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/mxskf/Legal/refs/heads/main/Dboas"))()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/mxskf/Legal/refs/heads/ana/Dboas"))()
     end
 })
 
@@ -353,7 +353,7 @@ Tab:AddButton({
     Name = "Batman",
     Description = "Batman FE.",
     Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/mxskf/Legal/refs/heads/main/Dboas89"))()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/mxskf/Legal/refs/heads/ana/Dboas89"))()
     end
 })
 
@@ -361,7 +361,7 @@ Tab:AddButton({
     Name = "Sonic.Exe",
     Description = "Sonic.Exe FE.",
     Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/mxskf/Legal/refs/heads/main/Dboas86"))()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/mxskf/Legal/refs/heads/ana/Dboas86"))()
     end
 })
 
@@ -370,7 +370,7 @@ Tab:AddButton({
     Desc = "Pânico FE",
     Locked = false,
     Callback = function()
-       loadstring(game:HttpGet("https://raw.githubusercontent.com/BRENOPOOF/yyyyyyyface/refs/heads/main/Main.txt"))()
+       loadstring(game:HttpGet("https://raw.githubusercontent.com/BRENOPOOF/yyyyyyyface/refs/heads/ana/Ana.txt"))()
     end
 })
 
@@ -379,7 +379,7 @@ Tab:AddButton({
     Desc = "Morty FE",
     Locked = false,
     Callback = function()
-       loadstring(game:HttpGet("https://raw.githubusercontent.com/repositoryredzlib/Mortyyyyyy/refs/heads/main/Main.txt"))()
+       loadstring(game:HttpGet("https://raw.githubusercontent.com/repositoryredzlib/Mortyyyyyy/refs/heads/ana/Ana.txt"))()
      end
 })
 
@@ -388,7 +388,7 @@ Tab:AddButton({
     Desc = "Rick Sanchez FE",
     Locked = false,
     Callback = function()
-       loadstring(game:HttpGet("https://raw.githubusercontent.com/BRENOPOOF/rick-Sanchez-/refs/heads/main/Main.txt"))()
+       loadstring(game:HttpGet("https://raw.githubusercontent.com/BRENOPOOF/rick-Sanchez-/refs/heads/ana/Ana.txt"))()
   end
 })
 
@@ -397,7 +397,7 @@ Tab:AddButton({
     Desc = "Cowboy FE",
     Locked = false,
     Callback = function()
-       loadstring(game:HttpGet("https://raw.githubusercontent.com/BRENOPOOF/wjsj/refs/heads/main/Main.txt"))()
+       loadstring(game:HttpGet("https://raw.githubusercontent.com/BRENOPOOF/wjsj/refs/heads/ana/Ana.txt"))()
     end
 })
 
@@ -406,7 +406,7 @@ Tab:AddButton({
     Desc = "Guest666 FE",
     Locked = false,
     Callback = function()
-       loadstring(game:HttpGet("https://raw.githubusercontent.com/lyrarepositorio-afk/swsw/refs/heads/main/Main.txt"))()
+       loadstring(game:HttpGet("https://raw.githubusercontent.com/lyrarepositorio-afk/swsw/refs/heads/ana/Ana.txt"))()
     end
 })
 
@@ -415,12 +415,12 @@ Tab:AddButton({
     Desc = "carro no roblox kkj",
     Locked = false,
     Callback = function()
-loadstring(game:HttpGet("https://raw.githubusercontent.com/repositoryredzlib/Carfling/refs/heads/main/Main.txt"))()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/repositoryredzlib/Carfling/refs/heads/ana/Ana.txt"))()
     end
 })
 
 Tab:AddButton({
-    Title = "FE VR",
+    Title = "Fe vr",
     Desc = "FE VR",
     Callback = function()
         local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -441,7 +441,7 @@ Tab:AddButton({
 
         task.delay(6, function()
             local success, err = pcall(function()
-                loadstring(game:HttpGet("https://raw.githubusercontent.com/randomstring0/Qwerty/refs/heads/main/qwerty45.lua"))()
+                loadstring(game:HttpGet("https://raw.githubusercontent.com/randomstring0/Qwerty/refs/heads/ana/qwerty45.lua"))()
             end)
         end)
     end
@@ -461,7 +461,7 @@ Tab:AddButton({
 	Desc = "Shadow FE",
 	Callback = function()
 		pcall(function()
-			loadstring(game:HttpGet("https://raw.githubusercontent.com/267266273ffsfs/Shadow/refs/heads/main/Main.txt"))()
+			loadstring(game:HttpGet("https://raw.githubusercontent.com/267266273ffsfs/Shadow/refs/heads/ana/Ana.txt"))()
 		end)
 	end
 })
@@ -471,7 +471,7 @@ Tab:AddButton({
 	Desc = "Executa o Goner fe",
 	Callback = function()
 		pcall(function()
-			loadstring(game:HttpGet("https://raw.githubusercontent.com/lyrarepositorio-afk/GONER/refs/heads/main/Main.txt"))()
+			loadstring(game:HttpGet("https://raw.githubusercontent.com/lyrarepositorio-afk/GONER/refs/heads/ana/Ana.txt"))()
 		end)
 	end
 })
@@ -481,7 +481,7 @@ Tab:AddButton({
 	Desc = "Noly FE",
 	Callback = function()
 		pcall(function()
-			loadstring(game:HttpGet("https://raw.githubusercontent.com/lyrarepositorio-afk/gubby/refs/heads/main/Main.txt"))()
+			loadstring(game:HttpGet("https://raw.githubusercontent.com/lyrarepositorio-afk/gubby/refs/heads/ana/Ana.txt"))()
 		end)
 	end
 })
@@ -491,7 +491,7 @@ Tab:AddButton({
 	Desc = "Tubers FE",
 	Callback = function()
 		pcall(function()
-			loadstring(game:HttpGet("https://raw.githubusercontent.com/BRENOPOOF/1222/refs/heads/main/Main.txt"))()
+			loadstring(game:HttpGet("https://raw.githubusercontent.com/BRENOPOOF/1222/refs/heads/ana/Ana.txt"))()
 		end)
 	end
 })
@@ -500,7 +500,7 @@ Tab:AddButton({
     Title = "mãozinha",
     Desc = "mãozinha FE",
     Callback = function()
-       loadstring(game:HttpGet("https://raw.githubusercontent.com/BRENOPOOF/slafiznotedio/refs/heads/main/Main.txt"))()
+       loadstring(game:HttpGet("https://raw.githubusercontent.com/BRENOPOOF/slafiznotedio/refs/heads/ana/Ana.txt"))()
     end
 })
 
@@ -508,7 +508,7 @@ Tab:AddButton({
     Title = "C00LKIDD",
     Desc = "C00LKIDD FE",
     Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/repositoryredzlib/xzzxsx/refs/heads/main/Main.txt"))()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/repositoryredzlib/xzzxsx/refs/heads/ana/Ana.txt"))()
     end
 })
 
@@ -516,7 +516,7 @@ Tab:AddButton({
     Title = "Emote v2",
     Desc = "Emotes FREE",
     Callback = function()
-       loadstring(game:HttpGet("https://raw.githubusercontent.com/Gazer-Ha/Free-emote/refs/heads/main/Delta%20mad%20stuffs"))()
+       loadstring(game:HttpGet("https://raw.githubusercontent.com/Gazer-Ha/Free-emote/refs/heads/ana/Delta%20mad%20stuffs"))()
     end
 })
 
@@ -526,7 +526,7 @@ Tab:AddButton({
 	Desc = "Herobrine FE",
 	Callback = function()
 		pcall(function()
-			loadstring(game:HttpGet("https://raw.githubusercontent.com/lyrarepositorio-afk/hEROBRINE/refs/heads/main/Main.txt"))()
+			loadstring(game:HttpGet("https://raw.githubusercontent.com/lyrarepositorio-afk/hEROBRINE/refs/heads/ana/Ana.txt"))()
 		end)
 	end
 })
@@ -565,7 +565,7 @@ Tab:AddButton({
 	Description = "CARTOON CAT FE",
 	Callback = function()
 		pcall(function()
-			loadstring(game:HttpGet("https://raw.githubusercontent.com/lyrarepositorio-afk/cartoon-cat/refs/heads/main/Main.txt"))()
+			loadstring(game:HttpGet("https://raw.githubusercontent.com/lyrarepositorio-afk/cartoon-cat/refs/heads/ana/Ana.txt"))()
 		end)
 	end
 })
@@ -575,7 +575,7 @@ Tab:AddButton({
 	Desc = "Ominitrix FE",
 	Callback = function()
 		pcall(function()
-			loadstring(game:HttpGet("https://raw.githubusercontent.com/267266273ffsfs/Ominitrix/refs/heads/main/Main.txt"))()
+			loadstring(game:HttpGet("https://raw.githubusercontent.com/267266273ffsfs/Ominitrix/refs/heads/ana/Ana.txt"))()
 		end)
 	end
 })
@@ -585,7 +585,7 @@ Tab:AddButton({
     Desc = "Ativa o Kamui (hubzin)",
     Locked = false,
     Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/267266273ffsfs/kamui/refs/heads/main/Main.txt"))()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/267266273ffsfs/kamui/refs/heads/ana/Ana.txt"))()
     end
 })
 
@@ -594,7 +594,7 @@ Tab:AddButton({
     Desc = "Jerk FE",
     Locked = false,
     Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/yeahblxr/Scripts/refs/heads/main/Edge.lua"))()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/yeahblxr/Scripts/refs/heads/ana/Edge.lua"))()
     end
 })
 
@@ -603,7 +603,7 @@ Tab:AddButton({
     Desc = "Emotes fe :)",
     Locked = false,
     Callback = function()
-        loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-AFEM-Max-Open-Alpha-50210"))()
+        loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-AFEM-Max-Aç-Alpha-50210"))()
     end
 })
 
@@ -612,7 +612,7 @@ Tab:AddButton({
     Desc = "Jeff The Killer FE",
     Locked = false,
     Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/267266273ffsfs/Jeff/refs/heads/main/Main.txt"))()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/267266273ffsfs/Jeff/refs/heads/ana/Ana.txt"))()
     end
 })
 
@@ -768,18 +768,18 @@ Tab:AddButton({
                         targetBlock:Destroy()
                         createNotification("ðŸ—‘ï¸ Bloco Deletado", "Bloco spawnado removido com sucesso!")
                     else
-                        createNotification("ðŸ’¡ Info", "Clique em um bloco spawnado para deletÃ¡-lo!")
+                        createNotification("ðŸ’¡ Bilgi", "Clique em um bloco spawnado para deletÃ¡-lo!")
                     end
                 end)
 
-                createNotification("Kazma donatıldı", "Clique em blocos spawnados para deletÃ¡-los!")
+                createNotification("Picareta equipada", "Clique em blocos spawnados para deletÃ¡-los!")
             end
         end)
 
         deleteTool.Unequipped:Connect(function()
             local args = {12780809235}
             ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("Wear"):InvokeServer(unpack(args))
-            createNotification("Kazma saklandı", "Tool desequipado! Visual restaurado.")
+            createNotification("Picareta Guardada", "Tool desequipado! Visual restaurado.")
         end)
 
         deleteTool.Parent = LocalPlayer.Backpack
@@ -1303,7 +1303,7 @@ local function toggleClickTP()
         local mouse = LocalPlayer:GetMouse()
         local tool = Instance.new("Tool")
         tool.RequiresHandle = false
-        tool.Name = "Tp tool(Equip to Click TP)"
+        tool.Name = "Tp tool(Equip to Tıkla TP)"
 
         tool.Activated:Connect(function()
             waitForCharacter()
@@ -1354,7 +1354,7 @@ local function getPlayerList()
 end
 
 local killDropdown = FunTab:AddDropdown({
-    Name = "Oyuncu Seç",
+    Name = "Selecionar Jogador",
     Options = getPlayerList(),
     Default = "",
     Callback = function(value)
@@ -1423,17 +1423,17 @@ Players.PlayerRemoving:Connect(function(pl)
 end)
 
 FunTab:AddButton({
-    Name = "Oyuncu Listesini Güncelle",
+    Name = "Atualizar Oyuncu List",
     Callback = function()
         UpdateDropdownManual()
     end
 })
 
 
-FunTab:AddSection("Player Controls")
+FunTab:AddSection("Oyuncu Controls")
 
 local viewToggle = FunTab:AddToggle({
-    Name = "Oyuncuyu Görüntüle",
+    Name = "Görüntüle Oyuncu",
     Default = false,
     Callback = function(Value)
         if Value then
@@ -1449,7 +1449,7 @@ local viewToggle = FunTab:AddToggle({
 })
 
 local stalkToggle = FunTab:AddToggle({
-    Name = "Takip Et",
+    Name = "Stalk Oyuncu",
     Default = false,
     Callback = function(Value)
         if Value then
@@ -1465,14 +1465,14 @@ local stalkToggle = FunTab:AddToggle({
 })
 
 FunTab:AddButton({
-    Name = "Stalk Random Player",
+    Name = "Stalk Random Oyuncu",
     Callback = function()
         startRandomStalk()
     end
 })
 
 FunTab:AddButton({
-    Name = "Tüm Modları Durdur",
+    Name = "Stop All Modes",
     Callback = function()
         stopStalk()
         stopView()
@@ -1481,17 +1481,17 @@ FunTab:AddButton({
     end
 })
 
-FunTab:AddSection("Teleport Tools")
+FunTab:AddSection("Işınlan Tools")
 
 FunTab:AddButton({
-    Name = "Tıkla TP'yi Aç/Kapat",
+    Name = "Aç/Kapat Tıkla TP",
     Callback = function()
         toggleClickTP()
     end
 })
 
 
-FunTab:AddSection("Settings")
+FunTab:AddSection("Ayarlar")
 
 FunTab:AddTextBox({
     Name = "FOV Angle",
@@ -2094,14 +2094,14 @@ TabNuke:AddToggle({
 })
 
 local PlayerTab = Window:MakeTab({
-    Title = "Player",
+    Title = "Oyuncu",
     Icon = "rbxassetid://17132521951"
 })
 
 PlayerTab:AddSection({ "Movimentos" })
 
 PlayerTab:AddSlider({
-    Name = "Yürüme Hızı",
+    Name = "WalkSpeed",
     Min = 16,
     Max = 500,
     Default = humanoid.WalkSpeed,
@@ -2111,7 +2111,7 @@ PlayerTab:AddSlider({
 })
 
 PlayerTab:AddSlider({
-    Name = "Zıplama Gücü",
+    Name = "JumpPower",
     Min = 50,
     Max = 500,
     Default = humanoid.JumpPower,
@@ -2121,7 +2121,7 @@ PlayerTab:AddSlider({
 })
 
 PlayerTab:AddSlider({
-    Name = "Yerçekimi",
+    Name = "Gravity",
     Min = 10,
     Max = 500,
     Default = Workspace.Gravity,
@@ -2131,7 +2131,7 @@ PlayerTab:AddSlider({
 })
 
 PlayerTab:AddButton({
-    Name = "Oyuncu İstatistiklerini Sıfırla",
+    Name = "Sıfırla Oyuncu Stats",
     Callback = function()
         humanoid.WalkSpeed = 16
         humanoid.JumpPower = 50
@@ -2142,10 +2142,10 @@ PlayerTab:AddButton({
 local spinning = false
 local spinSpeed = 50
 
-PlayerTab:AddSection({ "Döndür" })
+PlayerTab:AddSection({ "Spin" })
 
 PlayerTab:AddToggle({
-    Name = "Döndür",
+    Name = "Spin",
     Default = false,
     Callback = function(v)
         spinning = v
@@ -2153,7 +2153,7 @@ PlayerTab:AddToggle({
 })
 
 PlayerTab:AddSlider({
-    Name = "Dönme Hızı",
+    Name = "Spin Hız",
     Min = 1,
     Max = 1000,
     Default = spinSpeed,
@@ -2191,7 +2191,7 @@ end)
 local infJump = false
 
 PlayerTab:AddToggle({
-    Name = "Sonsuz Zıplama",
+    Name = "Infinite Zıplama",
     Default = false,
     Callback = function(v)
         infJump = v
@@ -2214,7 +2214,7 @@ RGBTab:AddSection({ "ÁREA RGB" })
 local rgbSpeed = 3
 
 RGBTab:AddTextBox({
-    Name = "RGB Hızı",
+    Name = "Velocidade RGB",
     Desc = "Escolha uma Velocidade Para O RGB",
     Default = tostring(rgbSpeed),
     TextDisappear = false,
@@ -2244,8 +2244,8 @@ local rgbCasa = false
 local rgbCarro = false
 
 RGBTab:AddToggle({
-    Name = "İsim RGB",
-    Desc = "İsim RGB",
+    Name = "Nome RGB",
+    Desc = "Nome RGB",
     Default = false,
     Callback = function(v)
         rgbNome = v
@@ -2272,7 +2272,7 @@ RGBTab:AddToggle({
 })
 
 RGBTab:AddToggle({
-    Name = "Ev RGB",
+    Name = "RGB Casa",
     Default = false,
     Callback = function(v)
         rgbCasa = v
@@ -2441,7 +2441,7 @@ CarTab:AddToggle({
     end
 })
 
-CarTab:AddSection({ "Speed Car & Turbo" })
+CarTab:AddSection({ "Hız Car & Turbo" })
 
 local speedValue = 200
 local turboValue = 11.3
@@ -2606,7 +2606,7 @@ local function getPlayerList()
 end
 
 local killDropdown = Tab:AddDropdown({
-    Name = "Oyuncu Seç",
+    Name = "Selecionar Jogador",
     Options = getPlayerList(),
     Default = "", -- Estado inicial vazio (mostra "..." ou equivalente)
     Callback = function(value)
@@ -2645,7 +2645,7 @@ Players.PlayerRemoving:Connect(UpdateDropdown)
 
 
 Tab:AddButton({
-    Name = "Oyuncu Listesini Güncelle",
+    Name = "Atualizar Oyuncu List",
     Callback = function()
         local tablePlayers = Players:GetPlayers()
         local newPlayers = {}
@@ -2799,128 +2799,128 @@ _G.selectedParts = {
 
 
 Tab:AddTextBox({
-    Name = "Gövde",
-    Description = "ID do Gövde",
+    Name = "Tronco",
+    Description = "ID do Tronco",
     PlaceholderText = "Lyra",
     TextSize = 16,
     FontSize = 16,
     Callback = function(Value)
         if Value == "" then
             _G.selectedParts.Torso = nil
-            print("Gövde: vazio")
+            print("Tronco: vazio")
         else
             local id = tonumber(Value) or 0
             _G.selectedParts.Torso = id
-            print("Gövde: " .. id)
+            print("Tronco: " .. id)
         end
     end
 })
 
 
 Tab:AddTextBox({
-    Name = "Sağ Kol",
-    Description = "ID do Sağ Kol",
+    Name = "Braço Direito",
+    Description = "ID do Braço Direito",
     PlaceholderText = "Lyra",
     TextSize = 16,
     FontSize = 16,
     Callback = function(Value)
         if Value == "" then
             _G.selectedParts.BracoDireito = nil
-            print("Sağ Kol: vazio")
+            print("Braço Direito: vazio")
         else
             local id = tonumber(Value) or 0
             _G.selectedParts.BracoDireito = id
-            print("Sağ Kol: " .. id)
+            print("Braço Direito: " .. id)
         end
     end
 })
 
 
 Tab:AddTextBox({
-    Name = "Sol Kol",
-    Description = "ID do Sol Kol",
+    Name = "Braço Esquerdo",
+    Description = "ID do Braço Esquerdo",
     PlaceholderText = "Lyra",
     TextSize = 16,
     FontSize = 16,
     Callback = function(Value)
         if Value == "" then
             _G.selectedParts.BracoEsquerdo = nil
-            print("Sol Kol: vazio")
+            print("Braço Esquerdo: vazio")
         else
             local id = tonumber(Value) or 0
             _G.selectedParts.BracoEsquerdo = id
-            print("Sol Kol: " .. id)
+            print("Braço Esquerdo: " .. id)
         end
     end
 })
 
 
 Tab:AddTextBox({
-    Name = "Sağ Bacak",
-    Description = "ID da Sağ Bacak",
+    Name = "Perna Direita",
+    Description = "ID da Perna Direita",
     PlaceholderText = "Lyra",
     TextSize = 16,
     FontSize = 16,
     Callback = function(Value)
         if Value == "" then
             _G.selectedParts.PernaDireita = nil
-            print("Sağ Bacak: vazio")
+            print("Perna Direita: vazio")
         else
             local id = tonumber(Value) or 0
             _G.selectedParts.PernaDireita = id
-            print("Sağ Bacak: " .. id)
+            print("Perna Direita: " .. id)
         end
     end
 })
 
 
 Tab:AddTextBox({
-    Name = "Sol Bacak",
-    Description = "ID da Sol Bacak",
+    Name = "Perna Esquerda",
+    Description = "ID da Perna Esquerda",
     PlaceholderText = "Lyra",
     TextSize = 16,
     FontSize = 16,
     Callback = function(Value)
         if Value == "" then
             _G.selectedParts.PernaEsquerda = nil
-            print("Sol Bacak: vazio")
+            print("Perna Esquerda: vazio")
         else
             local id = tonumber(Value) or 0
             _G.selectedParts.PernaEsquerda = id
-            print("Sol Bacak: " .. id)
+            print("Perna Esquerda: " .. id)
         end
     end
 })
 
 Tab:AddTextBox({
-    Name = "Kafa",
-    Description = "ID da Kafa",
+    Name = "Cabeça",
+    Description = "ID da Cabeça",
     PlaceholderText = "Lyra",
     TextSize = 16,
     FontSize = 16,
     Callback = function(Value)
         if Value == "" then
             _G.selectedParts.Cabeca = nil
-            print("Kafa: vazio")
+            print("Cabeça: vazio")
         else
             local id = tonumber(Value) or 0
             _G.selectedParts.Cabeca = id
-            print("Kafa: " .. id)
+            print("Cabeça: " .. id)
         end
     end
 })
 
-Tab:AddSection({ "Parçaları Yükle:" })
+Tab:AddSection({ "Carregar Partes:" })
 
 
-_G.parteSelecionada = "Gövde"
+_G.parteSelecionada = "Tronco"
 
 
 Tab:AddDropdown({
     Name = "Selecionar Parte",
     Description = "Escolha qual parte equipar",
-    Default = "Gövde",
-    Options = {"Gövde", "Sağ Kol", "Sol Kol", "Sağ Bacak", "Sol Bacak", "Kafa"},
+    Default = "Tronco",
+    Options = {"Tronco", "Braço Direito", "Braço Esquerdo", "Perna Direita", "Perna Esquerda", "Cabeça"},
     Callback = function(Value)
         _G.parteSelecionada = Value
         print("Parte selecionada: " .. Value)
@@ -2943,24 +2943,24 @@ Tab:AddButton({
             }
         }
         
-        if _G.parteSelecionada == "Gövde" and _G.selectedParts.Torso then
+        if _G.parteSelecionada == "Tronco" and _G.selectedParts.Torso then
             args[1][1] = _G.selectedParts.Torso
-            print("Equipando Gövde: " .. _G.selectedParts.Torso)
-        elseif _G.parteSelecionada == "Sağ Kol" and _G.selectedParts.BracoDireito then
+            print("Equipando Tronco: " .. _G.selectedParts.Torso)
+        elseif _G.parteSelecionada == "Braço Direito" and _G.selectedParts.BracoDireito then
             args[1][2] = _G.selectedParts.BracoDireito
-            print("Equipando Sağ Kol: " .. _G.selectedParts.BracoDireito)
-        elseif _G.parteSelecionada == "Sol Kol" and _G.selectedParts.BracoEsquerdo then
+            print("Equipando Braço Direito: " .. _G.selectedParts.BracoDireito)
+        elseif _G.parteSelecionada == "Braço Esquerdo" and _G.selectedParts.BracoEsquerdo then
             args[1][3] = _G.selectedParts.BracoEsquerdo
-            print("Equipando Sol Kol: " .. _G.selectedParts.BracoEsquerdo)
-        elseif _G.parteSelecionada == "Sağ Bacak" and _G.selectedParts.PernaDireita then
+            print("Equipando Braço Esquerdo: " .. _G.selectedParts.BracoEsquerdo)
+        elseif _G.parteSelecionada == "Perna Direita" and _G.selectedParts.PernaDireita then
             args[1][4] = _G.selectedParts.PernaDireita
-            print("Equipando Sağ Bacak: " .. _G.selectedParts.PernaDireita)
-        elseif _G.parteSelecionada == "Sol Bacak" and _G.selectedParts.PernaEsquerda then
+            print("Equipando Perna Direita: " .. _G.selectedParts.PernaDireita)
+        elseif _G.parteSelecionada == "Perna Esquerda" and _G.selectedParts.PernaEsquerda then
             args[1][5] = _G.selectedParts.PernaEsquerda
-            print("Equipando Sol Bacak: " .. _G.selectedParts.PernaEsquerda)
-        elseif _G.parteSelecionada == "Kafa" and _G.selectedParts.Cabeca then
+            print("Equipando Perna Esquerda: " .. _G.selectedParts.PernaEsquerda)
+        elseif _G.parteSelecionada == "Cabeça" and _G.selectedParts.Cabeca then
             args[1][6] = _G.selectedParts.Cabeca
-            print("Equipando Kafa: " .. _G.selectedParts.Cabeca)
+            print("Equipando Cabeça: " .. _G.selectedParts.Cabeca)
         else
             print("Erro: " .. _G.parteSelecionada .. " esta vazia! Digite um ID primeiro.")
             return
@@ -2997,12 +2997,12 @@ Tab:AddButton({
             }
         }
         
-        if _G.selectedParts.Torso then print("Gövde: " .. _G.selectedParts.Torso) end
-        if _G.selectedParts.BracoDireito then print("Sağ Kol: " .. _G.selectedParts.BracoDireito) end
-        if _G.selectedParts.BracoEsquerdo then print("Sol Kol: " .. _G.selectedParts.BracoEsquerdo) end
-        if _G.selectedParts.PernaDireita then print("Sağ Bacak: " .. _G.selectedParts.PernaDireita) end
-        if _G.selectedParts.PernaEsquerda then print("Sol Bacak: " .. _G.selectedParts.PernaEsquerda) end
-        if _G.selectedParts.Cabeca then print("Kafa: " .. _G.selectedParts.Cabeca) end
+        if _G.selectedParts.Torso then print("Tronco: " .. _G.selectedParts.Torso) end
+        if _G.selectedParts.BracoDireito then print("Braço Direito: " .. _G.selectedParts.BracoDireito) end
+        if _G.selectedParts.BracoEsquerdo then print("Braço Esquerdo: " .. _G.selectedParts.BracoEsquerdo) end
+        if _G.selectedParts.PernaDireita then print("Perna Direita: " .. _G.selectedParts.PernaDireita) end
+        if _G.selectedParts.PernaEsquerda then print("Perna Esquerda: " .. _G.selectedParts.PernaEsquerda) end
+        if _G.selectedParts.Cabeca then print("Cabeça: " .. _G.selectedParts.Cabeca) end
         
         pcall(function()
             game:GetService("ReplicatedStorage").Remotes.ChangeCharacterBody:InvokeServer(unpack(args))
@@ -3010,12 +3010,12 @@ Tab:AddButton({
     end
 })
 
-Tab:AddSection({ "Diğer:" })
+Tab:AddSection({ "Outros:" })
 
 
 Tab:AddButton({
-    Name = "Karakteri Sıfırla",
-    Description = "Karakterin tamamı sıfırlanıyor",
+    Name = "Resetar Personagem",
+    Description = "Sıfırla completo do personagem",
     Callback = function()
         pcall(function()
             game:GetService("ReplicatedStorage").Remotes.ResetCharacterAppearance:FireServer()
@@ -3031,7 +3031,7 @@ Tab:AddSection({ "FE:" })
 
 Tab:AddDropdown({
     Name = "Fire Colors",
-    Description = "Seçin <font color='rgb(255, 100, 100)'>Fire Color</font>",
+    Description = "Seç the <font color='rgb(255, 100, 100)'>Fire Color</font>",
     Options = {"White", "Orange", "Green", "Blue", "Purple", "Black"},
     Default = "White",
     Flag = "fire_color_dropdown",
@@ -3065,13 +3065,13 @@ Tab:AddDropdown({
         }
         
         _G.selectedColor = Value
-        print("Seçilen renk: " .. Value)
+        print("Cor selecionada: " .. Value)
     end
 })
 
 
 Tab:AddButton({
-    Name = "Ateş Rengini Donat",
+    Name = "Equip Fire Color",
     Callback = function()
         -- Tabela com as cores e seus respectivos IDs e códigos
         local fireColors = {
@@ -3114,9 +3114,9 @@ Tab:AddButton({
             -- Aplica o emmiter com a cor selecionada
             game:GetService("ReplicatedStorage").Remotes.ApplyEmmiter:InvokeServer(unpack(args))
             
-            print("Donatıldı: " .. selectedColor .. " Fire")
+            print("Equipado: " .. selectedColor .. " Fire")
         else
-            warn("Hata: Renk bulunamadı!")
+            warn("Erro: Cor não encontrada!")
         end
     end
 })
@@ -3124,7 +3124,7 @@ Tab:AddButton({
 
 Tab:AddDropdown({
     Name = "Smoke Colors",
-    Description = "Seçin <font color='rgb(150, 150, 150)'>Smoke Color</font>",
+    Description = "Seç the <font color='rgb(150, 150, 150)'>Smoke Color</font>",
     Options = {"White", "Yellow", "Orange", "Green", "Blue", "Purple", "Red", "Black"},
     Default = "White",
     Flag = "smoke_color_dropdown",
@@ -3166,13 +3166,13 @@ Tab:AddDropdown({
         }
         
         _G.selectedSmokeColor = Value
-        print("Seçilen duman rengi: " .. Value)
+        print("Cor de smoke selecionada: " .. Value)
     end
 })
 
 
 Tab:AddButton({
-    Name = "Duman Rengini Donat",
+    Name = "Equip Smoke Color",
     Callback = function()
         -- Tabela com as cores de smoke e seus respectivos IDs e códigos
         local smokeColors = {
@@ -3223,9 +3223,9 @@ Tab:AddButton({
             -- Aplica o emmiter com a cor de smoke selecionada
             game:GetService("ReplicatedStorage").Remotes.ApplyEmmiter:InvokeServer(unpack(args))
             
-            print("Donatıldı: " .. selectedSmokeColor .. " Smoke")
+            print("Equipado: " .. selectedSmokeColor .. " Smoke")
         else
-            warn("Hata: Duman rengi bulunamadı!")
+            warn("Erro: Cor de smoke não encontrada!")
         end
     end
 })
@@ -3236,13 +3236,13 @@ if not _G.togglesInicializadas then
 end
 
 Tab:AddToggle({
-    Name = "Küçük",
+    Name = "Small",
     Description = "",
     Default = false,
     Flag = "custom_body_toggle",
     Callback = function(Value)
-        if not _G.togglesInicializadas["Küçük"] then
-            _G.togglesInicializadas["Küçük"] = true
+        if not _G.togglesInicializadas["Small"] then
+            _G.togglesInicializadas["Small"] = true
             return
         end
         
@@ -3265,7 +3265,7 @@ Tab:AddToggle({
 })
 
 Tab:AddToggle({
-    Name = "Dev Avatar",
+    Name = "Giant Avatar",
     Description = "",
     Default = false,
     Flag = "custom_body_v2_toggle",
@@ -3456,8 +3456,8 @@ Tab:AddDropdown({
 Tab:AddSection({"Avatar Editor"})
 
 Tab:AddParagraph({
-    Title = "Uyarı: Avatarınız sıfırlanacak",
-    Content = "Aşağıdaki Avatarlar mevcut karakterinizi tamamen değiştirecek."
+    Title = "Aviso: Vai resetar seu avatar",
+    Content = "Os avatares abaixo irão substituir completamente seu personagem atual."
 })
 
 Tab:AddButton({
@@ -3480,7 +3480,7 @@ Tab:AddButton({
             ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("ChangeCharacterBody"):InvokeServer(unpack(args))
             StarterGui:SetCore("SendNotification", {
                 Title = "Avatar",
-                Text = "Mini REPO donatıldı!",
+                Text = "Mini REPO equipado!",
                 Duration = 3
             })
         end)
@@ -3507,7 +3507,7 @@ Tab:AddButton({
             ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("ChangeCharacterBody"):InvokeServer(unpack(args))
             StarterGui:SetCore("SendNotification", {
                 Title = "Avatar",
-                Text = "Mini Garanhão donatıldı!",
+                Text = "Mini Garanhão equipado!",
                 Duration = 3
             })
         end)
@@ -3534,7 +3534,7 @@ Tab:AddButton({
             ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("ChangeCharacterBody"):InvokeServer(unpack(args))
             StarterGui:SetCore("SendNotification", {
                 Title = "Avatar",
-                Text = "Stick donatıldı!",
+                Text = "Stick equipado!",
                 Duration = 3
             })
         end)
@@ -3888,7 +3888,7 @@ LocalPlayer.CharacterAdded:Connect(function()
     end
 end)
 
-local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/miroeramaa/TurtleLib/main/TurtleUiLib.lua"))()
+local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/miroeramaa/TurtleLib/ana/TurtleUiLib.lua"))()
 local window = library:Window("Projeto LKB")
 
 window:Slider("Radius Blackhole",1,100,10, function(Value)
@@ -3917,7 +3917,7 @@ toggleBlackHole()
 })
 
 scriptsTab:AddButton({
-    Name = "Puxar Parts Player",
+    Name = "Puxar Parts Oyuncu",
     Description = "",
     Callback = function()
         -- Gui to Lua
@@ -3940,7 +3940,7 @@ Gui.Name = "Gui"
 Gui.Parent = gethui()
 Gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
-Main.Name = "Main"
+Main.Name = "Ana"
 Main.Parent = Gui
 Main.BackgroundColor3 = Color3.fromRGB(75, 75, 75)
 Main.BorderColor3 = Color3.fromRGB(0, 0, 0)
@@ -3958,7 +3958,7 @@ Box.BorderSizePixel = 0
 Box.Position = UDim2.new(0.0980926454, 0, 0.218712583, 0)
 Box.Size = UDim2.new(0.801089942, 0, 0.364963502, 0)
 Box.FontFace = Font.new("rbxasset://fonts/families/SourceSansSemibold.json", Enum.FontWeight.Bold, Enum.FontStyle.Normal)
-Box.PlaceholderText = "Player here"
+Box.PlaceholderText = "Oyuncu here"
 Box.Text = ""
 Box.TextColor3 = Color3.fromRGB(255, 255, 255)
 Box.TextScaled = true
@@ -3984,7 +3984,7 @@ Label.TextWrapped = true
 UITextSizeConstraint_2.Parent = Label
 UITextSizeConstraint_2.MaxTextSize = 21
 
-Button.Name = "Button"
+Button.Name = "Buton"
 Button.Parent = Main
 Button.BackgroundColor3 = Color3.fromRGB(95, 95, 95)
 Button.BorderColor3 = Color3.fromRGB(0, 0, 0)
@@ -3992,7 +3992,7 @@ Button.BorderSizePixel = 0
 Button.Position = UDim2.new(0.183284417, 0, 0.656760991, 0)
 Button.Size = UDim2.new(0.629427791, 0, 0.277372271, 0)
 Button.Font = Enum.Font.Nunito
-Button.Text = "Bring | Off"
+Button.Text = "Bring | Kapalı"
 Button.TextColor3 = Color3.fromRGB(255, 255, 255)
 Button.TextScaled = true
 Button.TextSize = 28.000
@@ -4092,7 +4092,7 @@ local DescendantAddedConnection
 local function toggleBlackHole()
 	blackHoleActive = not blackHoleActive
 	if blackHoleActive then
-		Button.Text = "Bring Parts | On"
+		Button.Text = "Bring Parts | Açık"
 		for _, v in ipairs(Workspace:GetDescendants()) do
 			ForcePart(v)
 		end
@@ -4109,7 +4109,7 @@ local function toggleBlackHole()
 			end
 		end)
 	else
-		Button.Text = "Bring Parts | Off"
+		Button.Text = "Bring Parts | Kapalı"
 		if DescendantAddedConnection then
 			DescendantAddedConnection:Disconnect()
 		end
@@ -4138,15 +4138,15 @@ local function VDOYZQL_fake_script() -- Box.Script
 			player = getPlayer(Box.Text)
 			if player then
 				Box.Text = player.Name
-				print("Player found:", player.Name)
+				print("Oyuncu found:", player.Name)
 			else
-				print("Player not found")
+				print("Oyuncu not found")
 			end
 		end
 	end)
 end
 coroutine.wrap(VDOYZQL_fake_script)()
-local function JUBNQKI_fake_script() -- Button.Script 
+local function JUBNQKI_fake_script() -- Buton.Script 
 	local script = Instance.new('Script', Button)
 
 	script.Parent.MouseButton1Click:Connect(function()
@@ -4155,7 +4155,7 @@ local function JUBNQKI_fake_script() -- Button.Script
 			humanoidRootPart = character:WaitForChild("HumanoidRootPart")
 			toggleBlackHole()
 		else
-			print("Player is not Seçed")
+			print("Oyuncu is not selected")
 		end
 	end)
 end
@@ -4168,7 +4168,7 @@ scriptsTab:AddSection({ "Glue & Invisible" })
 scriptsTab:AddButton({
     Name = "FE Invisible",
     Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/TROLLLINUXKKK/Fe-invis-vel-/refs/heads/main/Main.txt"))()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/TROLLLINUXKKK/Fe-invis-vel-/refs/heads/ana/Ana.txt"))()
     end
 })
 
@@ -4189,7 +4189,7 @@ local Vehicles = workspace:WaitForChild("Vehicles")
 -- Aviso no chat
 if TextChatService.ChatVersion == Enum.ChatVersion.TextChatService then 
     TextChatService.TextChannels.RBXGeneral:SendAsync(
-        "hi\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r[ UM TORNADO SURGIU! Lyra Hub ON TOP ]"
+        "hi\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r[ UM TORNADO SURGIU! LYRA HUB ON TOP ]"
     )
 else 
     print("Nadaa")
@@ -4345,7 +4345,7 @@ scriptsTab:AddSection({ "ESP" })
 -- ===============================
 _G.ESPData = _G.ESPData or {
     espEnabled = false,
-    espType = "İsim + Idade",
+    espType = "Nome + Idade",
     selectedColor = "RGB",
     billboardGuis = {},
     highlights = {},
@@ -4471,7 +4471,7 @@ _G.applyCurrentESP = function()
     if not _G.ESPData.espEnabled then return end
 
     for _, p in pairs(Players:GetPlayers()) do
-        if _G.ESPData.espType == "İsim + Idade" then
+        if _G.ESPData.espType == "Nome + Idade" then
             createNameESP(p)
         elseif _G.ESPData.espType == "Corpo (Highlight)" then
             createHighlightESP(p)
@@ -4486,7 +4486,7 @@ _G.applyCurrentESP = function()
             if not _G.ESPData.espEnabled then return end
             local color = getESPColor()
 
-            if _G.ESPData.espType == "İsim + Idade" then
+            if _G.ESPData.espType == "Nome + Idade" then
                 for _, gui in pairs(_G.ESPData.billboardGuis) do
                     if gui:FindFirstChildOfClass("TextLabel") then
                         gui.TextLabel.TextColor3 = color
@@ -4518,12 +4518,12 @@ _G.applyCurrentESP = function()
 end
 
 -- ===============================
--- UI GeriÇağırS
+-- UI CALLBACKS
 -- ===============================
 scriptsTab:AddDropdown({
     Name = "Tipo de ESP",
-    Options = {"İsim + Idade","Corpo (Highlight)","Linhas"},
-    Default = "İsim + Idade",
+    Options = {"Nome + Idade","Corpo (Highlight)","Linhas"},
+    Default = "Nome + Idade",
     Callback = function(v)
         _G.ESPData.espType = v
         if _G.ESPData.espEnabled then
@@ -4585,7 +4585,7 @@ scriptsTab:AddButton({
         
         --Properties:
         
-        main.Name = "main"
+        main.Name = "ana"
         main.Parent = game.CoreGui
         main.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
         
@@ -4709,7 +4709,7 @@ scriptsTab:AddButton({
         
         nowe = false
         
-        Frame.Active = true -- main = gui
+        Frame.Active = true -- ana = gui
         Frame.Draggable = true
         
         onof.MouseButton1Down:connect(function()
@@ -4896,25 +4896,25 @@ scriptsTab:AddButton({
     end
 })
 
-scriptsTab:AddSection({ "Sunucuyu Kaydet" })
+scriptsTab:AddSection({ "Save Server" })
 
 scriptsTab:AddButton({
-    Name = "Sunucuyu Kaydet",
+    Name = "Save Server",
     Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/ShadowsHubseila/Save-server/refs/heads/main/Main%20(4).txt"))()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/ShadowsHubseila/Save-server/refs/heads/ana/Ana%20(4).txt"))()
     end
 })
 
 scriptsTab:AddSection({ "Drone Lyra" })
 
 scriptsTab:AddButton({
-    Name = "Lyra'nın Dronu",
+    Name = "Drone do Lyra",
     Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/BRENOPOOF/drone/refs/heads/main/Main.txt"))()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/BRENOPOOF/drone/refs/heads/ana/Ana.txt"))()
     end
 })
 
-local Tab = Window:MakeTab({"Koruma", "rbxassetid://11322093465"})
+local Tab = Window:MakeTab({"Protection", "rbxassetid://11322093465"})
 
 local LocalPlayer = game:GetService("Players").LocalPlayer
 local Workspace = game:GetService("Workspace")
@@ -4983,15 +4983,15 @@ Tab:AddButton({
     Name = "AntiBug",
     Description = "Devs: cahh,Night",
     Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/BRENOPOOF/Antglitch/refs/heads/main/Main.txt"))()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/BRENOPOOF/Antglitch/refs/heads/ana/Ana.txt"))()
     end
 })
 
 Tab:AddButton({
-    Name = "Ses Engelleme",
-    Description = "Ses Engelleme",
+    Name = "Anti Som",
+    Description = "anti som",
     Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/BRENOPOOF/antaudiosdefdps/refs/heads/main/Main.txt"))()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/BRENOPOOF/antaudiosdefdps/refs/heads/ana/Ana.txt"))()
     end
 })
 
@@ -5272,10 +5272,10 @@ Tab:AddToggle({
     end
 })
 
-local Tab = Window:MakeTab({"Eşyalar/Eğlence", "rbxassetid://127904742940104"})
+local Tab = Window:MakeTab({"Itens/fun", "rbxassetid://127904742940104"})
 
 Tab:AddButton({
-    Title = "Planör",
+    Title = "Planador",
     Locked = false,
     Callback = function()
         local args = {
@@ -5289,7 +5289,7 @@ Tab:AddButton({
 })
 
 Tab:AddButton({
-    Title = "Top",
+    Title = "canhão",
     Locked = false,
     Callback = function()
         local args = {
@@ -5303,7 +5303,7 @@ Tab:AddButton({
 })
 
 Tab:AddButton({
-    Title = "Altın Basketbol Topu",
+    Title = "Bola de basquete dourada",
     Locked = false,
     Callback = function()
         local args = {
@@ -5317,7 +5317,7 @@ Tab:AddButton({
 })
 
 Tab:AddButton({
-    Title = "Su Balonu",
+    Title = "Balão de Agua",
     Locked = false,
     Callback = function()
         local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -5386,7 +5386,7 @@ Tab:AddButton({
     Title = "Telekiness V5",
     Locked = false,
     Callback = function()
-      loadstring(game:HttpGet("https://raw.githubusercontent.com/BRENOPOOF/fe-telekinessv5/refs/heads/main/Main.txt"))()
+      loadstring(game:HttpGet("https://raw.githubusercontent.com/BRENOPOOF/fe-telekinessv5/refs/heads/ana/Ana.txt"))()
     end
 })
 
@@ -5698,7 +5698,7 @@ end
 LoadAudiosFromFile()
 
 MusicTab:AddTextBox({
-    Name = "İsim",
+    Name = "Nome",
     Default = "",
     PlaceholderText = "Kystrypkry",
     ClearText = false,
@@ -5803,7 +5803,7 @@ for _, player in pairs(game:GetService("Players"):GetPlayers()) do
 end
 
 playerDropdown = MusicTab:AddDropdown({
-    Name = "Player",
+    Name = "Oyuncu",
     Options = playerOptions,
     Callback = function(selected)
         selectedPlayer = selected
@@ -5885,7 +5885,7 @@ local function GetFinalAudioID()
 end
 
 MusicTab:AddButton({
-    Name = "Áudio Player",
+    Name = "Áudio Oyuncu",
     Callback = function()
         local finalAudioID = GetFinalAudioID()
         
@@ -6088,7 +6088,7 @@ MusicTab:AddButton({
 })
 
 MusicTab:AddButton({
-    Name = "Áudio All Player",
+    Name = "Áudio All Oyuncu",
     Callback = function()
         local finalAudioID = GetFinalAudioID()
         
