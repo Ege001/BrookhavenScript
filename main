@@ -1,54 +1,52 @@
 --[[
-    LYRA HUB V2 - ULTIMATE EDITION
-    Otimizado e Melhorado
-    Desenvolvido/Melhorado por IA
+    LYRA HUB ULTIMATE - Optimized & Expanded
+    Geliştirilmiş Versiyon
 ]]
 
---// SERVIÇOS
-local Players = game:GetService("Players")
-local Workspace = game:GetService("Workspace")
-local RunService = game:GetService("RunService")
+--// Services //--
 local TweenService = game:GetService("TweenService")
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Workspace = game:GetService("Workspace")
 local UserInputService = game:GetService("UserInputService")
 local Lighting = game:GetService("Lighting")
+local TeleportService = game:GetService("TeleportService")
 local HttpService = game:GetService("HttpService")
+local MarketplaceService = game:GetService("MarketplaceService")
+local TextChatService = game:GetService("TextChatService")
 local StarterGui = game:GetService("StarterGui")
 
---// VARIÁVEIS LOCAIS
+--// Variables //--
 local LocalPlayer = Players.LocalPlayer
 local Camera = Workspace.CurrentCamera
 local Mouse = LocalPlayer:GetMouse()
 
---// ANTI-AFK (Integrado)
-local virtualUser = game:GetService("VirtualUser")
-LocalPlayer.Idled:Connect(function()
-    virtualUser:CaptureController()
-    virtualUser:ClickButton2(Vector2.new())
-    print("[Lyra Hub] Anti-AFK ativado.")
-end)
+--// Colors //--
+local ROXO_PRINCIPAL = Color3.fromRGB(170, 0, 255)
+local ROXO_MEDIO = Color3.fromRGB(130, 0, 200)
+local ROXO_ESCURO = Color3.fromRGB(70, 0, 120)
 
---// LOADING SCREEN (Melhorado)
+--// Loading Screen //--
 local function PlayLoading()
-    local ROXO_PRINCIPAL = Color3.fromRGB(170, 0, 255)
-    local ROXO_MEDIO = Color3.fromRGB(130, 0, 200)
-    local ROXO_ESCURO = Color3.fromRGB(70, 0, 120)
-
+    if LocalPlayer.PlayerGui:FindFirstChild("LyraHubLoading") then return end
+    
     local ScreenGui = Instance.new("ScreenGui")
-    ScreenGui.Name = "LyraHubLoading_V2"
+    ScreenGui.Name = "LyraHubLoading"
     ScreenGui.IgnoreGuiInset = true
     ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+    ScreenGui.ResetOnSpawn = false
 
     local Sound = Instance.new("Sound")
     Sound.SoundId = "rbxassetid://1848354536"
-    Sound.Volume = 0.5
+    Sound.Volume = 1
     Sound.Looped = true
     Sound.Parent = ScreenGui
     Sound:Play()
 
     local Frame = Instance.new("Frame")
     Frame.Size = UDim2.new(1,0,1,0)
-    Frame.BackgroundColor3 = Color3.fromRGB(10,10,15)
+    Frame.BackgroundColor3 = Color3.fromRGB(0,0,0)
     Frame.Parent = ScreenGui
 
     local Gradient = Instance.new("UIGradient")
@@ -60,568 +58,633 @@ local function PlayLoading()
     Gradient.Rotation = 90
     Gradient.Parent = Frame
 
-    -- Efeito de Partículas (Pontos)
-    for i = 1, 20 do
+    -- Animasyonlu Noktalar
+    for i = 1, 35 do
+        local ponto = Instance.new("Frame")
+        ponto.Size = UDim2.new(0, math.random(4,7), 0, math.random(4,7))
+        ponto.Position = UDim2.new(math.random(), 0, math.random(), 0)
+        ponto.AnchorPoint = Vector2.new(0.5,0.5)
+        ponto.BackgroundColor3 = ROXO_PRINCIPAL
+        ponto.BackgroundTransparency = 0.25
+        ponto.Parent = Frame
+
+        Instance.new("UICorner", ponto).CornerRadius = UDim.new(1,0)
+
+        local stroke = Instance.new("UIStroke")
+        stroke.Color = ROXO_PRINCIPAL
+        stroke.Thickness = 1
+        stroke.Transparency = 0.4
+        stroke.Parent = ponto
+
         task.spawn(function()
-            local ponto = Instance.new("Frame")
-            ponto.Size = UDim2.new(0, math.random(4,7), 0, math.random(4,7))
-            ponto.Position = UDim2.new(math.random(), 0, math.random(), 0)
-            ponto.AnchorPoint = Vector2.new(0.5,0.5)
-            ponto.BackgroundColor3 = Color3.fromRGB(255,255,255)
-            ponto.BackgroundTransparency = 0.5
-            ponto.Parent = Frame
-            Instance.new("UICorner", ponto).CornerRadius = UDim.new(1,0)
-            
-            local speed = math.random(2,5)
             while ScreenGui.Parent do
-                local targetPos = UDim2.new(ponto.Position.X.Scale, 0, -0.1, 0)
-                local tween = TweenService:Create(ponto, TweenInfo.new(speed, Enum.EasingStyle.Linear), {Position = targetPos, BackgroundTransparency = 1})
-                tween:Play()
-                tween.Completed:Wait()
-                ponto.Position = UDim2.new(math.random(), 0, 1.1, 0)
-                ponto.BackgroundTransparency = 0.5
+                TweenService:Create(
+                    ponto,
+                    TweenInfo.new(math.random(2,4), Enum.EasingStyle.Sine, Enum.EasingDirection.InOut),
+                    {Size = UDim2.new(0,9,0,9), BackgroundTransparency = 0.05}
+                ):Play()
+                task.wait(2)
+                TweenService:Create(
+                    ponto,
+                    TweenInfo.new(math.random(2,4), Enum.EasingStyle.Sine, Enum.EasingDirection.InOut),
+                    {Size = UDim2.new(0,5,0,5), BackgroundTransparency = 0.35}
+                ):Play()
+                task.wait(2)
             end
         end)
     end
 
-    -- Texto e Logo
+    -- Başlık ve Bilgiler
     local Title = Instance.new("TextLabel")
-    Title.Size = UDim2.new(0.5,0,0.1,0)
-    Title.Position = UDim2.new(0.5,0,0.3,0)
-    Title.AnchorPoint = Vector2.new(0.5,0.5)
+    Title.Size = UDim2.new(0.7,0,0.12,0)
+    Title.Position = UDim2.new(0.5,0,0.1,0)
+    Title.AnchorPoint = Vector2.new(0.5,0)
     Title.BackgroundTransparency = 1
-    Title.Text = "LYRA HUB V2"
+    Title.Text = "LYRA HUB ULTIMATE"
     Title.Font = Enum.Font.GothamBlack
     Title.TextScaled = true
-    Title.TextColor3 = Color3.fromRGB(255,255,255)
+    Title.TextColor3 = ROXO_PRINCIPAL
     Title.Parent = Frame
-    
-    local Sub = Instance.new("TextLabel")
-    Sub.Size = UDim2.new(0.5,0,0.05,0)
-    Sub.Position = UDim2.new(0.5,0,0.4,0)
-    Sub.AnchorPoint = Vector2.new(0.5,0.5)
-    Sub.BackgroundTransparency = 1
-    Sub.Text = "Carregando Scripts e Assets..."
-    Sub.Font = Enum.Font.Gotham
-    Sub.TextScaled = true
-    Sub.TextColor3 = ROXO_PRINCIPAL
-    Sub.Parent = Frame
 
-    -- Barra de Progresso
+    local LogoFrame = Instance.new("Frame")
+    LogoFrame.Size = UDim2.new(0,110,0,110)
+    LogoFrame.Position = UDim2.new(0.5,0,0.35,0)
+    LogoFrame.AnchorPoint = Vector2.new(0.5,0.5)
+    LogoFrame.BackgroundTransparency = 1
+    LogoFrame.Parent = Frame
+
+    local thumb = Players:GetUserThumbnailAsync(LocalPlayer.UserId, Enum.ThumbnailType.AvatarBust, Enum.ThumbnailSize.Size420x420)
+    local Avatar = Instance.new("ImageLabel")
+    Avatar.Size = UDim2.new(1,0,1,0)
+    Avatar.BackgroundTransparency = 1
+    Avatar.Image = thumb
+    Avatar.Parent = LogoFrame
+    Instance.new("UICorner", Avatar).CornerRadius = UDim.new(1,0)
+    
+    local Stroke = Instance.new("UIStroke")
+    Stroke.Thickness = 3
+    Stroke.Color = ROXO_PRINCIPAL
+    Stroke.Parent = Avatar
+
+    -- Loading Bar
     local BarBG = Instance.new("Frame")
-    BarBG.Size = UDim2.new(0.4,0,0.02,0)
-    BarBG.Position = UDim2.new(0.3,0,0.6,0)
-    BarBG.BackgroundColor3 = Color3.fromRGB(30,30,30)
+    BarBG.Size = UDim2.new(0.6,0,0.05,0)
+    BarBG.Position = UDim2.new(0.2,0,0.8,0)
+    BarBG.BackgroundColor3 = ROXO_ESCURO
     BarBG.Parent = Frame
-    Instance.new("UICorner", BarBG).CornerRadius = UDim.new(1,0)
+    Instance.new("UICorner", BarBG).CornerRadius = UDim.new(0.3,0)
 
     local Bar = Instance.new("Frame")
     Bar.Size = UDim2.new(0,0,1,0)
     Bar.BackgroundColor3 = ROXO_PRINCIPAL
     Bar.Parent = BarBG
-    Instance.new("UICorner", Bar).CornerRadius = UDim.new(1,0)
+    Instance.new("UICorner", Bar).CornerRadius = UDim.new(0.3,0)
 
-    for i=1,100, 2 do
+    local Percent = Instance.new("TextLabel")
+    Percent.Size = UDim2.new(0.6,0,0.05,0)
+    Percent.Position = UDim2.new(0.2,0,0.87,0)
+    Percent.BackgroundTransparency = 1
+    Percent.Text = "0%"
+    Percent.Font = Enum.Font.GothamBold
+    Percent.TextScaled = true
+    Percent.TextColor3 = Color3.new(1,1,1)
+    Percent.Parent = Frame
+
+    -- Loading Animation
+    for i=1,100 do
         Bar.Size = UDim2.new(i/100,0,1,0)
-        task.wait(0.02)
+        Percent.Text = i.."%"
+        task.wait(0.02) -- Hızlandırıldı
     end
 
-    TweenService:Create(Frame, TweenInfo.new(1), {BackgroundTransparency = 1}):Play()
-    TweenService:Create(Title, TweenInfo.new(1), {TextTransparency = 1}):Play()
-    TweenService:Create(Sub, TweenInfo.new(1), {TextTransparency = 1}):Play()
-    TweenService:Create(BarBG, TweenInfo.new(1), {BackgroundTransparency = 1}):Play()
-    
+    task.wait(0.2)
     Sound:Stop()
-    task.wait(1)
     ScreenGui:Destroy()
 end
 
 PlayLoading()
 
---// BIBLIOTECA UI (RedzLib)
+--// Library Load //--
 local redzlib = loadstring(game:HttpGet("https://raw.githubusercontent.com/kayrus999/kayrus99/refs/heads/main/kayrusLINDO"))()
 
 local Window = redzlib:MakeWindow({
-  Title = " LYRA HUB V2 ",
-  SubTitle = "Ultimate Edition",
-  SaveFolder = "LyraHubV2_Config"
+  Title = " LYRA HUB ULTIMATE ",
+  SubTitle = "Remake & Optimized",
+  SaveFolder = "LyraHub_Ultimate_Cfg"
 })
 
---// NOTIFICAÇÃO HELPER
-local function Notify(title, msg, time)
-    game:GetService("StarterGui"):SetCore("SendNotification", {
-        Title = title,
-        Text = msg,
-        Duration = time or 3
+--// Helper Functions //--
+local function Notification(title, text, time)
+    StarterGui:SetCore("SendNotification", {
+        Title = title;
+        Text = text;
+        Duration = time or 3;
     })
 end
 
---// ABAS
-local HomeTab = Window:MakeTab({ "Início", "home" })
-local PlayerTab = Window:MakeTab({ "Jogador", "user" })
-local VisualTab = Window:MakeTab({ "Visual/ESP", "eye" })
-local FeTab = Window:MakeTab({ "Scripts FE", "swords" })
-local TrollTab = Window:MakeTab({ "Troll/Fun", "smile" })
-local CarTab = Window:MakeTab({ "Veículos", "car" })
-local AvatarTab = Window:MakeTab({ "Avatar", "shirt" })
-local MusicTab = Window:MakeTab({ "Música", "music" })
+local function GetCharacter()
+    return LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+end
 
---// ABA INÍCIO
-HomeTab:AddSection({ "Bem-vindo" })
-HomeTab:AddParagraph({ "Usuário:", LocalPlayer.Name })
-HomeTab:AddParagraph({ "ID:", tostring(LocalPlayer.UserId) })
-HomeTab:AddParagraph({ "Executor:", identifyexecutor and identifyexecutor() or "Desconhecido" })
-HomeTab:AddSection({ "Status" })
-local fpsLabel = HomeTab:AddLabel("FPS: Calculando...")
-local pingLabel = HomeTab:AddLabel("Ping: Calculando...")
+local function GetRoot()
+    local char = GetCharacter()
+    return char:WaitForChild("HumanoidRootPart", 5)
+end
+
+local function GetHumanoid()
+    local char = GetCharacter()
+    return char:WaitForChild("Humanoid", 5)
+end
+
+--// TABS //--
+
+-- [TAB 1: INFO]
+local infoTab = Window:MakeTab({ "Informaçoes", "info" })
+
+infoTab:AddSection({ "Status" })
+
+local function createInfoBlock(tab, title, initial)
+    local block
+    pcall(function() block = tab:AddParagraph({ Title = title, Content = initial }) end)
+    return block
+end
+
+local function setBlockText(block, title, text)
+    if not block then return end
+    pcall(function()
+        if block.SetDesc then block:SetDesc(text) end
+    end)
+end
+
+local fpsBlock     = createInfoBlock(infoTab, "FPS:", "Calculating...")
+local pingBlock    = createInfoBlock(infoTab, "Ping:", "Calculating...")
+local timeBlock    = createInfoBlock(infoTab, "Tempo Jogado:", "00:00:00")
+
+local startTime = os.clock()
 
 task.spawn(function()
     while true do
-        local fps = math.floor(1 / RunService.RenderStepped:Wait())
-        if fpsLabel.Set then fpsLabel:Set("FPS: " .. fps) end
-        -- Ping simples (fake calc based on frame) ou real se stats permitir
         task.wait(1)
+        -- FPS
+        local fps = math.floor(workspace:GetRealPhysicsFPS())
+        setBlockText(fpsBlock, "FPS:", tostring(fps))
+        
+        -- Ping
+        local ping = 0
+        pcall(function() ping = tonumber(string.format("%.0f", LocalPlayer:GetNetworkPing() * 2000)) end) -- Approximation
+        setBlockText(pingBlock, "Ping:", tostring(ping) .. " ms")
+        
+        -- Time
+        local e = os.clock() - startTime
+        local h = math.floor(e/3600)
+        local m = math.floor((e%3600)/60)
+        local s = math.floor(e%60)
+        setBlockText(timeBlock, "Tempo Jogado:", string.format("%02d:%02d:%02d", h, m, s))
     end
 end)
 
-HomeTab:AddButton({
-    Name = "Copiar Link do Discord",
+infoTab:AddButton({
+    Name = "Copiar Link Discord",
     Callback = function()
         setclipboard("https://discord.gg/YcM2DzZ4TM")
-        Notify("Discord", "Link copiado para a área de transferência!")
+        Notification("Lyra Hub", "Discord Linki Kopyalandı!", 3)
     end
 })
 
---// ABA JOGADOR
+-- [TAB 2: PLAYER]
+local PlayerTab = Window:MakeTab({
+    Title = "Player",
+    Icon = "rbxassetid://17132521951"
+})
+
 PlayerTab:AddSection({ "Movimento" })
 
 PlayerTab:AddSlider({
-    Name = "Velocidade (WalkSpeed)",
+    Name = "WalkSpeed",
     Min = 16,
     Max = 300,
     Default = 16,
     Callback = function(v)
-        if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
-            LocalPlayer.Character.Humanoid.WalkSpeed = v
-        end
+        local hum = GetHumanoid()
+        if hum then hum.WalkSpeed = v end
     end
 })
 
 PlayerTab:AddSlider({
-    Name = "Pulo (JumpPower)",
+    Name = "JumpPower",
     Min = 50,
     Max = 300,
     Default = 50,
     Callback = function(v)
-        if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
-            LocalPlayer.Character.Humanoid.UseJumpPower = true
-            LocalPlayer.Character.Humanoid.JumpPower = v
-        end
+        local hum = GetHumanoid()
+        if hum then hum.JumpPower = v end
     end
 })
 
-PlayerTab:AddToggle({
-    Name = "Infinite Jump",
-    Default = false,
-    Callback = function(state)
-        _G.InfJump = state
-    end
-})
-
-UserInputService.JumpRequest:Connect(function()
-    if _G.InfJump and LocalPlayer.Character then
-        LocalPlayer.Character:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping")
-    end
-end)
-
-PlayerTab:AddSection({ "Fly (Voo)" })
-
-local flySpeed = 50
-local flying = false
-local flyBodyGyro, flyBodyVelocity
+-- Flight Logic
+local flightEnabled = false
+local flightSpeed = 50
+local bv, bg
 
 PlayerTab:AddToggle({
-    Name = "Ativar Fly (Tecla E)",
+    Name = "Fly (Voo)",
     Default = false,
     Callback = function(state)
-        flying = state
-        if not state and LocalPlayer.Character then
-            if flyBodyVelocity then flyBodyVelocity:Destroy() end
-            if flyBodyGyro then flyBodyGyro:Destroy() end
-            LocalPlayer.Character.Humanoid.PlatformStand = false
+        flightEnabled = state
+        local root = GetRoot()
+        local hum = GetHumanoid()
+        
+        if state and root and hum then
+            bv = Instance.new("BodyVelocity")
+            bv.Velocity = Vector3.new(0,0,0)
+            bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+            bv.Parent = root
+            
+            bg = Instance.new("BodyGyro")
+            bg.P = 9e4
+            bg.MaxTorque = Vector3.new(9e9, 9e9, 9e9)
+            bg.CFrame = root.CFrame
+            bg.Parent = root
+            
+            hum.PlatformStand = true
+            
+            task.spawn(function()
+                while flightEnabled and root and hum do
+                    local cam = Workspace.CurrentCamera
+                    local moveDir = Vector3.new(0,0,0)
+                    
+                    if UserInputService:IsKeyDown(Enum.KeyCode.W) then moveDir = moveDir + cam.CFrame.LookVector end
+                    if UserInputService:IsKeyDown(Enum.KeyCode.S) then moveDir = moveDir - cam.CFrame.LookVector end
+                    if UserInputService:IsKeyDown(Enum.KeyCode.A) then moveDir = moveDir - cam.CFrame.RightVector end
+                    if UserInputService:IsKeyDown(Enum.KeyCode.D) then moveDir = moveDir + cam.CFrame.RightVector end
+                    if UserInputService:IsKeyDown(Enum.KeyCode.Space) then moveDir = moveDir + Vector3.new(0,1,0) end
+                    if UserInputService:IsKeyDown(Enum.KeyCode.LeftControl) then moveDir = moveDir - Vector3.new(0,1,0) end
+                    
+                    bv.Velocity = moveDir * flightSpeed
+                    bg.CFrame = cam.CFrame
+                    task.wait()
+                end
+            end)
+        else
+            if bv then bv:Destroy() end
+            if bg then bg:Destroy() end
+            if hum then hum.PlatformStand = false end
         end
     end
 })
 
 PlayerTab:AddSlider({
-    Name = "Velocidade do Fly",
-    Min = 20,
+    Name = "Fly Speed",
+    Min = 10,
     Max = 200,
     Default = 50,
     Callback = function(v)
-        flySpeed = v
+        flightSpeed = v
     end
 })
 
--- Lógica simples de Fly
-RunService.RenderStepped:Connect(function()
-    if flying and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-        local hrp = LocalPlayer.Character.HumanoidRootPart
-        local cam = Workspace.CurrentCamera
-        
-        if not flyBodyVelocity or not flyBodyVelocity.Parent then
-            flyBodyVelocity = Instance.new("BodyVelocity")
-            flyBodyVelocity.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
-            flyBodyVelocity.Parent = hrp
+-- Noclip Logic
+local noclip = false
+PlayerTab:AddToggle({
+    Name = "Noclip",
+    Default = false,
+    Callback = function(v)
+        noclip = v
+    end
+})
+
+RunService.Stepped:Connect(function()
+    if noclip and LocalPlayer.Character then
+        for _, v in ipairs(LocalPlayer.Character:GetDescendants()) do
+            if v:IsA("BasePart") and v.CanCollide == true then
+                v.CanCollide = false
+            end
         end
-        
-        if not flyBodyGyro or not flyBodyGyro.Parent then
-            flyBodyGyro = Instance.new("BodyGyro")
-            flyBodyGyro.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
-            flyBodyGyro.P = 10000
-            flyBodyGyro.Parent = hrp
-        end
-        
-        flyBodyGyro.CFrame = cam.CFrame
-        flyBodyVelocity.Velocity = Vector3.new()
-        
-        if UserInputService:IsKeyDown(Enum.KeyCode.W) then
-            flyBodyVelocity.Velocity = cam.CFrame.LookVector * flySpeed
-        end
-        if UserInputService:IsKeyDown(Enum.KeyCode.S) then
-            flyBodyVelocity.Velocity = cam.CFrame.LookVector * -flySpeed
-        end
-        if UserInputService:IsKeyDown(Enum.KeyCode.A) then
-            flyBodyVelocity.Velocity = cam.CFrame.RightVector * -flySpeed
-        end
-        if UserInputService:IsKeyDown(Enum.KeyCode.D) then
-            flyBodyVelocity.Velocity = cam.CFrame.RightVector * flySpeed
-        end
-        
-        LocalPlayer.Character.Humanoid.PlatformStand = true
-    elseif not flying and LocalPlayer.Character then
-        if flyBodyVelocity then flyBodyVelocity:Destroy() flyBodyVelocity = nil end
-        if flyBodyGyro then flyBodyGyro:Destroy() flyBodyGyro = nil end
-        LocalPlayer.Character.Humanoid.PlatformStand = false
     end
 end)
 
---// ABA VISUAL (ESP)
-VisualTab:AddSection({ "ESP & Visual" })
-
-local espEnabled = false
-local espHighlights = {}
-
-VisualTab:AddToggle({
-    Name = "ESP Players (Highlight)",
-    Default = false,
-    Callback = function(v)
-        espEnabled = v
-        if not v then
-            for _, hl in pairs(espHighlights) do hl:Destroy() end
-            espHighlights = {}
-        end
+PlayerTab:AddButton({
+    Name = "Inf Jump",
+    Callback = function()
+        UserInputService.JumpRequest:Connect(function()
+            local hum = GetHumanoid()
+            if hum then hum:ChangeState(Enum.HumanoidStateType.Jumping) end
+        end)
+        Notification("Lyra Hub", "Infinite Jump Ativado!", 2)
     end
 })
 
-VisualTab:AddToggle({
-    Name = "Fullbright (Luz Infinita)",
-    Default = false,
-    Callback = function(v)
-        if v then
-            Lighting.Brightness = 2
-            Lighting.ClockTime = 14
-            Lighting.FogEnd = 100000
-            Lighting.GlobalShadows = false
-            Lighting.OutdoorAmbient = Color3.fromRGB(128, 128, 128)
+-- [TAB 3: TELEPORTS (NEW)]
+local TpTab = Window:MakeTab({
+    Title = "Teleportes",
+    Icon = "rbxassetid://10884457088"
+})
+
+local function TP(cframe)
+    local root = GetRoot()
+    if root then
+        root.CFrame = cframe
+    end
+end
+
+TpTab:AddSection({ "Locais Brookhaven" })
+
+-- Koordinatlar tahmini ve güvenli yüksekliktedir
+TpTab:AddButton({ Name = "Spawn", Callback = function() TP(CFrame.new(0, 5, 0)) end })
+TpTab:AddButton({ Name = "Okul", Callback = function() TP(CFrame.new(-330, 20, 470)) end })
+TpTab:AddButton({ Name = "Banka (Kasa)", Callback = function() TP(CFrame.new(30, 20, 420)) end })
+TpTab:AddButton({ Name = "Polis Merkezi", Callback = function() TP(CFrame.new(120, 20, 420)) end })
+TpTab:AddButton({ Name = "Hastane", Callback = function() TP(CFrame.new(130, 20, -50)) end })
+TpTab:AddButton({ Name = "Mezarlık", Callback = function() TP(CFrame.new(150, 20, 780)) end })
+TpTab:AddButton({ Name = "Yat (Boat)", Callback = function() TP(CFrame.new(-70, 15, -730)) end })
+
+TpTab:AddSection({ "Araçlar" })
+TpTab:AddButton({
+    Name = "Tıklayarak TP (Ctrl + Click)",
+    Callback = function()
+        local mouse = LocalPlayer:GetMouse()
+        mouse.Button1Down:Connect(function()
+            if UserInputService:IsKeyDown(Enum.KeyCode.LeftControl) then
+                TP(CFrame.new(mouse.Hit.p + Vector3.new(0, 3, 0)))
+            end
+        end)
+        Notification("TP", "CTRL basılı tutup tıklayın.", 3)
+    end
+})
+
+-- [TAB 4: FUN & TROLL]
+local FunTab = Window:MakeTab({"Fun & Troll", "rbxassetid://105212753583689"})
+
+FunTab:AddSection({ "Troll" })
+
+FunTab:AddButton({
+    Name = "Fling (Döndürerek Fırlat)",
+    Callback = function()
+        local root = GetRoot()
+        local hum = GetHumanoid()
+        if not root then return end
+        
+        local bav = Instance.new("BodyAngularVelocity")
+        bav.MaxTorque = Vector3.new(math.huge,math.huge,math.huge)
+        bav.AngularVelocity = Vector3.new(0, 10000, 0)
+        bav.Parent = root
+        
+        Notification("Fling", "Yakındaki oyunculara dokun!", 3)
+        
+        -- 5 saniye sonra kapat
+        task.delay(5, function()
+            bav:Destroy()
+            bav = nil
+            if root then root.RotVelocity = Vector3.new(0,0,0) end
+        end)
+    end
+})
+
+FunTab:AddButton({
+    Name = "Invisible (Görünmezlik - FE)",
+    Callback = function()
+        -- Basit FE Görünmezlik mantığı (LowerTorso yok etme)
+        local char = GetCharacter()
+        if char:FindFirstChild("LowerTorso") then
+            char.LowerTorso:Destroy()
+            Notification("Invis", "Görünmezlik Aktif (Reset atana kadar)", 3)
         else
-            Lighting.Brightness = 1
-            Lighting.ClockTime = 12
-            Lighting.FogEnd = 1000
-            Lighting.GlobalShadows = true
-            Lighting.OutdoorAmbient = Color3.fromRGB(127, 127, 127)
+             Notification("Invis", "Zaten görünmez veya R6 avatar.", 3)
         end
     end
 })
 
--- Loop ESP Otimizado
-task.spawn(function()
-    while true do
-        task.wait(0.5)
-        if espEnabled then
-            for _, plr in ipairs(Players:GetPlayers()) do
-                if plr ~= LocalPlayer and plr.Character then
-                    if not espHighlights[plr] or not espHighlights[plr].Parent then
-                        local hl = Instance.new("Highlight")
-                        hl.Parent = plr.Character
-                        hl.FillColor = Color3.fromRGB(170, 0, 255)
-                        hl.OutlineColor = Color3.fromRGB(255, 255, 255)
-                        hl.FillTransparency = 0.5
-                        hl.OutlineTransparency = 0
-                        espHighlights[plr] = hl
+FunTab:AddSection({ "FE Scriptleri" })
+
+FunTab:AddButton({
+    Name = "Nameless Animation V3",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/Miztiny/Nameless-Animation-V3/main/Source"))()
+    end
+})
+
+FunTab:AddButton({
+    Name = "Enerji Kılıcı",
+    Callback = function()
+         -- ReplicatedStorage eventlerini kullanarak tool alma (Orijinal scriptten)
+         local args = {
+            [1] = "AcceptedToolToServer",
+            [2] = "Scythe",
+            [3] = LocalPlayer
+        }
+        pcall(function()
+            ReplicatedStorage.RE:FindFirstChild("1Playe1rTrigge1rEven1t"):FireServer(unpack(args))
+        end)
+    end
+})
+
+-- [TAB 5: CAR (ARAÇ)]
+local CarTab = Window:MakeTab({"Veiculo", "car"})
+
+CarTab:AddSection({ "Modifikasyonlar" })
+
+local carSpeed = 200
+CarTab:AddTextBox({
+    Name = "Hız (MaxSpeed)",
+    Default = "200",
+    TextDisappear = false,
+    Callback = function(v)
+        carSpeed = tonumber(v) or 200
+    end
+})
+
+CarTab:AddButton({
+    Name = "Hızı Uygula (Tüm Araçlar)",
+    Callback = function()
+        for _, vehicle in pairs(workspace.Vehicles:GetChildren()) do
+            local seat = vehicle:FindFirstChild("Seats") and vehicle.Seats:FindFirstChild("VehicleSeat")
+            if seat then
+                pcall(function() seat.MaxSpeed = carSpeed end)
+                -- Eğer Value varsa onu da değiştir
+                if seat:FindFirstChild("MaxSpeed") then seat.MaxSpeed.Value = carSpeed end
+            end
+        end
+        Notification("Car", "Hız uygulandı: " .. carSpeed, 2)
+    end
+})
+
+CarTab:AddToggle({
+    Name = "Araç Uçurma (Car Fly)",
+    Default = false,
+    Callback = function(state)
+        -- Araç uçurma mantığı
+        _G.CarFly = state
+        task.spawn(function()
+            while _G.CarFly do
+                local char = LocalPlayer.Character
+                if char then
+                    local hum = char:FindFirstChild("Humanoid")
+                    local seat = hum and hum.SeatPart
+                    if seat and seat:IsA("VehicleSeat") then
+                        local vehicle = seat.Parent.Parent -- Genelde yapı böyledir
+                        local root = seat
                         
-                        -- Limpar se morrer
-                        plr.CharacterRemoving:Connect(function()
-                            if espHighlights[plr] then
-                                espHighlights[plr]:Destroy()
-                                espHighlights[plr] = nil
-                            end
-                        end)
+                        local cam = Workspace.CurrentCamera
+                        local bv = root:FindFirstChild("CarFlyVel") or Instance.new("BodyVelocity", root)
+                        bv.Name = "CarFlyVel"
+                        bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+                        bv.Velocity = Vector3.new(0,0,0)
+                        
+                        local bg = root:FindFirstChild("CarFlyGyro") or Instance.new("BodyGyro", root)
+                        bg.Name = "CarFlyGyro"
+                        bg.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
+                        bg.P = 10000
+                        bg.CFrame = cam.CFrame
+                        
+                        local speed = 100
+                        local vel = Vector3.new(0,0,0)
+                         if UserInputService:IsKeyDown(Enum.KeyCode.W) then vel = vel + cam.CFrame.LookVector end
+                        if UserInputService:IsKeyDown(Enum.KeyCode.S) then vel = vel - cam.CFrame.LookVector end
+                        
+                        bv.Velocity = vel * speed
+                    else
+                        -- Araçta değilse temizle
                     end
                 end
+                task.wait()
+            end
+            -- Döngü biterse temizle
+             for _, v in pairs(workspace.Vehicles:GetDescendants()) do
+                if v.Name == "CarFlyVel" or v.Name == "CarFlyGyro" then v:Destroy() end
+            end
+        end)
+    end
+})
+
+-- [TAB 6: MISC (DİĞER)]
+local MiscTab = Window:MakeTab({ "Diğer", "settings" })
+
+MiscTab:AddSection({ "Sunucu İşlemleri" })
+
+MiscTab:AddButton({
+    Name = "Rejoin (Tekrar Katıl)",
+    Callback = function()
+        TeleportService:Teleport(game.PlaceId, LocalPlayer)
+    end
+})
+
+MiscTab:AddButton({
+    Name = "Server Hop (Başka Sunucuya Git)",
+    Callback = function()
+        local Servers = HttpService:JSONDecode(game:HttpGet("https://games.roblox.com/v1/games/"..game.PlaceId.."/servers/Public?sortOrder=Asc&limit=100"))
+        for _, v in ipairs(Servers.data) do
+            if v.playing ~= v.maxPlayers then
+                TeleportService:TeleportToPlaceInstance(game.PlaceId, v.id, LocalPlayer)
+                break
             end
         end
     end
-end)
+})
 
---// ABA SCRIPTS FE
-FeTab:AddSection({ "Scripts Populares" })
+MiscTab:AddSection({ "Performans" })
 
--- Tabela de Scripts FE para organizar o código
-local feScripts = {
-    {Name = "Nameless Animation V2", Url = "https://raw.githubusercontent.com/MariyaFurmanova/Library/main/NamelessAnimationV2", Desc = "Animação R15"},
-    {Name = "Fe Pendulum Hub", Url = "https://raw.githubusercontent.com/Tescalus/Pendulum-Hub-V5/main/Pendulum%20Hub%20V5.lua", Desc = "Hub de animações"},
-    {Name = "Energize Animation", Url = "https://pastebin.com/raw/S4xTjW0w", Desc = "Animação Energética"},
-    {Name = "System Broken", Url = "https://raw.githubusercontent.com/H20CalibreYT/SystemBroken/main/script", Desc = "Animações quebradas"},
-    {Name = "Keyboard Script", Url = "https://raw.githubusercontent.com/Advplyr/Roblox/master/VirtualKeyboard", Desc = "Teclado Virtual"},
-    {Name = "Infinite Yield", Url = "https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source", Desc = "Admin Commands"},
-    {Name = "Fates Admin", Url = "https://raw.githubusercontent.com/fatesc/fates-admin/main/main.lua", Desc = "Outro Admin"},
-}
-
-for _, scriptData in ipairs(feScripts) do
-    FeTab:AddButton({
-        Name = scriptData.Name,
-        Description = scriptData.Desc,
-        Callback = function()
-            Notify("Carregando...", "Executando " .. scriptData.Name)
-            loadstring(game:HttpGet(scriptData.Url))()
-        end
-    })
-end
-
---// ABA TROLL/FUN
-TrollTab:AddSection({ "Desastres & Troll" })
-
-TrollTab:AddButton({
-    Name = "Tornado (Navio)",
-    Description = "Spawna um tornado usando o navio",
+MiscTab:AddButton({
+    Name = "FPS Boost (Low GFX)",
     Callback = function()
-        -- Código original do tornado otimizado
-        Notify("Aviso", "Iniciando Tornado...")
-        local RS = ReplicatedStorage
-        local RE = RS:WaitForChild("RE")
-        
-        -- Spawnar barco
-        RE:FindFirstChild("1Ca1r"):FireServer("PickingBoat", "PirateFree")
-        task.wait(1)
-        
-        local PCar = Workspace.Vehicles:FindFirstChild(LocalPlayer.Name .. "Car")
-        if PCar and PCar:FindFirstChild("Body") then
-            -- Teleportar e sentar
-            local seat = PCar.Body:FindFirstChild("VehicleSeat")
-            if seat then
-                LocalPlayer.Character.HumanoidRootPart.CFrame = seat.CFrame + Vector3.new(0,2,0)
-                task.wait(0.5)
-                seat:Sit(LocalPlayer.Character.Humanoid)
+        local decalsyeeted = true
+        local g = game
+        local w = g.Workspace
+        local l = g.Lighting
+        local t = g.Workspace.Terrain
+        t.WaterWaveSize = 0
+        t.WaterWaveSpeed = 0
+        t.WaterReflectance = 0
+        t.WaterTransparency = 0
+        l.GlobalShadows = false
+        l.FogEnd = 9e9
+        l.Brightness = 0
+        settings().Rendering.QualityLevel = "Level01"
+        for i, v in pairs(g:GetDescendants()) do
+            if v:IsA("Part") or v:IsA("Union") or v:IsA("CornerWedgePart") or v:IsA("TrussPart") then
+                v.Material = "Plastic"
+                v.Reflectance = 0
+            elseif v:IsA("Decal") or v:IsA("Texture") and decalsyeeted then
+                v.Transparency = 1
+            elseif v:IsA("ParticleEmitter") or v:IsA("Trail") then
+                v.Lifetime = NumberRange.new(0)
             end
+        end
+        Notification("System", "FPS Boost Aktif!", 3)
+    end
+})
+
+MiscTab:AddButton({
+    Name = "Tam Aydınlık (Fullbright)",
+    Callback = function()
+        Lighting.Brightness = 2
+        Lighting.ClockTime = 14
+        Lighting.FogEnd = 100000
+        Lighting.GlobalShadows = false
+        Lighting.OutdoorAmbient = Color3.fromRGB(128, 128, 128)
+    end
+})
+
+-- [TAB 7: ESP]
+local EspTab = Window:MakeTab({ "ESP", "eye" })
+
+_G.ESPEnabled = false
+local espFolder = Instance.new("Folder", game.CoreGui)
+espFolder.Name = "LyraESP"
+
+local function UpdateESP()
+    espFolder:ClearAllChildren()
+    if not _G.ESPEnabled then return end
+    
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+            local highlight = Instance.new("Highlight")
+            highlight.Parent = espFolder
+            highlight.Adornee = player.Character
+            highlight.FillColor = ROXO_PRINCIPAL
+            highlight.OutlineColor = Color3.new(1,1,1)
+            highlight.FillTransparency = 0.5
+            highlight.OutlineTransparency = 0
             
-            -- Girar loucamente
-            task.spawn(function()
-                local startTime = tick()
-                while tick() - startTime < 15 and PCar.Parent do
-                    PCar:SetPrimaryPartCFrame(PCar.PrimaryPart.CFrame * CFrame.Angles(0, math.rad(45), 0) + Vector3.new(math.random(-5,5), 2, math.random(-5,5)))
-                    RE:WaitForChild("1Player1sCa1r"):FireServer("Flip")
-                    task.wait(0.1)
-                end
-            end)
-        else
-            Notify("Erro", "Veículo não spawnou.")
+            -- İsim
+            local bg = Instance.new("BillboardGui", player.Character.Head)
+            bg.Size = UDim2.new(0, 200, 0, 50)
+            bg.StudsOffset = Vector3.new(0, 3, 0)
+            bg.AlwaysOnTop = true
+            
+            local txt = Instance.new("TextLabel", bg)
+            txt.Size = UDim2.new(1,0,1,0)
+            txt.BackgroundTransparency = 1
+            txt.Text = player.Name
+            txt.TextColor3 = Color3.new(1,1,1)
+            txt.TextStrokeTransparency = 0
+            txt.Font = Enum.Font.GothamBold
+            txt.TextSize = 14
         end
     end
-})
+end
 
-TrollTab:AddButton({
-    Name = "Black Hole (Buraco Negro)",
-    Description = "Puxa partes soltas (Client-Side Visual)",
-    Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/miroeramaa/TurtleLib/main/TurtleUiLib.lua"))()
-        -- Nota: O código original do black hole era muito extenso, carregando a lib dele é mais seguro
-    end
-})
-
-TrollTab:AddToggle({
-    Name = "Anti-Sit (Não Sentar)",
+EspTab:AddToggle({
+    Name = "ESP Player (Kutu + İsim)",
     Default = false,
-    Callback = function(v)
-        local hum = LocalPlayer.Character:FindFirstChild("Humanoid")
-        if hum then
-            hum:SetStateEnabled(Enum.HumanoidStateType.Seated, not v)
+    Callback = function(state)
+        _G.ESPEnabled = state
+        if state then
+            UpdateESP()
+            -- Oyuncu girince/çıkınca yenile
+             Players.PlayerAdded:Connect(UpdateESP)
+             Players.PlayerRemoving:Connect(UpdateESP)
+             -- Döngü (Character yenilenmesi için)
+             task.spawn(function()
+                 while _G.ESPEnabled do
+                     UpdateESP()
+                     task.wait(5)
+                 end
+             end)
+        else
+            espFolder:ClearAllChildren()
         end
     end
 })
 
---// ABA VEÍCULOS
-CarTab:AddSection({ "Configuração" })
-
-CarTab:AddTextBox({
-    Name = "Velocidade Máxima",
-    PlaceholderText = "Ex: 200",
-    Callback = function(v)
-        local num = tonumber(v)
-        if not num then return end
-        for _, car in pairs(Workspace.Vehicles:GetChildren()) do
-            if car:FindFirstChild("Seats") and car.Seats:FindFirstChild("VehicleSeat") then
-                car.Seats.VehicleSeat.MaxSpeed = num
-            end
-        end
-        Notify("Sucesso", "Velocidade aplicada aos carros ativos.")
-    end
-})
-
-CarTab:AddButton({
-    Name = "Carro RGB (Pisca-Pisca)",
-    Callback = function()
-        task.spawn(function()
-            while task.wait(0.5) do
-                pcall(function()
-                     ReplicatedStorage.RE["1Player1sCa1r"]:FireServer("PickingCarColor", Color3.fromHSV(tick()%5/5, 1, 1))
-                end)
-            end
-        end)
-    end
-})
-
-CarTab:AddButton({
-    Name = "Remover Todos os Carros (Client)",
-    Callback = function()
-        for _, v in pairs(Workspace.Vehicles:GetChildren()) do
-            v:Destroy()
-        end
-        Notify("Limpeza", "Carros removidos visualmente.")
-    end
-})
-
---// ABA AVATAR
-AvatarTab:AddSection({ "Copiar Skin" })
-
-local targetPlayerName = ""
-local playersDropdown = AvatarTab:AddDropdown({
-    Name = "Selecionar Jogador",
-    Options = {},
-    Callback = function(v)
-        targetPlayerName = v
-    end
-})
-
-local function refreshPlayers()
-    local names = {}
-    for _, p in ipairs(Players:GetPlayers()) do
-        if p ~= LocalPlayer then table.insert(names, p.Name) end
-    end
-    playersDropdown:Set(names)
-end
-
-AvatarTab:AddButton({
-    Name = "Atualizar Lista",
-    Callback = refreshPlayers
-})
-
-AvatarTab:AddButton({
-    Name = "Copiar Avatar Selecionado",
-    Callback = function()
-        local target = Players:FindFirstChild(targetPlayerName)
-        if not target or not target.Character then Notify("Erro", "Jogador não encontrado/sem personagem") return end
-        
-        -- Lógica de cópia via Remote (Específica do Brookhaven)
-        local hum = target.Character:FindFirstChild("Humanoid")
-        if hum then
-            local desc = hum:GetAppliedDescription()
-            -- Aplica acessórios, camisas, calças via remotes do jogo
-            -- Nota: Simplificado para evitar erros de sintaxe, usa o método padrão do script original
-            pcall(function()
-                local args = {{
-                    desc.Torso, desc.RightArm, desc.LeftArm, desc.RightLeg, desc.LeftLeg, desc.Head
-                }}
-                ReplicatedStorage.Remotes.ChangeCharacterBody:InvokeServer(unpack(args))
-                -- Aplicar roupas
-                if desc.Shirt ~= 0 then ReplicatedStorage.Remotes.Wear:InvokeServer(desc.Shirt) end
-                if desc.Pants ~= 0 then ReplicatedStorage.Remotes.Wear:InvokeServer(desc.Pants) end
-                if desc.Face ~= 0 then ReplicatedStorage.Remotes.Wear:InvokeServer(desc.Face) end
-            end)
-            Notify("Sucesso", "Avatar copiado (tentativa).")
-        end
-    end
-})
-
-AvatarTab:AddSection({ "Acessórios Divertidos" })
-
-local funAccessories = {
-    ["Capivara"] = 123881270149502,
-    ["Shrek"] = 120960401202173,
-    ["Minecraft"] = 18161752527,
-    ["Dominus"] = 21070012,
-    ["Valkyrie"] = 1365767,
-    ["Gato Banana"] = 138936629170553
-}
-
-for name, id in pairs(funAccessories) do
-    AvatarTab:AddButton({
-        Name = "Equipar " .. name,
-        Callback = function()
-            pcall(function()
-                ReplicatedStorage.Remotes.Wear:InvokeServer(id)
-            end)
-        end
-    })
-end
-
---// ABA MÚSICA
-MusicTab:AddSection({ "Tocar Sons (Global/Local)" })
-
-local musicList = {
-    ["Meme - Vine Boom"] = "18984970630",
-    ["Meme - Bruh"] = "6349641063",
-    ["Phonk - Sigma"] = "135082533097287",
-    ["Terror - Jumpscare"] = "6754147732",
-    ["Meme - Sus"] = "75183593514657",
-    ["Meme - Emotional Damage"] = "82284055473737"
-}
-
-local selectedMusic = ""
-local musicOptions = {}
-for name, id in pairs(musicList) do table.insert(musicOptions, name) end
-
-MusicTab:AddDropdown({
-    Name = "Selecionar Música",
-    Options = musicOptions,
-    Callback = function(v)
-        selectedMusic = musicList[v]
-    end
-})
-
-MusicTab:AddButton({
-    Name = "Tocar no Personagem",
-    Callback = function()
-        if selectedMusic == "" then Notify("Erro", "Selecione uma música") return end
-        pcall(function()
-            local args = {
-                Workspace, selectedMusic, 1
-            }
-            ReplicatedStorage.RE:FindFirstChild("1Gu1nSound1s"):FireServer(unpack(args))
-            Notify("Audio", "Tocando...")
-        end)
-    end
-})
-
-MusicTab:AddSection({ "ID Personalizado" })
-MusicTab:AddTextBox({
-    Name = "ID do Áudio",
-    PlaceholderText = "Cole o ID aqui",
-    Callback = function(v)
-        selectedMusic = v
-    end
-})
-
---// INICIALIZAÇÃO
-refreshPlayers()
-Notify("Lyra Hub V2", "Carregado com sucesso! Divirta-se.", 5)
+--// FINAL NOTIFICATION //--
+Notification("Lyra Hub", "Script Yüklendi! İyi Eğlenceler.", 5)
