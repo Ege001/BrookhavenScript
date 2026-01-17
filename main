@@ -5437,6 +5437,34 @@ Tab:AddButton({
 })
 
 Tab:AddButton({
+    Title = "Snowflake Glider",
+    Locked = false,
+    Callback = function()
+        local args = {
+            [1] = "AcceptedToolToServer",
+            [2] = "SnowflakeGlider",
+            [3] = game.Players.LocalPlayer
+        }
+
+        game:GetService("ReplicatedStorage").RE["1Playe1rTrigge1rEven1t"]:FireServer(unpack(args))
+    end
+})
+
+Tab:AddButton({
+    Title = "Lollipop Peppermint",
+    Locked = false,
+    Callback = function()
+        local args = {
+            [1] = "AcceptedToolToServer",
+            [2] = "LollipopPeppermint",
+            [3] = game.Players.LocalPlayer
+        }
+
+        game:GetService("ReplicatedStorage").RE["1Playe1rTrigge1rEven1t"]:FireServer(unpack(args))
+    end
+})
+
+Tab:AddButton({
     Title = "canhão",
     Locked = false,
     Callback = function()
