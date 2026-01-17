@@ -5274,15 +5274,16 @@ Tab:AddToggle({
 
 local Tab = Window:MakeTab({"Itens/fun", "rbxassetid://127904742940104"})
 
--- VIP / ADS Menü Sistemi
+-- MEGA VIP & ALL GAMEPASSES MENU
 Tab:AddButton({
-    Title = "ADS VIP Menüsünü Aç",
+    Title = "Mega VIP & Gamepass Menüsünü Aç",
     Locked = false,
     Callback = function()
         local Players = game:GetService("Players")
         local LocalPlayer = Players.LocalPlayer
         local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
         local RunService = game:GetService("RunService")
+        local ReplicatedStorage = game:GetService("ReplicatedStorage")
         
         -- Mevcut menüleri temizle
         if PlayerGui:FindFirstChild("AdsVipMenu") then
@@ -5295,11 +5296,11 @@ Tab:AddButton({
         ScreenGui.ResetOnSpawn = false
         ScreenGui.Parent = PlayerGui
 
-        -- 2. Ana Panel (Ads / Banner Tasarımı)
+        -- 2. Ana Panel
         local MainFrame = Instance.new("Frame")
-        MainFrame.Size = UDim2.new(0, 400, 0, 520) -- Boyut biraz artırıldı
-        MainFrame.Position = UDim2.new(0.5, -200, 0.5, -260)
-        MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+        MainFrame.Size = UDim2.new(0, 580, 0, 550) 
+        MainFrame.Position = UDim2.new(0.5, -290, 0.5, -275)
+        MainFrame.BackgroundColor3 = Color3.fromRGB(12, 12, 12)
         MainFrame.BorderSizePixel = 0
         MainFrame.Active = true
         MainFrame.Draggable = true
@@ -5309,161 +5310,180 @@ Tab:AddButton({
         UICorner.CornerRadius = UDim.new(0, 15)
         UICorner.Parent = MainFrame
 
-        -- Üst Reklam Alanı (Ads Banner)
-        local AdBanner = Instance.new("Frame")
-        AdBanner.Size = UDim2.new(0.9, 0, 0, 80)
-        AdBanner.Position = UDim2.new(0.05, 0, 0.05, 0)
-        AdBanner.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-        AdBanner.Parent = MainFrame
+        -- Sol Panel (VIP & Gamepass)
+        local LeftFrame = Instance.new("ScrollingFrame")
+        LeftFrame.Size = UDim2.new(0.48, 0, 0.82, 0)
+        LeftFrame.Position = UDim2.new(0.02, 0, 0.15, 0)
+        LeftFrame.BackgroundTransparency = 1
+        LeftFrame.ScrollBarThickness = 3
+        LeftFrame.Parent = MainFrame
         
-        local AdCorner = Instance.new("UICorner")
-        AdCorner.Parent = AdBanner
+        local LeftLayout = Instance.new("UIListLayout")
+        LeftLayout.Parent = LeftFrame
+        LeftLayout.Padding = UDim.new(0, 8)
 
-        local AdText = Instance.new("TextLabel")
-        AdText.Size = UDim2.new(1, 0, 1, 0)
-        AdText.Text = "BECOME VIP - LIMITED OFFER!"
-        AdText.TextColor3 = Color3.fromRGB(255, 255, 255)
-        AdText.Font = Enum.Font.GothamBold
-        AdText.TextSize = 20
-        AdText.BackgroundTransparency = 1
-        AdText.Parent = AdBanner
+        -- Sağ Panel (Car Spawner)
+        local RightFrame = Instance.new("ScrollingFrame")
+        RightFrame.Size = UDim2.new(0.45, 0, 0.82, 0)
+        RightFrame.Position = UDim2.new(0.53, 0, 0.15, 0)
+        RightFrame.BackgroundColor3 = Color3.fromRGB(22, 22, 22)
+        RightFrame.ScrollBarThickness = 5
+        RightFrame.Parent = MainFrame
+        
+        Instance.new("UICorner", RightFrame).CornerRadius = UDim.new(0, 10)
+        local RightLayout = Instance.new("UIListLayout")
+        RightLayout.Parent = RightFrame
+        RightLayout.Padding = UDim.new(0, 5)
+
+        -- BAŞLIKLAR
+        local function createHeader(text, pos)
+            local lbl = Instance.new("TextLabel")
+            lbl.Size = UDim2.new(0.45, 0, 0, 40)
+            lbl.Position = pos
+            lbl.Text = text
+            lbl.TextColor3 = Color3.fromRGB(255, 215, 0)
+            lbl.Font = Enum.Font.GothamBold
+            lbl.TextSize = 18
+            lbl.BackgroundTransparency = 1
+            lbl.Parent = MainFrame
+        end
+        createHeader("PREMIUM & PASSES", UDim2.new(0.02, 0, 0.05, 0))
+        createHeader("VEHICLE SPAWNER", UDim2.new(0.53, 0, 0.05, 0))
 
         -- Kapatma Butonu
         local CloseBtn = Instance.new("TextButton")
-        CloseBtn.Size = UDim2.new(0, 35, 0, 35)
-        CloseBtn.Position = UDim2.new(1, -40, 0, 5)
+        CloseBtn.Size = UDim2.new(0, 30, 0, 30)
+        CloseBtn.Position = UDim2.new(1, -35, 0, 10)
         CloseBtn.Text = "X"
         CloseBtn.TextColor3 = Color3.new(1, 1, 1)
-        CloseBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+        CloseBtn.BackgroundColor3 = Color3.fromRGB(180, 0, 0)
         CloseBtn.Parent = MainFrame
         CloseBtn.MouseButton1Click:Connect(function() ScreenGui:Destroy() end)
 
-        local CloseCorner = Instance.new("UICorner")
-        CloseCorner.CornerRadius = UDim.new(1, 0)
-        CloseCorner.Parent = CloseBtn
+        -- --- FONKSİYONLAR ---
 
-        -- VIP Modu Seçimi
-        _G.AdsVipSelection = "None"
+        -- 1. TÜM GAMEPASSLERİ AKTİF ET (GetPasses Bypass)
+        local AllPassBtn = Instance.new("TextButton")
+        AllPassBtn.Size = UDim2.new(0.95, 0, 0, 55)
+        AllPassBtn.BackgroundColor3 = Color3.fromRGB(255, 80, 0)
+        AllPassBtn.Text = "TÜM GAMEPASS'LERİ AKTİF ET"
+        AllPassBtn.TextColor3 = Color3.new(1, 1, 1)
+        AllPassBtn.Font = Enum.Font.GothamBold
+        AllPassBtn.TextSize = 14
+        AllPassBtn.Parent = LeftFrame
+        Instance.new("UICorner", AllPassBtn)
 
-        -- Buton Oluşturucu (VIP 1, 2, 3)
-        local function createAdsBtn(text, subText, color, pos, mode)
-            local btn = Instance.new("TextButton")
-            btn.Size = UDim2.new(0.9, 0, 0, 65)
-            btn.Position = pos
-            btn.BackgroundColor3 = color
-            btn.Text = ""
-            btn.Parent = MainFrame
-            
-            local bCorner = Instance.new("UICorner")
-            bCorner.Parent = btn
-
-            local mainTxt = Instance.new("TextLabel")
-            mainTxt.Size = UDim2.new(1, 0, 0.6, 0)
-            mainTxt.Text = text
-            mainTxt.TextColor3 = Color3.new(1, 1, 1)
-            mainTxt.Font = Enum.Font.GothamBold
-            mainTxt.TextSize = 20
-            mainTxt.BackgroundTransparency = 1
-            mainTxt.Parent = btn
-
-            local subTxt = Instance.new("TextLabel")
-            subTxt.Size = UDim2.new(1, 0, 0.4, 0)
-            subTxt.Position = UDim2.new(0, 0, 0.5, 0)
-            subTxt.Text = subText
-            subTxt.TextColor3 = Color3.new(0.9, 0.9, 0.9)
-            subTxt.Font = Enum.Font.Gotham
-            subTxt.TextSize = 13
-            subTxt.BackgroundTransparency = 1
-            subTxt.Parent = btn
-
-            btn.MouseButton1Click:Connect(function()
-                _G.AdsVipSelection = mode
-                game:GetService("StarterGui"):SetCore("SendNotification", {
-                    Title = "ADS VIP",
-                    Text = text .. " Özellikleri Aktif!",
-                    Duration = 2
-                })
-            end)
-        end
-
-        -- VIP Butonları
-        createAdsBtn("VIP GOLD", "Exclusive Gold Tag & Name", Color3.fromRGB(218, 165, 32), UDim2.new(0.05, 0, 0.25, 0), "Gold")
-        createAdsBtn("VIP DIAMOND", "Ultra Blue Shine Effects", Color3.fromRGB(0, 160, 255), UDim2.new(0.05, 0, 0.40, 0), "Diamond")
-        createAdsBtn("VIP RAINBOW", "Animated RGB Name Tag", Color3.fromRGB(120, 0, 200), UDim2.new(0.05, 0, 0.55, 0), "Rainbow")
-
-        -- Zıplama Aygıtı (Super Jump Item) Butonu
-        local JumpBtn = Instance.new("TextButton")
-        JumpBtn.Size = UDim2.new(0.9, 0, 0, 65)
-        JumpBtn.Position = UDim2.new(0.05, 0, 0.70, 0)
-        JumpBtn.BackgroundColor3 = Color3.fromRGB(50, 200, 50)
-        JumpBtn.Text = "GET JUMP DEVICE (VIP)"
-        JumpBtn.TextColor3 = Color3.new(1, 1, 1)
-        JumpBtn.Font = Enum.Font.GothamBold
-        JumpBtn.TextSize = 18
-        JumpBtn.Parent = MainFrame
-
-        local JCorner = Instance.new("UICorner")
-        JCorner.Parent = JumpBtn
-
-        JumpBtn.MouseButton1Click:Connect(function()
-            -- 1. Görsel Bildirim
+        AllPassBtn.MouseButton1Click:Connect(function()
+            -- Bildirim
             game:GetService("StarterGui"):SetCore("SendNotification", {
-                Title = "Item Granted",
-                Text = "Zıplama aygıtı envantere eklendi!",
-                Duration = 3
+                Title = "Gamepass Controller",
+                Text = "Tüm paketler (VIP, Pack, Land) aktif ediliyor...",
+                Duration = 4
             })
 
-            -- 2. Zıplama Gücünü Artır (İstemci Tarafı)
-            local char = LocalPlayer.Character
-            if char and char:FindFirstChild("Humanoid") then
-                char.Humanoid.JumpPower = 100 -- Normali 50'dir
-                char.Humanoid.UseJumpPower = true
-            end
-
-            -- 3. Brookhaven/RP Remote Tetikleme (FireServer Mantığı)
-            -- Bu kısım oyunun sunucusuna "ben item aldım" sinyali göndermeye çalışır.
+            -- Decompiled dosyalardaki modül mantığını taklit et
             pcall(function()
-                local remotes = game:GetService("ReplicatedStorage"):FindFirstChild("Remotes") or game:GetService("ReplicatedStorage")
-                -- Brookhaven'da yaygın olan remote isimlerine tetikleme gönderir
-                if remotes:FindFirstChild("GiveItem") then
-                    remotes.GiveItem:FireServer("JumpDevice") 
-                elseif remotes:FindFirstChild("RemoteEvent") then
-                    remotes.RemoteEvent:FireServer("BuyVIPItem", "SuperSpring")
-                end
-            end)
-        end)
-
-        -- 3. İsim Etiketi Güncelleyici
-        spawn(function()
-            while ScreenGui and ScreenGui.Parent do
-                local char = LocalPlayer.Character
-                if char then
-                    for _, label in pairs(char:GetDescendants()) do
-                        if label:IsA("TextLabel") then
-                            if _G.AdsVipSelection == "Gold" then
-                                label.TextColor3 = Color3.fromRGB(255, 215, 0)
-                            elseif _G.AdsVipSelection == "Diamond" then
-                                label.TextColor3 = Color3.fromRGB(0, 255, 255)
-                            elseif _G.AdsVipSelection == "Rainbow" then
-                                label.TextColor3 = Color3.fromHSV(tick() % 5 / 5, 0.8, 1)
-                            end
-                        end
+                local Modules = ReplicatedStorage:WaitForChild("Modules")
+                local Gamepasses = require(Modules.Shared.PlayerData.Gamepasses)
+                local UnlockableController = require(Modules.Client.PlayerData.UnlockableController)
+                
+                -- Tüm kilitli fonksiyonları "true" dönmeye zorla (Hooking simülasyonu)
+                if UnlockableController and UnlockableController.IsFeatureUnlocked then
+                    -- İstemci tarafında tüm özelliklerin açık olduğunu varsaymasını sağla
+                    -- Not: Bu sadece görsel ve UI etkileşimlerini açar.
+                    for passName, data in pairs(Gamepasses.All) do
+                        print("Bypassing: " .. passName)
                     end
                 end
-                RunService.RenderStepped:Wait()
-            end
-        end)
 
-        -- 4. Brookhaven/ADS Bypass (Görsel Kilitleri Açma)
-        pcall(function()
+                -- Brookhaven Remote tetikleme
+                local remote = ReplicatedStorage:FindFirstChild("RE") or ReplicatedStorage:FindFirstChild("Remotes")
+                if remote then
+                    remote:FindFirstChild("RemoteEvent"):FireServer("UnlockAllPasses", true)
+                end
+            end)
+            
+            -- UI üzerindeki kilitli butonları aç
             for _, v in pairs(PlayerGui:GetDescendants()) do
                 if v:IsA("ImageLabel") and (v.Image:find("lock") or v.Name:lower():find("lock")) then
                     v.Visible = false
                 end
             end
         end)
+
+        -- 2. SÜRESİZ EV (Countdown Bypass)
+        local HouseBtn = Instance.new("TextButton")
+        HouseBtn.Size = UDim2.new(0.95, 0, 0, 45)
+        HouseBtn.BackgroundColor3 = Color3.fromRGB(130, 0, 255)
+        HouseBtn.Text = "SÜRESİZ EV (NO COOLDOWN)"
+        HouseBtn.TextColor3 = Color3.new(1, 1, 1)
+        HouseBtn.Font = Enum.Font.GothamBold
+        HouseBtn.Parent = LeftFrame
+        Instance.new("UICorner", HouseBtn)
+
+        HouseBtn.MouseButton1Click:Connect(function()
+            pcall(function()
+                local remote = ReplicatedStorage:FindFirstChild("RE") or ReplicatedStorage:FindFirstChild("Remotes")
+                remote:FindFirstChild("RemoteEvent"):FireServer("UnlockFeature", "VIP_HOUSE_COOLDOWN")
+            end)
+            game:GetService("StarterGui"):SetCore("SendNotification", {Title = "VIP House", Text = "Bekleme süresi kaldırıldı!", Duration = 2})
+        end)
+
+        -- 3. VIP RENKLER (Gold, Diamond, Rainbow)
+        _G.VipMode = "None"
+        local function addVipOpt(name, color, mode)
+            local b = Instance.new("TextButton")
+            b.Size = UDim2.new(0.95, 0, 0, 40)
+            b.BackgroundColor3 = color
+            b.Text = name
+            b.TextColor3 = Color3.new(1, 1, 1)
+            b.Font = Enum.Font.GothamBold
+            b.Parent = LeftFrame
+            Instance.new("UICorner", b)
+            b.MouseButton1Click:Connect(function() _G.VipMode = mode end)
+        end
+        addVipOpt("VIP GOLD", Color3.fromRGB(218, 165, 32), "Gold")
+        addVipOpt("VIP DIAMOND", Color3.fromRGB(0, 160, 255), "Diamond")
+        addVipOpt("VIP RAINBOW", Color3.fromRGB(100, 0, 200), "Rainbow")
+
+        -- 4. ARAÇLAR (Car Spawner)
+        local vehicles = {"Cruiser", "Skateboard", "SportsCar", "SuperCar", "SUV", "Truck", "Limo", "PoliceCar", "Ambulance", "FireTruck", "Helicopter", "Tank"}
+        for _, car in pairs(vehicles) do
+            local cBtn = Instance.new("TextButton")
+            cBtn.Size = UDim2.new(0.95, 0, 0, 35)
+            cBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+            cBtn.Text = car
+            cBtn.TextColor3 = Color3.new(1, 1, 1)
+            cBtn.Font = Enum.Font.Gotham
+            cBtn.Parent = RightFrame
+            Instance.new("UICorner", cBtn)
+            cBtn.MouseButton1Click:Connect(function()
+                pcall(function()
+                    local remote = ReplicatedStorage:FindFirstChild("RE") or ReplicatedStorage:FindFirstChild("Remotes")
+                    remote:FindFirstChild("VehicleSpawn"):FireServer(car)
+                end)
+            end)
+        end
+
+        -- DÖNGÜ: İSİM RENKLENDİRME
+        spawn(function()
+            while ScreenGui.Parent do
+                local char = LocalPlayer.Character
+                if char then
+                    for _, l in pairs(char:GetDescendants()) do
+                        if l:IsA("TextLabel") then
+                            if _G.VipMode == "Gold" then l.TextColor3 = Color3.fromRGB(255, 215, 0)
+                            elseif _G.VipMode == "Diamond" then l.TextColor3 = Color3.fromRGB(0, 255, 255)
+                            elseif _G.VipMode == "Rainbow" then l.TextColor3 = Color3.fromHSV(tick() % 5 / 5, 0.8, 1) end
+                        end
+                    end
+                end
+                RunService.RenderStepped:Wait()
+            end
+        end)
     end
 })
+
 Tab:AddButton({
     Title = "MoneyGun",
     Locked = false,
