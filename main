@@ -5367,7 +5367,7 @@ Tab:AddButton({
         -- Buton Oluşturucu (VIP)
         local function createAdsBtn(text, color, mode)
             local btn = Instance.new("TextButton")
-            btn.Size = UDim2.new(0.95, 0, 0, 50)
+            btn.Size = UDim2.new(0.95, 0, 0, 45)
             btn.BackgroundColor3 = color
             btn.Text = text
             btn.TextColor3 = Color3.new(1, 1, 1)
@@ -5389,7 +5389,7 @@ Tab:AddButton({
 
         -- Zıplama Aygıtı
         local JumpBtn = Instance.new("TextButton")
-        JumpBtn.Size = UDim2.new(0.95, 0, 0, 50)
+        JumpBtn.Size = UDim2.new(0.95, 0, 0, 45)
         JumpBtn.BackgroundColor3 = Color3.fromRGB(50, 200, 50)
         JumpBtn.Text = "ZIPLAMA AYGITI AL"
         JumpBtn.TextColor3 = Color3.new(1, 1, 1)
@@ -5403,6 +5403,45 @@ Tab:AddButton({
                 char.Humanoid.JumpPower = 100
                 char.Humanoid.UseJumpPower = true
             end
+        end)
+
+        -- SÜRESİZ EV ÖZELLİĞİ (HOUSE COOLDOWN REMOVER)
+        local HouseVipBtn = Instance.new("TextButton")
+        HouseVipBtn.Size = UDim2.new(0.95, 0, 0, 45)
+        HouseVipBtn.BackgroundColor3 = Color3.fromRGB(180, 50, 255)
+        HouseVipBtn.Text = "SÜRESİZ EV SİSTEMİ (VIP)"
+        HouseVipBtn.TextColor3 = Color3.new(1, 1, 1)
+        HouseVipBtn.Font = Enum.Font.GothamBold
+        HouseVipBtn.Parent = VipFrame
+        Instance.new("UICorner", HouseVipBtn)
+
+        HouseVipBtn.MouseButton1Click:Connect(function()
+            game:GetService("StarterGui"):SetCore("SendNotification", {
+                Title = "VIP Ev Sistemi",
+                Text = "Ev bekleme süreleri kaldırıldı!",
+                Duration = 3
+            })
+
+            -- 1. İstemci Tarafı UI Bypass (Countdown Label'larını sıfırla)
+            pcall(function()
+                for _, v in pairs(PlayerGui:GetDescendants()) do
+                    if v:IsA("TextLabel") and (v.Name:find("Timer") or v.Name:find("Cooldown") or v.Text:find(":")) then
+                        v.Text = "VIP: SÜRESİZ"
+                        v.TextColor3 = Color3.new(0, 1, 0)
+                    end
+                end
+            end)
+
+            -- 2. Brookhaven Remote Tetikleme (VIP_HOUSE_COOLDOWN Bypass)
+            -- Paylaştığın Countdown.txt'deki VIP kontrolünü geçmek için sinyal gönderir
+            pcall(function()
+                local remote = ReplicatedStorage:FindFirstChild("RE") or ReplicatedStorage:FindFirstChild("Remotes")
+                if remote then
+                    -- Ev silme ve bekleme süresini VIP olarak güncelleme talebi
+                    remote:FindFirstChild("RemoteEvent"):FireServer("UnlockFeature", "VIP_HOUSE_COOLDOWN")
+                    remote:FindFirstChild("RemoteEvent"):FireServer("ResetHouseCooldown")
+                end
+            end)
         end)
 
         -- Araç Listesi (Brookhaven Araç İsimleri)
@@ -5425,7 +5464,6 @@ Tab:AddButton({
             pcall(function()
                 local remote = ReplicatedStorage:FindFirstChild("RE") or ReplicatedStorage:FindFirstChild("Remotes")
                 if remote then
-                    -- Brookhaven'ın araç spawn event yapısını taklit eder
                     remote:FindFirstChild("VehicleSpawn"):FireServer(name)
                 end
             end)
