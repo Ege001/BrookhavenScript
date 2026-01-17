@@ -5274,68 +5274,108 @@ Tab:AddToggle({
 
 local Tab = Window:MakeTab({"Itens/fun", "rbxassetid://127904742940104"})
 
--- RP İsim ve Bio Renklerini (Rainbow/VIP) Aktif Etme Butonu
+-- VIP Menü ve İsim Değiştirme Sistemi
 Tab:AddButton({
-    Title = "Rainbow/VIP Renkleri Aktif Et",
+    Title = "VIP Renk Menüsünü Aç",
     Locked = false,
     Callback = function()
         local Players = game:GetService("Players")
         local LocalPlayer = Players.LocalPlayer
+        local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
         local RunService = game:GetService("RunService")
         
-        -- 1. Bildirim Gönder
-        game:GetService("StarterGui"):SetCore("SendNotification", {
-            Title = "Renk Kilidi",
-            Text = "RP Bio ve İsim renkleri için kilitler açılıyor...",
-            Duration = 3
-        })
-
-        -- 2. UI Üzerindeki Gizli Butonları Zorla Açma (Client-Side)
-        -- Oyuncunun ekranındaki (PlayerGui) tüm arayüzü tarar.
-        -- "Rainbow", "Color" veya "VIP" isminde olup gizli olan butonları görünür yapar.
-        local pGui = LocalPlayer:WaitForChild("PlayerGui")
-        
-        local function unlockButtons(parent)
-            for _, obj in pairs(parent:GetDescendants()) do
-                if obj:IsA("GuiButton") or obj:IsA("ImageButton") then
-                    local name = string.lower(obj.Name)
-                    -- Eğer butonda renk veya rainbow kelimesi geçiyorsa ve gizliyse:
-                    if string.find(name, "rainbow") or string.find(name, "color") or string.find(name, "vip") then
-                        obj.Visible = true    -- Görünür yap
-                        obj.Active = true     -- Tıklanabilir yap
-                        obj.Selectable = true -- Seçilebilir yap
-                        
-                        -- Eğer butonun üzerinde "Kilit" (Lock) resmi varsa onu gizle
-                        for _, child in pairs(obj:GetChildren()) do
-                            if child:IsA("ImageLabel") and (string.find(string.lower(child.Name), "lock") or string.find(string.lower(child.Name), "padlock")) then
-                                child.Visible = false
-                            end
-                        end
-                    end
-                end
-            end
+        -- Eğer eski menü varsa temizle
+        if PlayerGui:FindFirstChild("CustomVipMenu") then
+            PlayerGui.CustomVipMenu:Destroy()
         end
-        
-        -- İşlemi çalıştır
-        pcall(function()
-            unlockButtons(pGui)
-        end)
 
-        -- 3. Manuel Rainbow Döngüsü (Yedek Özellik)
-        -- Eğer oyunun butonları sunucu korumalıysa, bu kod karakterin ismini sürekli renk değiştirir (Rainbow Loop).
+        -- 1. Ayrı Bir Menü Oluşturma (ScreenGui)
+        local ScreenGui = Instance.new("ScreenGui")
+        ScreenGui.Name = "CustomVipMenu"
+        ScreenGui.Parent = PlayerGui
+
+        local MainFrame = Instance.new("Frame")
+        MainFrame.Size = UDim2.new(0, 250, 0, 300)
+        MainFrame.Position = UDim2.new(0.5, -125, 0.4, -150)
+        MainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+        MainFrame.BorderSizePixel = 0
+        MainFrame.Active = true
+        MainFrame.Draggable = true
+        MainFrame.Parent = ScreenGui
+        
+        -- Köşeleri yuvarlat
+        local UICorner = Instance.new("UICorner")
+        UICorner.CornerRadius = UDim.new(0, 10)
+        UICorner.Parent = MainFrame
+
+        local Title = Instance.new("TextLabel")
+        Title.Size = UDim2.new(1, 0, 0, 40)
+        Title.Text = "VIP SEÇİM MENÜSÜ"
+        Title.TextColor3 = Color3.new(1, 1, 1)
+        Title.BackgroundTransparency = 1
+        Title.Font = Enum.Font.GothamBold
+        Title.TextSize = 18
+        Title.Parent = MainFrame
+
+        -- Kapatma Butonu
+        local CloseBtn = Instance.new("TextButton")
+        CloseBtn.Size = UDim2.new(0, 30, 0, 30)
+        CloseBtn.Position = UDim2.new(1, -35, 0, 5)
+        CloseBtn.Text = "X"
+        CloseBtn.TextColor3 = Color3.new(1, 0, 0)
+        CloseBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+        CloseBtn.Parent = MainFrame
+        CloseBtn.MouseButton1Click:Connect(function() ScreenGui:Destroy() end)
+
+        -- VIP Modları Değişkeni
+        _G.VipMode = "None"
+
+        -- Buton Oluşturucu Fonksiyon
+        local function createVipBtn(name, color, pos, mode)
+            local btn = Instance.new("TextButton")
+            btn.Size = UDim2.new(0.8, 0, 0, 45)
+            btn.Position = pos
+            btn.Text = name
+            btn.TextColor3 = Color3.new(1, 1, 1)
+            btn.BackgroundColor3 = color
+            btn.Font = Enum.Font.GothamSemibold
+            btn.TextSize = 16
+            btn.Parent = MainFrame
+            
+            local btnCorner = Instance.new("UICorner")
+            btnCorner.Parent = btn
+
+            btn.MouseButton1Click:Connect(function()
+                _G.VipMode = mode
+                game:GetService("StarterGui"):SetCore("SendNotification", {
+                    Title = "VIP Aktif",
+                    Text = name .. " modu seçildi!",
+                    Duration = 2
+                })
+            end)
+        end
+
+        -- 3 Farklı VIP Butonu (Renkler ve Modlar)
+        createVipBtn("VIP 1 (Altın)", Color3.fromRGB(255, 170, 0), UDim2.new(0.1, 0, 0, 60), "Gold")
+        createVipBtn("VIP 2 (Elmas)", Color3.fromRGB(0, 170, 255), UDim2.new(0.1, 0, 0, 120), "Diamond")
+        createVipBtn("VIP 3 (Rainbow)", Color3.fromRGB(150, 0, 255), UDim2.new(0.1, 0, 0, 180), "Rainbow")
+
+        -- 2. İsim Etiketi Döngüsü
+        -- Bu kısım basılan butona göre RP ismini sürekli günceller
         spawn(function()
-            while true do
+            while ScreenGui.Parent do
                 local char = LocalPlayer.Character
                 if char and char:FindFirstChild("Head") then
-                    -- Zamanlayıcıya göre renk üret (HSV döngüsü)
-                    local hue = tick() % 5 / 5
-                    local rainbowColor = Color3.fromHSV(hue, 1, 1)
-                    
-                    -- Kafanın üzerindeki isim etiketlerini bul ve rengini değiştir
-                    for _, v in pairs(char.Head:GetDescendants()) do
-                        if v:IsA("TextLabel") or v:IsA("TextButton") then
-                            -- Genellikle isimler TextLabel içindedir
-                            v.TextColor3 = rainbowColor
+                    for _, v in pairs(char:GetDescendants()) do
+                        -- Brookhaven isim etiketlerini veya genel TextLabel'ları hedefle
+                        if v:IsA("TextLabel") and (v.Name == "NameTag" or v.Parent.Name == "Head") then
+                            if _G.VipMode == "Gold" then
+                                v.TextColor3 = Color3.fromRGB(255, 170, 0)
+                            elseif _G.VipMode == "Diamond" then
+                                v.TextColor3 = Color3.fromRGB(0, 170, 255)
+                            elseif _G.VipMode == "Rainbow" then
+                                v.TextColor3 = Color3.fromHSV(tick() % 5 / 5, 0.8, 1)
+                            end
                         end
                     end
                 end
