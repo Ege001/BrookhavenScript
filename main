@@ -5274,39 +5274,74 @@ Tab:AddToggle({
 
 local Tab = Window:MakeTab({"Itens/fun", "rbxassetid://127904742940104"})
 
--- Güvenli Buton: Bu kod sadece istemci tarafında çalışır ve görsel bir testtir.
--- Gerçek oyun sunucularında (Brookhaven vb.) ücretsiz Premium vermez.
+-- RP İsim ve Bio Renklerini (Rainbow/VIP) Aktif Etme Butonu
 Tab:AddButton({
-    Title = "Premium Test (Görsel)",
+    Title = "Rainbow/VIP Renkleri Aktif Et",
     Locked = false,
     Callback = function()
-        -- 1. Servisleri tanımla
-        local StarterGui = game:GetService("StarterGui")
+        local Players = game:GetService("Players")
+        local LocalPlayer = Players.LocalPlayer
+        local RunService = game:GetService("RunService")
         
-        -- 2. İşlem başlıyor bildirimi (Simülasyon)
+        -- 1. Bildirim Gönder
+        game:GetService("StarterGui"):SetCore("SendNotification", {
+            Title = "Renk Kilidi",
+            Text = "RP Bio ve İsim renkleri için kilitler açılıyor...",
+            Duration = 3
+        })
+
+        -- 2. UI Üzerindeki Gizli Butonları Zorla Açma (Client-Side)
+        -- Oyuncunun ekranındaki (PlayerGui) tüm arayüzü tarar.
+        -- "Rainbow", "Color" veya "VIP" isminde olup gizli olan butonları görünür yapar.
+        local pGui = LocalPlayer:WaitForChild("PlayerGui")
+        
+        local function unlockButtons(parent)
+            for _, obj in pairs(parent:GetDescendants()) do
+                if obj:IsA("GuiButton") or obj:IsA("ImageButton") then
+                    local name = string.lower(obj.Name)
+                    -- Eğer butonda renk veya rainbow kelimesi geçiyorsa ve gizliyse:
+                    if string.find(name, "rainbow") or string.find(name, "color") or string.find(name, "vip") then
+                        obj.Visible = true    -- Görünür yap
+                        obj.Active = true     -- Tıklanabilir yap
+                        obj.Selectable = true -- Seçilebilir yap
+                        
+                        -- Eğer butonun üzerinde "Kilit" (Lock) resmi varsa onu gizle
+                        for _, child in pairs(obj:GetChildren()) do
+                            if child:IsA("ImageLabel") and (string.find(string.lower(child.Name), "lock") or string.find(string.lower(child.Name), "padlock")) then
+                                child.Visible = false
+                            end
+                        end
+                    end
+                end
+            end
+        end
+        
+        -- İşlemi çalıştır
         pcall(function()
-            StarterGui:SetCore("SendNotification", {
-                Title = "İşlem Başlatıldı",
-                Text = "Premium aktivasyonu deneniyor...",
-                Duration = 2
-            })
+            unlockButtons(pGui)
         end)
 
-        wait(1.5) -- İşlem süresini taklit et
-
-        -- 3. Sonuç bildirimi
-        -- NOT: getpremium veya GetGamepass gibi fonksiyonlar çoğu modern oyunda "patched" (yamalı) durumdadır.
-        -- Sunucu taraflı doğrulama (Server-Side Validation) olduğu için istemci sunucuyu değiştiremez.
-        pcall(function()
-            StarterGui:SetCore("SendNotification", {
-                Title = "Sonuç: Başarısız",
-                Text = "Sunucu koruması aktif. Bu işlem sadece görseldir, gerçek yetki verilmedi.",
-                Duration = 5
-            })
+        -- 3. Manuel Rainbow Döngüsü (Yedek Özellik)
+        -- Eğer oyunun butonları sunucu korumalıysa, bu kod karakterin ismini sürekli renk değiştirir (Rainbow Loop).
+        spawn(function()
+            while true do
+                local char = LocalPlayer.Character
+                if char and char:FindFirstChild("Head") then
+                    -- Zamanlayıcıya göre renk üret (HSV döngüsü)
+                    local hue = tick() % 5 / 5
+                    local rainbowColor = Color3.fromHSV(hue, 1, 1)
+                    
+                    -- Kafanın üzerindeki isim etiketlerini bul ve rengini değiştir
+                    for _, v in pairs(char.Head:GetDescendants()) do
+                        if v:IsA("TextLabel") or v:IsA("TextButton") then
+                            -- Genellikle isimler TextLabel içindedir
+                            v.TextColor3 = rainbowColor
+                        end
+                    end
+                end
+                RunService.Heartbeat:Wait()
+            end
         end)
-        
-        -- Konsola bilgi bas
-        warn("Bu buton sadece istemci tarafında çalıştı. Sunucuya herhangi bir veri gönderilmedi.")
     end
 })
 
