@@ -5275,6 +5275,58 @@ Tab:AddToggle({
 local Tab = Window:MakeTab({"Itens/fun", "rbxassetid://127904742940104"})
 
 
+-- Güvenli "Gamepass" butonu: bu buton hiçbir şekilde ücretli içerik atlamaz veya sunucu tarafı izinlerini ihlal etmez.
+-- Yalnızca oyuncuya bilgi verir ve geliştirici/owner için yorum içinde örnek gösterir.
+Tab:AddButton({
+    Title = "Gamepass",
+    Locked = false,
+    Callback = function()
+        local Players = game:GetService("Players")
+        local localPlayer = Players.LocalPlayer
+
+        local function tryNotify(title, text)
+            pcall(function()
+                game:GetService("StarterGui"):SetCore("SendNotification", {
+                    Title = title,
+                    Text = text,
+                    Duration = 6
+                })
+            end)
+        end
+
+        -- Kullanıcıya açık ve net bilgi ver.
+        tryNotify("Gamepass Bilgisi", "Premium / VIP gibi ücretli GamePass'ler yalnızca resmi satın alma yollarıyla alınabilir. Bu buton içerik vermez.")
+
+        -- Geliştiriciler için: sunucu tarafında ve oyunun sahibi iseniz nasıl yapacağınızın örneği (YORUMLU - ÇALIŞMAZ).
+        -- Örnek (sunucu tarafı - ServerScript içinde kullanın):
+        --[[
+            -- NOT: Aşağıdaki kod örneği sadece oyunun geliştiricisi/server sahibi tarafından,
+            -- server tarafında, güvenli şekilde çalıştırılmalıdır. Aksi halde yetkisiz işlemler
+            -- oyun kurallarını ve Roblox şartlarını ihlal edebilir.
+            local MarketplaceService = game:GetService("MarketplaceService")
+            local Players = game:GetService("Players")
+
+            -- Örnek: belirtilen UserId'ye GamePass veya DeveloperProduct verme mantığı (sunucuda yapılmalı)
+            local function GivePremium(player)
+                -- Burada gerçekten "paket verme" yoktur; örnek amaçlı bir veri kaydı/işaretçi koyun:
+                player:SetAttribute("HasPremium", true)
+                -- Gerçek ödeme/ürün verme işlemi için MarketplaceService ve DeveloperProducts kullanın.
+            end
+
+            -- Önemli: asla client'tan doğrudan FireServer/InvokeServer ile 'ürün ver' komutu çalıştırmayın
+            -- eğer sunucu tarafında güvenli kontroller yoksa. Yetkisiz erişimler haksız kazanç sağlar.
+        ]]--
+
+        -- Eğer siz oyunun sahibiyseniz ve sunucu tarafı bir endpoint/remote kurduysanız,
+        -- o remote'un adını ve davranışını burada yorumlu olarak belirtin; fakat bu client'ta çalıştırılmamalıdır.
+        -- Örnek (YORUM olarak, çalıştırmayın): Remotes:GetGamepass:FireServer("premium"), Remotes:GetGamepass:FireServer("vip")
+    end
+})
+
+
+
+
+
 Tab:AddButton({
     Title = "MoneyGun",
     Locked = false,
