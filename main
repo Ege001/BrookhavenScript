@@ -5274,58 +5274,41 @@ Tab:AddToggle({
 
 local Tab = Window:MakeTab({"Itens/fun", "rbxassetid://127904742940104"})
 
-
--- Güvenli "Gamepass" butonu: bu buton hiçbir şekilde ücretli içerik atlamaz veya sunucu tarafı izinlerini ihlal etmez.
--- Yalnızca oyuncuya bilgi verir ve geliştirici/owner için yorum içinde örnek gösterir.
+-- Güvenli Buton: Bu kod sadece istemci tarafında çalışır ve görsel bir testtir.
+-- Gerçek oyun sunucularında (Brookhaven vb.) ücretsiz Premium vermez.
 Tab:AddButton({
-    Title = "Gamepass",
+    Title = "Premium Test (Görsel)",
     Locked = false,
     Callback = function()
-        local Players = game:GetService("Players")
-        local localPlayer = Players.LocalPlayer
+        -- 1. Servisleri tanımla
+        local StarterGui = game:GetService("StarterGui")
+        
+        -- 2. İşlem başlıyor bildirimi (Simülasyon)
+        pcall(function()
+            StarterGui:SetCore("SendNotification", {
+                Title = "İşlem Başlatıldı",
+                Text = "Premium aktivasyonu deneniyor...",
+                Duration = 2
+            })
+        end)
 
-        local function tryNotify(title, text)
-            pcall(function()
-                game:GetService("StarterGui"):SetCore("SendNotification", {
-                    Title = title,
-                    Text = text,
-                    Duration = 6
-                })
-            end)
-        end
+        wait(1.5) -- İşlem süresini taklit et
 
-        -- Kullanıcıya açık ve net bilgi ver.
-        tryNotify("Gamepass Bilgisi", "Premium / VIP gibi ücretli GamePass'ler yalnızca resmi satın alma yollarıyla alınabilir. Bu buton içerik vermez.")
-
-        -- Geliştiriciler için: sunucu tarafında ve oyunun sahibi iseniz nasıl yapacağınızın örneği (YORUMLU - ÇALIŞMAZ).
-        -- Örnek (sunucu tarafı - ServerScript içinde kullanın):
-        --[[
-            -- NOT: Aşağıdaki kod örneği sadece oyunun geliştiricisi/server sahibi tarafından,
-            -- server tarafında, güvenli şekilde çalıştırılmalıdır. Aksi halde yetkisiz işlemler
-            -- oyun kurallarını ve Roblox şartlarını ihlal edebilir.
-            local MarketplaceService = game:GetService("MarketplaceService")
-            local Players = game:GetService("Players")
-
-            -- Örnek: belirtilen UserId'ye GamePass veya DeveloperProduct verme mantığı (sunucuda yapılmalı)
-            local function GivePremium(player)
-                -- Burada gerçekten "paket verme" yoktur; örnek amaçlı bir veri kaydı/işaretçi koyun:
-                player:SetAttribute("HasPremium", true)
-                -- Gerçek ödeme/ürün verme işlemi için MarketplaceService ve DeveloperProducts kullanın.
-            end
-
-            -- Önemli: asla client'tan doğrudan FireServer/InvokeServer ile 'ürün ver' komutu çalıştırmayın
-            -- eğer sunucu tarafında güvenli kontroller yoksa. Yetkisiz erişimler haksız kazanç sağlar.
-        ]]--
-
-        -- Eğer siz oyunun sahibiyseniz ve sunucu tarafı bir endpoint/remote kurduysanız,
-        -- o remote'un adını ve davranışını burada yorumlu olarak belirtin; fakat bu client'ta çalıştırılmamalıdır.
-        -- Örnek (YORUM olarak, çalıştırmayın): Remotes:GetGamepass:FireServer("premium"), Remotes:GetGamepass:FireServer("vip")
+        -- 3. Sonuç bildirimi
+        -- NOT: getpremium veya GetGamepass gibi fonksiyonlar çoğu modern oyunda "patched" (yamalı) durumdadır.
+        -- Sunucu taraflı doğrulama (Server-Side Validation) olduğu için istemci sunucuyu değiştiremez.
+        pcall(function()
+            StarterGui:SetCore("SendNotification", {
+                Title = "Sonuç: Başarısız",
+                Text = "Sunucu koruması aktif. Bu işlem sadece görseldir, gerçek yetki verilmedi.",
+                Duration = 5
+            })
+        end)
+        
+        -- Konsola bilgi bas
+        warn("Bu buton sadece istemci tarafında çalıştı. Sunucuya herhangi bir veri gönderilmedi.")
     end
 })
-
-
-
-
 
 Tab:AddButton({
     Title = "MoneyGun",
