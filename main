@@ -5456,7 +5456,7 @@ Tab:AddButton({
     Callback = function()
         local args = {
             [1] = "AcceptedToolToServer",
-            [2] = "Peppermint",
+            [2] = "Lollipop",
             [3] = game.Players.LocalPlayer
         }
 
