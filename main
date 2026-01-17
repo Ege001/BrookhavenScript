@@ -5437,12 +5437,12 @@ Tab:AddButton({
 })
 
 Tab:AddButton({
-    Title = "Snowflake Glider",
+    Title = "SnowBall",
     Locked = false,
     Callback = function()
         local args = {
             [1] = "AcceptedToolToServer",
-            [2] = "RainbowSnowflake",
+            [2] = "SnowBall",
             [3] = game.Players.LocalPlayer
         }
 
