@@ -6320,4 +6320,339 @@ MusicTab:AddButton({
                                 [2] = hrp,
                                 [3] = Vector3.new(0, -1, 0),
                                 [4] = Vector3.new(0, 0, 0),
-                                
+                                [5] = hrp,
+                                [6] = hrp,
+                                [7] = finalAudioID,
+                                [8] = finalAudioID,
+                                [9] = {[1] = true},
+                                [10] = {
+                                    [1] = 25,
+                                    [2] = Vector3.new(0.25, 0.25, 100),
+                                    [3] = BrickColor.new('Bright yellow'),
+                                    [4] = 0.25,
+                                    [5] = Enum.Material.SmoothPlastic,
+                                    [6] = 0.25,
+                                },
+                                [11] = true,
+                                [12] = false,
+                            }))
+                        end)
+                    end)
+                end
+            end
+        end
+    end
+})
+
+MusicTab:AddButton({
+    Name = "Áudio Casa",
+    Callback = function()
+        local finalAudioID = GetFinalAudioID()
+        
+        if not finalAudioID or selectedHouse == "" then
+            return
+        end
+        
+        local lotsFolder = workspace:FindFirstChild("001_Lots")
+        if not lotsFolder then
+            return
+        end
+        
+        local house = lotsFolder:FindFirstChild(selectedHouse)
+        if not house then
+            return
+        end
+        
+        local buyHouse = house:FindFirstChild("BuyHouse")
+        if not buyHouse then
+            return
+        end
+        
+        local ReplicatedStorage = game:GetService("ReplicatedStorage")
+        local GunSoundEvent = ReplicatedStorage:FindFirstChild("1Gu1nSound1s", true)
+        
+        if GunSoundEvent then
+            GunSoundEvent:FireServer(workspace, finalAudioID, 1)
+        end
+        
+        task.wait(0.3)
+        
+        local GuinRemote = ReplicatedStorage.RE:FindFirstChild("1Gu1n")
+        
+        if GuinRemote then
+            task.spawn(function()
+                local Sound = Instance.new("Sound")
+                Sound.SoundId = "rbxassetid://" .. finalAudioID
+                Sound.Volume = 1
+                Sound.Looped = false
+                Sound.Parent = buyHouse
+                Sound:Play()
+                
+                Sound.Ended:Connect(function()
+                    Sound:Destroy()
+                end)
+            end)
+            
+            task.spawn(function()
+                pcall(function()
+                    firesignal(GuinRemote.OnClientEvent, table.unpack({
+                        [1] = game:GetService("Players").LocalPlayer,
+                        [2] = buyHouse,
+                        [3] = buyHouse,
+                        [4] = Vector3.new(0, -1, 0),
+                        [5] = Vector3.new(0, 0, 0),
+                        [6] = buyHouse,
+                        [7] = buyHouse,
+                        [8] = finalAudioID,
+                        [9] = finalAudioID,
+                        [10] = {[1] = true},
+                        [11] = {
+                            [1] = 25,
+                            [2] = Vector3.new(0.25, 0.25, 100),
+                            [3] = BrickColor.new('Bright yellow'),
+                            [4] = 0.25,
+                            [5] = Enum.Material.SmoothPlastic,
+                            [6] = 0.25,
+                        },
+                        [12] = true,
+                        [13] = false,
+                    }))
+                end)
+            end)
+            
+            task.spawn(function()
+                pcall(function()
+                    GuinRemote:FireServer(table.unpack({
+                        [1] = buyHouse,
+                        [2] = buyHouse,
+                        [3] = Vector3.new(0, -1, 0),
+                        [4] = Vector3.new(0, 0, 0),
+                        [5] = buyHouse,
+                        [6] = buyHouse,
+                        [7] = finalAudioID,
+                        [8] = finalAudioID,
+                        [9] = {[1] = true},
+                        [10] = {
+                            [1] = 25,
+                            [2] = Vector3.new(0.25, 0.25, 100),
+                            [3] = BrickColor.new('Bright yellow'),
+                            [4] = 0.25,
+                            [5] = Enum.Material.SmoothPlastic,
+                            [6] = 0.25,
+                        },
+                        [11] = true,
+                        [12] = false,
+                    }))
+                end)
+            end)
+        end
+    end
+})
+
+MusicTab:AddButton({
+    Name = "Áudio All Player",
+    Callback = function()
+        local finalAudioID = GetFinalAudioID()
+        
+        if not finalAudioID then
+            return
+        end
+        
+        local Players = game:GetService("Players")
+        local ReplicatedStorage = game:GetService("ReplicatedStorage")
+        
+        local GunSoundEvent = ReplicatedStorage:FindFirstChild("1Gu1nSound1s", true)
+        
+        if GunSoundEvent then
+            GunSoundEvent:FireServer(workspace, finalAudioID, 1)
+        end
+        
+        task.wait(0.1)
+        
+        local GuinRemote = ReplicatedStorage.RE:FindFirstChild("1Gu1n")
+        
+        if GuinRemote then
+            local allPlayers = Players:GetPlayers()
+            
+            for _, player in pairs(allPlayers) do
+                local character = player.Character
+                if character and character:FindFirstChild("HumanoidRootPart") then
+                    local hrp = character.HumanoidRootPart
+                    
+                    task.spawn(function()
+                        local Sound = Instance.new("Sound")
+                        Sound.SoundId = "rbxassetid://" .. finalAudioID
+                        Sound.Volume = 1
+                        Sound.Looped = false
+                        Sound.Parent = hrp
+                        Sound:Play()
+                        
+                        Sound.Ended:Connect(function()
+                            Sound:Destroy()
+                        end)
+                    end)
+                    
+                    task.spawn(function()
+                        pcall(function()
+                            firesignal(GuinRemote.OnClientEvent, table.unpack({
+                                [1] = player,
+                                [2] = hrp,
+                                [3] = hrp,
+                                [4] = Vector3.new(0, -1, 0),
+                                [5] = Vector3.new(0, 0, 0),
+                                [6] = hrp,
+                                [7] = hrp,
+                                [8] = finalAudioID,
+                                [9] = finalAudioID,
+                                [10] = {[1] = true},
+                                [11] = {
+                                    [1] = 25,
+                                    [2] = Vector3.new(0.25, 0.25, 100),
+                                    [3] = BrickColor.new('Bright yellow'),
+                                    [4] = 0.25,
+                                    [5] = Enum.Material.SmoothPlastic,
+                                    [6] = 0.25,
+                                },
+                                [12] = true,
+                                [13] = false,
+                            }))
+                        end)
+                    end)
+                    
+                    task.spawn(function()
+                        pcall(function()
+                            GuinRemote:FireServer(table.unpack({
+                                [1] = hrp,
+                                [2] = hrp,
+                                [3] = Vector3.new(0, -1, 0),
+                                [4] = Vector3.new(0, 0, 0),
+                                [5] = hrp,
+                                [6] = hrp,
+                                [7] = finalAudioID,
+                                [8] = finalAudioID,
+                                [9] = {[1] = true},
+                                [10] = {
+                                    [1] = 25,
+                                    [2] = Vector3.new(0.25, 0.25, 100),
+                                    [3] = BrickColor.new('Bright yellow'),
+                                    [4] = 0.25,
+                                    [5] = Enum.Material.SmoothPlastic,
+                                    [6] = 0.25,
+                                },
+                                [11] = true,
+                                [12] = false,
+                            }))
+                        end)
+                    end)
+                    
+                    task.wait(0.3)
+                end
+            end
+        end
+    end
+})
+
+MusicTab:AddButton({
+    Name = "Áudio Casa All",
+    Callback = function()
+        local finalAudioID = GetFinalAudioID()
+        
+        if not finalAudioID then
+            return
+        end
+        
+        local lotsFolder = workspace:FindFirstChild("001_Lots")
+        if not lotsFolder then
+            return
+        end
+        
+        local ReplicatedStorage = game:GetService("ReplicatedStorage")
+        
+        local GunSoundEvent = ReplicatedStorage:FindFirstChild("1Gu1nSound1s", true)
+        
+        if GunSoundEvent then
+            GunSoundEvent:FireServer(workspace, finalAudioID, 1)
+        end
+        
+        task.wait(0.3)
+        
+        local GuinRemote = ReplicatedStorage.RE:FindFirstChild("1Gu1n")
+        
+        if GuinRemote then
+            for _, house in pairs(lotsFolder:GetChildren()) do
+                if house:IsA("Model") then
+                    local buyHouse = house:FindFirstChild("BuyHouse")
+                    if buyHouse then
+                        task.spawn(function()
+                            local Sound = Instance.new("Sound")
+                            Sound.SoundId = "rbxassetid://" .. finalAudioID
+                            Sound.Volume = 1
+                            Sound.Looped = false
+                            Sound.Parent = buyHouse
+                            Sound:Play()
+                            
+                            Sound.Ended:Connect(function()
+                                Sound:Destroy()
+                            end)
+                        end)
+                        
+                        task.spawn(function()
+                            pcall(function()
+                                firesignal(GuinRemote.OnClientEvent, table.unpack({
+                                    [1] = game:GetService("Players").LocalPlayer,
+                                    [2] = buyHouse,
+                                    [3] = buyHouse,
+                                    [4] = Vector3.new(0, -1, 0),
+                                    [5] = Vector3.new(0, 0, 0),
+                                    [6] = buyHouse,
+                                    [7] = buyHouse,
+                                    [8] = finalAudioID,
+                                    [9] = finalAudioID,
+                                    [10] = {[1] = true},
+                                    [11] = {
+                                        [1] = 25,
+                                        [2] = Vector3.new(0.25, 0.25, 100),
+                                        [3] = BrickColor.new('Bright yellow'),
+                                        [4] = 0.25,
+                                        [5] = Enum.Material.SmoothPlastic,
+                                        [6] = 0.25,
+                                    },
+                                    [12] = true,
+                                    [13] = false,
+                                }))
+                            end)
+                        end)
+                        
+                        task.spawn(function()
+                            pcall(function()
+                                GuinRemote:FireServer(table.unpack({
+                                    [1] = buyHouse,
+                                    [2] = buyHouse,
+                                    [3] = Vector3.new(0, -1, 0),
+                                    [4] = Vector3.new(0, 0, 0),
+                                    [5] = buyHouse,
+                                    [6] = buyHouse,
+                                    [7] = finalAudioID,
+                                    [8] = finalAudioID,
+                                    [9] = {[1] = true},
+                                    [10] = {
+                                        [1] = 25,
+                                        [2] = Vector3.new(0.25, 0.25, 100),
+                                        [3] = BrickColor.new('Bright yellow'),
+                                        [4] = 0.25,
+                                        [5] = Enum.Material.SmoothPlastic,
+                                        [6] = 0.25,
+                                    },
+                                    [11] = true,
+                                    [12] = false,
+                                }))
+                            end)
+                        end)
+                        
+                        task.wait(0.1)
+                    end
+                end
+            end
+        end
+    end
+})
