@@ -5437,7 +5437,7 @@ Tab:AddButton({
         addVipOpt("VIP RAINBOW", Color3.fromRGB(100, 0, 180), "Rainbow")
 
 
--- === BROOKHAVEN VIP EMOTE "67" | VIDEO FIX ===
+-- === BROOKHAVEN VIP EMOTE "67" | VIDEO FIX + VFX ===
 local Emote67Btn = Instance.new("TextButton")
 Emote67Btn.Size = UDim2.new(0.96, 0, 0, 38)
 Emote67Btn.BackgroundColor3 = Color3.fromRGB(30, 150, 80)
@@ -5448,8 +5448,21 @@ Emote67Btn.TextSize = 13
 Emote67Btn.Parent = LeftFrame
 Instance.new("UICorner", Emote67Btn)
 
+-- === VFX MODÜLÜ (BULDUĞUN) ===
+-- YOLU OYUNDA NASILSA O ŞEKİLDE AYARLA
+-- ÖRNEK: ReplicatedStorage.Emotes.Modules["67"]
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Emote67VFXModule
+pcall(function()
+    Emote67VFXModule = require(
+        ReplicatedStorage:WaitForChild("Emotes")
+            :WaitForChild("Modules")
+            :WaitForChild("67")
+    )
+end)
+
 Emote67Btn.MouseButton1Click:Connect(function()
-    local rep = game:GetService("ReplicatedStorage")
+    local rep = ReplicatedStorage
     local plr = game:GetService("Players").LocalPlayer
 
     -- Brookhaven ana tetikleyici (AYNI)
@@ -5470,30 +5483,15 @@ Emote67Btn.MouseButton1Click:Connect(function()
 
     if trigger and trigger.FireServer then
         -- Orijinal çağrılar (AYNI)
-        pcall(function()
-            trigger:FireServer("PlayEmote","67",plr)
-        end)
-
-        pcall(function()
-            trigger:FireServer("Emote","67")
-        end)
-
-        pcall(function()
-            trigger:FireServer("Emotes","67",true)
-        end)
-
-        -- EK: number + player varyasyonu
-        pcall(function()
-            trigger:FireServer("PlayEmote",67,plr)
-        end)
-
-        pcall(function()
-            trigger:FireServer("PlayEmote","67")
-        end)
+        pcall(function() trigger:FireServer("PlayEmote","67",plr) end)
+        pcall(function() trigger:FireServer("Emote","67") end)
+        pcall(function() trigger:FireServer("Emotes","67",true) end)
+        pcall(function() trigger:FireServer("PlayEmote",67,plr) end)
+        pcall(function() trigger:FireServer("PlayEmote","67") end)
     end
 
     -- =================================================
-    -- === VIDEO'DAKİ GİBİ ZORLA LOOP EMOTE (ANA FİX) ===
+    -- === ANİMASYONU YÜKLE + VFX MODÜLÜNÜ BAŞLAT ===
     -- =================================================
     pcall(function()
         local char = plr.Character or plr.CharacterAdded:Wait()
@@ -5517,9 +5515,16 @@ Emote67Btn.MouseButton1Click:Connect(function()
         if not anim then return end
 
         local track = animator:LoadAnimation(anim)
-        track.Looped = true -- 🔁 VIDEO GİBİ SÜREKLİ
+        track.Looped = true
         track.Priority = Enum.AnimationPriority.Action
         track:Play()
+
+        -- === 🔥 VFX: BULDUĞUN MODÜLÜ DOĞRU ŞEKİLDE BAŞLAT ===
+        if Emote67VFXModule and Emote67VFXModule.new then
+            local handler = Emote67VFXModule.new()
+            -- start(self, character, animationTrack)
+            handler:start(char, track)
+        end
     end)
 end)
 
