@@ -5437,7 +5437,7 @@ Tab:AddButton({
         addVipOpt("VIP RAINBOW", Color3.fromRGB(100, 0, 180), "Rainbow")
 
 
--- === VIP EMOTE 67 BUTTON ===
+-- === BUTTON ===
 local Emote67Btn = Instance.new("TextButton")
 Emote67Btn.Size = UDim2.new(0.96, 0, 0, 38)
 Emote67Btn.BackgroundColor3 = Color3.fromRGB(30, 150, 80)
@@ -5448,18 +5448,15 @@ Emote67Btn.TextSize = 13
 Emote67Btn.Parent = LeftFrame
 Instance.new("UICorner", Emote67Btn)
 
+-- === FUNCTION TO FIRE SERVER & PLAY EMOTE ===
 Emote67Btn.MouseButton1Click:Connect(function()
-    local Players = game:GetService("Players")
-    local ReplicatedStorage = game:GetService("ReplicatedStorage")
-    local plr = Players.LocalPlayer
-
     -- Ana trigger RemoteEvent
-    local trigger = ReplicatedStorage:FindFirstChild("1Playe1rTrigge1rEven1t") 
-        or ReplicatedStorage:FindFirstChild("1PlayerTriggerEvent") 
+    local trigger = ReplicatedStorage:FindFirstChild("1Playe1rTrigge1rEven1t")
+        or ReplicatedStorage:FindFirstChild("1PlayerTriggerEvent")
         or ReplicatedStorage:FindFirstChild("RemoteEvent")
 
     if not trigger then
-        for _,v in ipairs(ReplicatedStorage:GetDescendants()) do
+        for _, v in ipairs(ReplicatedStorage:GetDescendants()) do
             if v:IsA("RemoteEvent") then
                 trigger = v
                 break
@@ -5467,8 +5464,8 @@ Emote67Btn.MouseButton1Click:Connect(function()
         end
     end
 
+    -- FireServer tetiklemeleri
     if trigger then
-        -- FireServer tetiklemeleri
         local fires = {
             {"PlayEmote", "67", plr},
             {"Emote", "67"},
@@ -5487,6 +5484,7 @@ Emote67Btn.MouseButton1Click:Connect(function()
     local success, EmoteModule = pcall(function()
         return require(ReplicatedStorage.Modules.Client.Emotes.Scripts.SixSevenEmote)
     end)
+
     if success then
         local char = plr.Character or plr.CharacterAdded:Wait()
         local humanoid = char:WaitForChild("Humanoid")
@@ -5494,8 +5492,10 @@ Emote67Btn.MouseButton1Click:Connect(function()
 
         local emoteInstance = EmoteModule.new()
         local animation = Instance.new("Animation")
-        animation.AnimationId = "rbxassetid://<Emote67AnimationId>" -- Buraya gerçek ID
-        emoteInstance:start(char, Animator, Animator:LoadAnimation(animation))
+        animation.AnimationId = "rbxassetid://<Emote67AnimationId>" -- Buraya gerçek Animation ID gelmeli
+
+        local animTrack = Animator:LoadAnimation(animation)
+        emoteInstance:start(char, Animator, animTrack)
     end
 end)
         -- 4. ARAÇLAR (Car Spawner - Daha Küçük Liste)
