@@ -318,7 +318,7 @@ end
 Players.PlayerAdded:Connect(refreshPlayers)
 Players.PlayerRemoving:Connect(refreshPlayers)
 
-infoTab:AddParagraph({"Senin Executor: " .. (pcall(identifyexecutor) and identifyexecutor()) or "Bilinmiyor"})
+infoTab:AddParagraph({"KULLANILAN EXECUTOR: " .. (pcall(identifyexecutor) and identifyexecutor()) or "Bilinmiyor"})
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
