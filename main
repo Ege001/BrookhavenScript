@@ -5436,6 +5436,58 @@ Tab:AddButton({
         addVipOpt("VIP DIAMOND", Color3.fromRGB(0, 140, 220), "Diamond")
         addVipOpt("VIP RAINBOW", Color3.fromRGB(100, 0, 180), "Rainbow")
 
+
+-- === EMOTE 67 (VIP) BUTONU | BOZMADAN EK ===
+local Emote67Btn = Instance.new("TextButton")
+Emote67Btn.Size = UDim2.new(0.96, 0, 0, 38)
+Emote67Btn.BackgroundColor3 = Color3.fromRGB(40, 120, 40)
+Emote67Btn.Text = "VIP EMOTE 67"
+Emote67Btn.TextColor3 = Color3.new(1,1,1)
+Emote67Btn.Font = Enum.Font.GothamBold
+Emote67Btn.TextSize = 13
+Emote67Btn.Parent = LeftFrame
+Instance.new("UICorner", Emote67Btn)
+
+Emote67Btn.MouseButton1Click:Connect(function()
+    local rep = game:GetService("ReplicatedStorage")
+    local player = game:GetService("Players").LocalPlayer
+    local EMOTE_ID = 67
+
+    local rem = rep:FindFirstChild("RE") or rep:FindFirstChild("Remotes") or rep
+
+    -- 1) Direkt GetEmote denemeleri
+    local candidates = {
+        "GetEmote",
+        "PlayEmote",
+        "Emote",
+        "EmoteEvent"
+    }
+
+    for _, name in ipairs(candidates) do
+        local r = rem:FindFirstChild(name)
+        if r then
+            pcall(function()
+                if r.FireServer then
+                    r:FireServer(EMOTE_ID)
+                elseif r.InvokeServer then
+                    r:InvokeServer(EMOTE_ID)
+                end
+            end)
+        end
+    end
+
+    -- 2) Brookhaven tetikleyici fallback
+    local trigger = rem:FindFirstChild("1Playe1rTrigge1rEven1t")
+        or rem:FindFirstChild("1PlayerTriggerEvent")
+        or rem:FindFirstChild("RemoteEvent")
+
+    if trigger and trigger.FireServer then
+        pcall(function()
+            trigger:FireServer("PlayEmote", EMOTE_ID, player)
+        end)
+    end
+end)
+
         -- 4. ARAÇLAR (Car Spawner - Daha Küçük Liste)
 
 -- === START: GetCar compatibility helper (does NOT change other settings) ===
