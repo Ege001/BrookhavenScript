@@ -5480,7 +5480,7 @@ local function spawnCarFixed(carName)
 end
 -- === END: GetCar compatibility helper ===
 
-        local vehicles = {"RollsRoyce", "SemiPass", "DragBike", "CopChallenger", "CopLambo", "Truck", "Limo", "PoliceCar", "Ambulance", "FireTruck", "Helicopter", "Tank"}
+        local vehicles = {"RollsRoyce", "SemiPass", "DragBike", "CopChallenger", "CopLambo", "Halloween2025GhostBikeFire", "Halloween2025CoffinCarPumpkin", "PajeroSUV", "Ambulance", "KeiTruck", "FireTruck", "67FordTruck"}
         for _, car in pairs(vehicles) do
             local cBtn = Instance.new("TextButton")
             cBtn.Size = UDim2.new(0.96, 0, 0, 32)
