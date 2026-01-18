@@ -5276,7 +5276,7 @@ local Tab = Window:MakeTab({"Itens/fun", "rbxassetid://127904742940104"})
 
 -- MEGA VIP & ALL GAMEPASSES MENU
 Tab:AddButton({
-    Title = "Mega VIP & Araç Menüsünü Aç",
+    Title = "Mega VIP & Gamepass Menüsünü Aç",
     Locked = false,
     Callback = function()
         local Players = game:GetService("Players")
@@ -5285,16 +5285,18 @@ Tab:AddButton({
         local RunService = game:GetService("RunService")
         local ReplicatedStorage = game:GetService("ReplicatedStorage")
         
-        -- Mevcut menüyü temizle
-        if PlayerGui:FindFirstChild("BrookhavenForceMenu") then
-            PlayerGui.BrookhavenForceMenu:Destroy()
+        -- Mevcut menüleri temizle
+        if PlayerGui:FindFirstChild("AdsVipMenu") then
+            PlayerGui.AdsVipMenu:Destroy()
         end
 
+        -- 1. ScreenGui Oluşturma
         local ScreenGui = Instance.new("ScreenGui")
-        ScreenGui.Name = "BrookhavenForceMenu"
+        ScreenGui.Name = "AdsVipMenu"
         ScreenGui.ResetOnSpawn = false
         ScreenGui.Parent = PlayerGui
 
+        -- 2. Ana Panel (Boyut küçültüldü ve daha kompakt hale getirildi)
         local MainFrame = Instance.new("Frame")
         MainFrame.Size = UDim2.new(0, 520, 0, 480) 
         MainFrame.Position = UDim2.new(0.5, -260, 0.5, -240)
@@ -5304,9 +5306,11 @@ Tab:AddButton({
         MainFrame.Draggable = true
         MainFrame.Parent = ScreenGui
 
-        Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 12)
+        local UICorner = Instance.new("UICorner")
+        UICorner.CornerRadius = UDim.new(0, 12)
+        UICorner.Parent = MainFrame
 
-        -- Sol Panel (Gamepass & VIP)
+        -- Sol Panel (VIP & Gamepass)
         local LeftFrame = Instance.new("ScrollingFrame")
         LeftFrame.Size = UDim2.new(0.48, 0, 0.8, 0)
         LeftFrame.Position = UDim2.new(0.02, 0, 0.16, 0)
@@ -5314,166 +5318,199 @@ Tab:AddButton({
         LeftFrame.ScrollBarThickness = 2
         LeftFrame.Parent = MainFrame
         
-        local LeftLayout = Instance.new("UIListLayout", LeftFrame)
+        local LeftLayout = Instance.new("UIListLayout")
+        LeftLayout.Parent = LeftFrame
         LeftLayout.Padding = UDim.new(0, 6)
 
-        -- Sağ Panel (Vehicle Spawner)
+        -- Sağ Panel (Car Spawner)
         local RightFrame = Instance.new("ScrollingFrame")
         RightFrame.Size = UDim2.new(0.46, 0, 0.8, 0)
         RightFrame.Position = UDim2.new(0.52, 0, 0.16, 0)
-        RightFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+        RightFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
         RightFrame.ScrollBarThickness = 4
         RightFrame.Parent = MainFrame
         
         Instance.new("UICorner", RightFrame).CornerRadius = UDim.new(0, 8)
-        local RightLayout = Instance.new("UIListLayout", RightFrame)
+        local RightLayout = Instance.new("UIListLayout")
+        RightLayout.Parent = RightFrame
         RightLayout.Padding = UDim.new(0, 4)
 
-        -- Başlık Fonksiyonu
+        -- BAŞLIKLAR
         local function createHeader(text, pos)
             local lbl = Instance.new("TextLabel")
             lbl.Size = UDim2.new(0.45, 0, 0, 35)
             lbl.Position = pos
             lbl.Text = text
-            lbl.TextColor3 = Color3.fromRGB(0, 255, 150)
+            lbl.TextColor3 = Color3.fromRGB(255, 215, 0)
             lbl.Font = Enum.Font.GothamBold
-            lbl.TextSize = 14
+            lbl.TextSize = 16
             lbl.BackgroundTransparency = 1
             lbl.Parent = MainFrame
         end
-        createHeader("BYPASS & VIP", UDim2.new(0.02, 0, 0.04, 0))
-        createHeader("FORCE SPAWNER", UDim2.new(0.52, 0, 0.04, 0))
+        createHeader("PREMIUM & PASSES", UDim2.new(0.02, 0, 0.04, 0))
+        createHeader("VEHICLE SPAWNER", UDim2.new(0.52, 0, 0.04, 0))
 
-        -- Kapatma
+        -- Kapatma Butonu
         local CloseBtn = Instance.new("TextButton")
-        CloseBtn.Size = UDim2.new(0, 30, 0, 30)
-        CloseBtn.Position = UDim2.new(1, -35, 0, 5)
+        CloseBtn.Size = UDim2.new(0, 28, 0, 28)
+        CloseBtn.Position = UDim2.new(1, -33, 0, 8)
         CloseBtn.Text = "X"
         CloseBtn.TextColor3 = Color3.new(1, 1, 1)
-        CloseBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+        CloseBtn.BackgroundColor3 = Color3.fromRGB(200, 40, 40)
         CloseBtn.Parent = MainFrame
         CloseBtn.MouseButton1Click:Connect(function() ScreenGui:Destroy() end)
-        Instance.new("UICorner", CloseBtn)
+        Instance.new("UICorner", CloseBtn).CornerRadius = UDim.new(0, 6)
 
-        -- === BROOKHAVEN TETİKLEME MOTORU (ZORLAMALI) ===
-        local function ForceSpawn(carName)
-            local re = ReplicatedStorage:FindFirstChild("RE")
-            if not re then return end
+        -- --- FONKSİYONLAR ---
 
-            -- 1. Protokol: PickingCar (Brookhaven'ın asıl spawn metodu)
+        -- 1. TÜM GAMEPASSLERİ AKTİF ET (GetPasses Bypass)
+        local AllPassBtn = Instance.new("TextButton")
+        AllPassBtn.Size = UDim2.new(0.96, 0, 0, 50)
+        AllPassBtn.BackgroundColor3 = Color3.fromRGB(255, 100, 0)
+        AllPassBtn.Text = "TÜM GAMEPASS'LERİ AKTİF ET"
+        AllPassBtn.TextColor3 = Color3.new(1, 1, 1)
+        AllPassBtn.Font = Enum.Font.GothamBold
+        AllPassBtn.TextSize = 13
+        AllPassBtn.Parent = LeftFrame
+        Instance.new("UICorner", AllPassBtn)
+
+        AllPassBtn.MouseButton1Click:Connect(function()
+            game:GetService("StarterGui"):SetCore("SendNotification", {
+                Title = "Gamepass Unlocker",
+                Text = "Tüm kilitler açılıyor...",
+                Duration = 3
+            })
+
             pcall(function()
-                local event = re:FindFirstChild("1Ca1r")
-                if event then
-                    event:FireServer("PickingCar", carName)
+                local Modules = ReplicatedStorage:WaitForChild("Modules")
+                local Gamepasses = require(Modules.Shared.PlayerData.Gamepasses)
+                local UnlockableController = require(Modules.Client.PlayerData.UnlockableController)
+                
+                -- Görsel kilitleri kaldırma döngüsü
+                for _, v in pairs(PlayerGui:GetDescendants()) do
+                    if v:IsA("ImageLabel") and (v.Image:find("lock") or v.Name:lower():find("lock")) then
+                        v.Visible = false
+                    end
                 end
-            end)
 
-            -- 2. Protokol: GetCar (Alternatif ve eski sürümler)
-            pcall(function()
-                local getCar = re:FindFirstChild("GetCar") or re:FindFirstChild("Get_Car")
-                if getCar then
-                    getCar:FireServer(carName)
-                end
-            end)
-
-            -- 3. Protokol: Premium/VIP Check Bypass
-            pcall(function()
-                local trigger = re:FindFirstChild("1Playe1rTrigge1rEven1t")
-                if trigger then
-                    -- Sunucuya aracın "satın alındığı" bilgisini fake olarak gönderir
-                    trigger:FireServer("PurchaseSuccess", "VehiclePack")
-                    trigger:FireServer("PurchaseSuccess", "Premium")
-                end
-            end)
-        end
-
-        -- Bypass Butonu
-        local UnlockBtn = Instance.new("TextButton")
-        UnlockBtn.Size = UDim2.new(0.96, 0, 0, 45)
-        UnlockBtn.BackgroundColor3 = Color3.fromRGB(255, 140, 0)
-        UnlockBtn.Text = "KİLİTLERİ KIR (FORCE)"
-        UnlockBtn.TextColor3 = Color3.new(1, 1, 1)
-        UnlockBtn.Font = Enum.Font.GothamBold
-        UnlockBtn.Parent = LeftFrame
-        Instance.new("UICorner", UnlockBtn)
-
-        UnlockBtn.MouseButton1Click:Connect(function()
-            pcall(function()
-                local re = ReplicatedStorage:FindFirstChild("RE")
-                local trig = re:FindFirstChild("1Playe1rTrigge1rEven1t")
-                local passes = {"Premium", "VehiclePack", "Penthouse", "SpeedPass"}
-                for _, p in pairs(passes) do
-                    trig:FireServer("PurchaseSuccess", p)
+                -- Brookhaven Remote Tetikleme
+                local remote = ReplicatedStorage:FindFirstChild("RE") or ReplicatedStorage:FindFirstChild("Remotes")
+                if remote then
+                    remote:FindFirstChild("RemoteEvent"):FireServer("UnlockAllPasses", true)
                 end
             end)
         end)
 
-        -- ARAÇ LİSTESİ (Ambulans ilk sıraya eklendi)
-        local carList = {
-            {n = "Ambulance", d = "🚑 AMBULANS (İLK)"}, -- İlk sırada
-            {n = "Limo", d = "Limuzin (VIP)"},
-            {n = "Lamborghini", d = "Lambo (Premium)"},
-            {n = "Tesla", d = "Tesla Model S"},
-            {n = "PoliceCar", d = "Polis Arabası"},
-            {n = "FireTruck", d = "İtfaiye"},
-            {n = "Helicopter", d = "Helikopter"},
-            {n = "Tank", d = "Askeri Tank"},
-            {n = "SemiTruck", d = "Tır (Force)"},
-            {n = "SportsCar1", d = "Spor Araba 1"},
-            {n = "Mclaren", d = "Mclaren (Premium)"},
-            {n = "Ferrar", d = "Ferrari"},
-            {n = "Bike1", d = "Motor"},
-            {n = "GoKart", d = "Go-Kart"}
-        }
+        -- 2. SÜRESİZ EV (Countdown Bypass)
+        local HouseBtn = Instance.new("TextButton")
+        HouseBtn.Size = UDim2.new(0.96, 0, 0, 42)
+        HouseBtn.BackgroundColor3 = Color3.fromRGB(120, 0, 220)
+        HouseBtn.Text = "SÜRESİZ EV SİSTEMİ"
+        HouseBtn.TextColor3 = Color3.new(1, 1, 1)
+        HouseBtn.Font = Enum.Font.GothamBold
+        HouseBtn.Parent = LeftFrame
+        Instance.new("UICorner", HouseBtn)
 
-        for _, car in pairs(carList) do
+        HouseBtn.MouseButton1Click:Connect(function()
+            pcall(function()
+                local remote = ReplicatedStorage:FindFirstChild("RE") or ReplicatedStorage:FindFirstChild("Remotes")
+                remote:FindFirstChild("RemoteEvent"):FireServer("UnlockFeature", "VIP_HOUSE_COOLDOWN")
+            end)
+            game:GetService("StarterGui"):SetCore("SendNotification", {Title = "VIP House", Text = "Süre kısıtlaması kaldırıldı!", Duration = 2})
+        end)
+
+        -- 3. VIP RENKLER (Kompakt Butonlar)
+        _G.VipMode = "None"
+        local function addVipOpt(name, color, mode)
             local b = Instance.new("TextButton")
-            b.Size = UDim2.new(0.96, 0, 0, 35)
-            b.BackgroundColor3 = car.n == "Ambulance" and Color3.fromRGB(60, 20, 20) or Color3.fromRGB(40, 40, 40)
-            b.Text = car.d
+            b.Size = UDim2.new(0.96, 0, 0, 38)
+            b.BackgroundColor3 = color
+            b.Text = name
             b.TextColor3 = Color3.new(1, 1, 1)
-            b.Font = Enum.Font.Gotham
-            b.TextSize = 12
-            b.Parent = RightFrame
+            b.Font = Enum.Font.GothamBold
+            b.Parent = LeftFrame
             Instance.new("UICorner", b)
+            b.MouseButton1Click:Connect(function() _G.VipMode = mode end)
+        end
+        addVipOpt("VIP GOLD", Color3.fromRGB(218, 165, 32), "Gold")
+        addVipOpt("VIP DIAMOND", Color3.fromRGB(0, 140, 220), "Diamond")
+        addVipOpt("VIP RAINBOW", Color3.fromRGB(100, 0, 180), "Rainbow")
 
-            b.MouseButton1Click:Connect(function()
-                ForceSpawn(car.n)
+        -- 4. ARAÇLAR (Car Spawner - Daha Küçük Liste)
+
+-- === START: GetCar compatibility helper (does NOT change other settings) ===
+local function spawnCarFixed(carName)
+    local remote = ReplicatedStorage:FindFirstChild("RE") or ReplicatedStorage:FindFirstChild("Remotes") or ReplicatedStorage
+
+    -- 1) Try original VehicleSpawn (preserve existing behavior)
+    pcall(function()
+        if remote and remote:FindFirstChild("VehicleSpawn") and remote.VehicleSpawn.FireServer then
+            remote.VehicleSpawn:FireServer(carName)
+        end
+    end)
+
+    -- 2) Try common alternative GetCar/Get_Car names
+    pcall(function()
+        local candidates = {"GetCar", "Get_Car", "GetCarToServer", "GetCarServer"}
+        for _, name in ipairs(candidates) do
+            local r = remote:FindFirstChild(name)
+            if r and r.FireServer then
+                r:FireServer(carName)
+                break
+            end
+        end
+    end)
+
+    -- 3) Brookhaven-style fallback (1Ca1r expects PickingCar)
+    pcall(function()
+        local r = remote:FindFirstChild("1Ca1r")
+        if r and r.FireServer then
+            r:FireServer("PickingCar", carName)
+        end
+    end)
+
+    -- 4) Generic trigger fallback (some scripts use an AcceptedTool trigger)
+    pcall(function()
+        local trigger = remote:FindFirstChild("1Playe1rTrigge1rEven1t") or remote:FindFirstChild("1PlayerTriggerEvent") or remote:FindFirstChild("RemoteEvent") or remote:FindFirstChild("GetItem")
+        if trigger and trigger.FireServer then
+            local args = { [1] = "AcceptedToolToServer", [2] = carName, [3] = game:GetService("Players").LocalPlayer }
+            trigger:FireServer(unpack(args))
+        end
+    end)
+end
+-- === END: GetCar compatibility helper ===
+
+        local vehicles = {"RollsRoyce", "SemiPass", "DragBike", "CopChallenger", "CopLambo", "Truck", "Limo", "PoliceCar", "Ambulance", "FireTruck", "Helicopter", "Tank"}
+        for _, car in pairs(vehicles) do
+            local cBtn = Instance.new("TextButton")
+            cBtn.Size = UDim2.new(0.96, 0, 0, 32)
+            cBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+            cBtn.Text = car
+            cBtn.TextColor3 = Color3.new(1, 1, 1)
+            cBtn.Font = Enum.Font.Gotham
+            cBtn.Parent = RightFrame
+            Instance.new("UICorner", cBtn)
+            cBtn.MouseButton1Click:Connect(function()
+                pcall(function()
+                    spawnCarFixed(car)
+                end)
             end)
         end
 
-        -- VIP Renk Sistemi
-        local function addColor(name, color, id)
-            local cb = Instance.new("TextButton")
-            cb.Size = UDim2.new(0.96, 0, 0, 35)
-            cb.BackgroundColor3 = color
-            cb.Text = name
-            cb.Font = Enum.Font.GothamBold
-            cb.TextColor3 = Color3.new(1, 1, 1)
-            cb.Parent = LeftFrame
-            Instance.new("UICorner", cb)
-            cb.MouseButton1Click:Connect(function() _G.VMode = id end)
-        end
-        addColor("ALTIN İSİM", Color3.fromRGB(255, 215, 0), 1)
-        addColor("ELMAS İSİM", Color3.fromRGB(0, 255, 255), 2)
-        addColor("GÖKKUŞAĞI", Color3.fromRGB(150, 0, 255), 3)
-
-        -- Döngü: İsim Renklerini Uygula
+        -- DÖNGÜ: İSİM RENKLENDİRME (VIP)
         spawn(function()
             while ScreenGui and ScreenGui.Parent do
-                pcall(function()
-                    local char = LocalPlayer.Character
-                    if char then
-                        for _, tag in pairs(char:GetDescendants()) do
-                            if tag:IsA("TextLabel") then
-                                if _G.VMode == 1 then tag.TextColor3 = Color3.fromRGB(255, 215, 0)
-                                elseif _G.VMode == 2 then tag.TextColor3 = Color3.fromRGB(0, 255, 255)
-                                elseif _G.VMode == 3 then tag.TextColor3 = Color3.fromHSV(tick() % 5 / 5, 1, 1) end
-                            end
+                local char = LocalPlayer.Character
+                if char then
+                    for _, l in pairs(char:GetDescendants()) do
+                        if l:IsA("TextLabel") then
+                            if _G.VipMode == "Gold" then l.TextColor3 = Color3.fromRGB(255, 215, 0)
+                            elseif _G.VipMode == "Diamond" then l.TextColor3 = Color3.fromRGB(0, 255, 255)
+                            elseif _G.VipMode == "Rainbow" then l.TextColor3 = Color3.fromHSV(tick() % 5 / 5, 0.8, 1) end
                         end
                     end
-                end)
-                task.wait(0.1)
+                end
+                RunService.RenderStepped:Wait()
             end
         end)
     end
