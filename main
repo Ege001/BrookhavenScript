@@ -5437,6 +5437,49 @@ Tab:AddButton({
         addVipOpt("VIP RAINBOW", Color3.fromRGB(100, 0, 180), "Rainbow")
 
         -- 4. ARAÇLAR (Car Spawner - Daha Küçük Liste)
+
+-- === START: GetCar compatibility helper (does NOT change other settings) ===
+local function spawnCarFixed(carName)
+    local remote = ReplicatedStorage:FindFirstChild("RE") or ReplicatedStorage:FindFirstChild("Remotes") or ReplicatedStorage
+
+    -- 1) Try original VehicleSpawn (preserve existing behavior)
+    pcall(function()
+        if remote and remote:FindFirstChild("VehicleSpawn") and remote.VehicleSpawn.FireServer then
+            remote.VehicleSpawn:FireServer(carName)
+        end
+    end)
+
+    -- 2) Try common alternative GetCar/Get_Car names
+    pcall(function()
+        local candidates = {"GetCar", "Get_Car", "GetCarToServer", "GetCarServer"}
+        for _, name in ipairs(candidates) do
+            local r = remote:FindFirstChild(name)
+            if r and r.FireServer then
+                r:FireServer(carName)
+                break
+            end
+        end
+    end)
+
+    -- 3) Brookhaven-style fallback (1Ca1r expects PickingCar)
+    pcall(function()
+        local r = remote:FindFirstChild("1Ca1r")
+        if r and r.FireServer then
+            r:FireServer("PickingCar", carName)
+        end
+    end)
+
+    -- 4) Generic trigger fallback (some scripts use an AcceptedTool trigger)
+    pcall(function()
+        local trigger = remote:FindFirstChild("1Playe1rTrigge1rEven1t") or remote:FindFirstChild("1PlayerTriggerEvent") or remote:FindFirstChild("RemoteEvent") or remote:FindFirstChild("GetItem")
+        if trigger and trigger.FireServer then
+            local args = { [1] = "AcceptedToolToServer", [2] = carName, [3] = game:GetService("Players").LocalPlayer }
+            trigger:FireServer(unpack(args))
+        end
+    end)
+end
+-- === END: GetCar compatibility helper ===
+
         local vehicles = {"Cruiser", "Skateboard", "SportsCar", "SuperCar", "SUV", "Truck", "Limo", "PoliceCar", "Ambulance", "FireTruck", "Helicopter", "Tank"}
         for _, car in pairs(vehicles) do
             local cBtn = Instance.new("TextButton")
@@ -5449,8 +5492,7 @@ Tab:AddButton({
             Instance.new("UICorner", cBtn)
             cBtn.MouseButton1Click:Connect(function()
                 pcall(function()
-                    local remote = ReplicatedStorage:FindFirstChild("RE") or ReplicatedStorage:FindFirstChild("Remotes")
-                    remote:FindFirstChild("VehicleSpawn"):FireServer(car)
+                    spawnCarFixed(car)
                 end)
             end)
         end
