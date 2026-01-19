@@ -5323,7 +5323,7 @@ Tab:AddToggle({
     end
 })
 
-local MusicTab = Window:MakeTab({"Ses", "Müzik"})
+local Tab = Window:MakeTab({"Premium ⭐"})
 
 MusicTab:AddSection("Tüm Sesler")
 
