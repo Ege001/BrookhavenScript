@@ -5549,6 +5549,58 @@ Emote67Btn.MouseButton1Click:Connect(function()
         emoteInstance:start(char, Animator, animTrack)
     end
 end)
+
+-- === FIRE HOUSE BUTTON (BOZMADAN EK) ===
+local FireHouseBtn = Instance.new("TextButton")
+FireHouseBtn.Size = UDim2.new(0.96, 0, 0, 38)
+FireHouseBtn.BackgroundColor3 = Color3.fromRGB(200, 60, 40)
+FireHouseBtn.Text = "FIRE HOUSE (ATEŞE VER)"
+FireHouseBtn.TextColor3 = Color3.new(1,1,1)
+FireHouseBtn.Font = Enum.Font.GothamBold
+FireHouseBtn.TextSize = 13
+FireHouseBtn.Parent = LeftFrame
+Instance.new("UICorner", FireHouseBtn)
+
+FireHouseBtn.MouseButton1Click:Connect(function()
+    local remotes = {
+        "FireHouse",
+        "HouseFire",
+        "TriggerHouseFire",
+        "StartHouseFire",
+        "Fire",
+        "RemoteEvent",
+        "1Playe1rTrigge1rEven1t",
+        "1PlayerTriggerEvent"
+    }
+
+    local containers = {
+        ReplicatedStorage,
+        ReplicatedStorage:FindFirstChild("RE"),
+        ReplicatedStorage:FindFirstChild("Remotes")
+    }
+
+    for _, container in ipairs(containers) do
+        if container then
+            for _, rName in ipairs(remotes) do
+                local r = container:FindFirstChild(rName)
+                if r and r:IsA("RemoteEvent") then
+                    -- Brookhaven / RP uyumlu tetiklemeler
+                    pcall(function() r:FireServer("FireHouse") end)
+                    pcall(function() r:FireServer("HouseFire", true) end)
+                    pcall(function() r:FireServer("StartFire", LocalPlayer) end)
+                    pcall(function() r:FireServer("TriggerFire", LocalPlayer.Character) end)
+                end
+            end
+        end
+    end
+
+    game:GetService("StarterGui"):SetCore("SendNotification", {
+        Title = "Fire House",
+        Text = "Ev ateşi tetikleme isteği gönderildi.",
+        Duration = 3
+    })
+end)
+
         -- 4. ARAÇLAR (Car Spawner - Daha Küçük Liste)
 
 -- === START: GetCar compatibility helper (does NOT change other settings) ===
