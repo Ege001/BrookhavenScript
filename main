@@ -5657,6 +5657,54 @@ Tab:AddButton({
     end
 })
 
+local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
+
+-- Ana Pencere Oluşturma (Görseldeki koyu tema için)
+local Window = OrionLib:MakeWindow({
+    Name = "Cartola Hub | Brookhaven RP", 
+    HidePremium = false, 
+    SaveConfig = true, 
+    ConfigFolder = "CartolaConfig",
+    IntroEnabled = true,
+    IntroText = "Cartola Hub Yükleniyor..."
+})
+
+-- PREMIUM SEKMESİ (Görseldeki mor yıldızlı bölüm)
+local PremiumTab = Window:MakeTab({
+	Name = "Premium",
+	Icon = "rbxassetid://4483345998", -- Yıldız ikonu
+	PremiumOnly = false
+})
+
+-- Görseldeki Başlık (Free Gamepass)
+PremiumTab:AddSection({
+	Name = "Free Gamepass:"
+})
+
+-- Görseldeki butonların birebir isimleri
+PremiumTab:AddButton({
+	Name = "Get All Gamepasses (Best) (Mobile) (60% Visual) >",
+	Callback = function()
+        print("Tüm Passler Tetiklendi")
+	end    
+})
+
+PremiumTab:AddButton({
+	Name = "Get VIP (Best) (PC) >",
+	Callback = function()
+        -- Fonksiyon buraya
+	end    
+})
+
+-- ALT SEÇENEKLER (Görseldeki Checkbox/Toggle yapısı)
+PremiumTab:AddToggle({
+	Name = "Get Free Gamepass (Patched)",
+	Default = false,
+	Callback = function(Value)
+		print("Durum: ", Value)
+	end
+})
+
 Tab:AddButton({
     Title = "MoneyGun",
     Locked = false,
