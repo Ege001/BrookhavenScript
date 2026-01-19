@@ -5347,7 +5347,7 @@ Tab:AddButton({
         ScreenGui.ResetOnSpawn = false
         ScreenGui.Parent = PlayerGui
 
-        -- 2. Ana Panel (Boyut küçültüldü ve daha kompakt hale getirildi)
+        -- 2. Ana Panel
         local MainFrame = Instance.new("Frame")
         MainFrame.Size = UDim2.new(0, 520, 0, 480) 
         MainFrame.Position = UDim2.new(0.5, -260, 0.5, -240)
@@ -5434,9 +5434,6 @@ Tab:AddButton({
 
             pcall(function()
                 local Modules = ReplicatedStorage:WaitForChild("Modules")
-                local Gamepasses = require(Modules.Shared.PlayerData.Gamepasses)
-                local UnlockableController = require(Modules.Client.PlayerData.UnlockableController)
-                
                 -- Görsel kilitleri kaldırma döngüsü
                 for _, v in pairs(PlayerGui:GetDescendants()) do
                     if v:IsA("ImageLabel") and (v.Image:find("lock") or v.Name:lower():find("lock")) then
@@ -5470,7 +5467,55 @@ Tab:AddButton({
             game:GetService("StarterGui"):SetCore("SendNotification", {Title = "VIP House", Text = "Süre kısıtlaması kaldırıldı!", Duration = 2})
         end)
 
-        -- 3. VIP RENKLER (Kompakt Butonlar)
+        -- 3. [YENİ] EVİ YAK (PATCHED KIRICI & ANINDA YAKMA)
+        local FireHouseBtn = Instance.new("TextButton")
+        FireHouseBtn.Size = UDim2.new(0.96, 0, 0, 42)
+        FireHouseBtn.BackgroundColor3 = Color3.fromRGB(220, 50, 0) -- Ateş Rengi
+        FireHouseBtn.Text = "EVİ YAK (ANINDA ATEŞ)"
+        FireHouseBtn.TextColor3 = Color3.new(1, 1, 1)
+        FireHouseBtn.Font = Enum.Font.GothamBold
+        FireHouseBtn.Parent = LeftFrame
+        Instance.new("UICorner", FireHouseBtn)
+
+        FireHouseBtn.MouseButton1Click:Connect(function()
+             game:GetService("StarterGui"):SetCore("SendNotification", {
+                Title = "House Fire",
+                Text = "Ev ateşe veriliyor (Anti-Patch)...",
+                Duration = 2
+            })
+            
+            -- Anti-Patch: Olası tüm remote isimleri ve argümanları dener
+            local RS = game:GetService("ReplicatedStorage")
+            local possibleRemotes = {
+                RS:FindFirstChild("RE"),
+                RS:FindFirstChild("Remotes"),
+                RS:FindFirstChild("1Playe1rTrigge1rEven1t"),
+                RS:FindFirstChild("RemoteEvent"),
+                RS:FindFirstChild("Events")
+            }
+            
+            local argsList = {
+                {"HouseSettings", "Fire", true},
+                {"HouseSettings", "FireOn", true},
+                {"SetState", "Fire", true},
+                {"HouseEvent", "Fire", true}
+            }
+
+            for _, remote in pairs(possibleRemotes) do
+                if remote then
+                    local targetEvent = remote:FindFirstChild("RemoteEvent") or remote
+                    if targetEvent and targetEvent:IsA("RemoteEvent") then
+                        for _, args in pairs(argsList) do
+                            pcall(function()
+                                targetEvent:FireServer(unpack(args))
+                            end)
+                        end
+                    end
+                end
+            end
+        end)
+
+        -- 4. VIP RENKLER (Kompakt Butonlar)
         _G.VipMode = "None"
         local function addVipOpt(name, color, mode)
             local b = Instance.new("TextButton")
@@ -5488,153 +5533,93 @@ Tab:AddButton({
         addVipOpt("VIP RAINBOW", Color3.fromRGB(100, 0, 180), "Rainbow")
 
 
--- === BUTTON ===
-local Emote67Btn = Instance.new("TextButton")
-Emote67Btn.Size = UDim2.new(0.96, 0, 0, 38)
-Emote67Btn.BackgroundColor3 = Color3.fromRGB(30, 150, 80)
-Emote67Btn.Text = "VIP EMOTE 67"
-Emote67Btn.TextColor3 = Color3.new(1,1,1)
-Emote67Btn.Font = Enum.Font.GothamBold
-Emote67Btn.TextSize = 13
-Emote67Btn.Parent = LeftFrame
-Instance.new("UICorner", Emote67Btn)
+        -- 5. VIP EMOTE 67
+        local Emote67Btn = Instance.new("TextButton")
+        Emote67Btn.Size = UDim2.new(0.96, 0, 0, 38)
+        Emote67Btn.BackgroundColor3 = Color3.fromRGB(30, 150, 80)
+        Emote67Btn.Text = "VIP EMOTE 67"
+        Emote67Btn.TextColor3 = Color3.new(1,1,1)
+        Emote67Btn.Font = Enum.Font.GothamBold
+        Emote67Btn.TextSize = 13
+        Emote67Btn.Parent = LeftFrame
+        Instance.new("UICorner", Emote67Btn)
 
--- === FUNCTION TO FIRE SERVER & PLAY EMOTE ===
-Emote67Btn.MouseButton1Click:Connect(function()
-    -- Ana trigger RemoteEvent
-    local trigger = ReplicatedStorage:FindFirstChild("1Playe1rTrigge1rEven1t")
-        or ReplicatedStorage:FindFirstChild("1PlayerTriggerEvent")
-        or ReplicatedStorage:FindFirstChild("RemoteEvent")
+        Emote67Btn.MouseButton1Click:Connect(function()
+            local plr = LocalPlayer
+            local trigger = ReplicatedStorage:FindFirstChild("1Playe1rTrigge1rEven1t")
+                or ReplicatedStorage:FindFirstChild("1PlayerTriggerEvent")
+                or ReplicatedStorage:FindFirstChild("RemoteEvent")
 
-    if not trigger then
-        for _, v in ipairs(ReplicatedStorage:GetDescendants()) do
-            if v:IsA("RemoteEvent") then
-                trigger = v
-                break
+            if not trigger then
+                for _, v in ipairs(ReplicatedStorage:GetDescendants()) do
+                    if v:IsA("RemoteEvent") then
+                        trigger = v
+                        break
+                    end
+                end
             end
-        end
-    end
 
-    -- FireServer tetiklemeleri
-    if trigger then
-        local fires = {
-            {"PlayEmote", "67", plr},
-            {"Emote", "67"},
-            {"Emotes", "67", true},
-            {"PlayEmote", 67, plr},
-            {"PlayEmote", "67"}
-        }
-        for _, args in ipairs(fires) do
+            -- FireServer tetiklemeleri
+            if trigger then
+                local fires = {
+                    {"PlayEmote", "67", plr},
+                    {"Emote", "67"},
+                    {"Emotes", "67", true},
+                    {"PlayEmote", 67, plr},
+                    {"PlayEmote", "67"}
+                }
+                for _, args in ipairs(fires) do
+                    pcall(function()
+                        trigger:FireServer(unpack(args))
+                    end)
+                end
+            end
+        end)
+
+
+        -- 6. ARAÇLAR (Car Spawner - Daha Küçük Liste)
+
+        -- === START: GetCar compatibility helper ===
+        local function spawnCarFixed(carName)
+            local remote = ReplicatedStorage:FindFirstChild("RE") or ReplicatedStorage:FindFirstChild("Remotes") or ReplicatedStorage
+
+            -- 1) Try original VehicleSpawn
             pcall(function()
-                trigger:FireServer(unpack(args))
+                if remote and remote:FindFirstChild("VehicleSpawn") and remote.VehicleSpawn.FireServer then
+                    remote.VehicleSpawn:FireServer(carName)
+                end
+            end)
+
+            -- 2) Try common alternative GetCar/Get_Car names
+            pcall(function()
+                local candidates = {"GetCar", "Get_Car", "GetCarToServer", "GetCarServer"}
+                for _, name in ipairs(candidates) do
+                    local r = remote:FindFirstChild(name)
+                    if r and r.FireServer then
+                        r:FireServer(carName)
+                        break
+                    end
+                end
+            end)
+
+            -- 3) Brookhaven-style fallback (1Ca1r expects PickingCar)
+            pcall(function()
+                local r = remote:FindFirstChild("1Ca1r")
+                if r and r.FireServer then
+                    r:FireServer("PickingCar", carName)
+                end
+            end)
+
+            -- 4) Generic trigger fallback
+            pcall(function()
+                local trigger = remote:FindFirstChild("1Playe1rTrigge1rEven1t") or remote:FindFirstChild("1PlayerTriggerEvent") or remote:FindFirstChild("RemoteEvent") or remote:FindFirstChild("GetItem")
+                if trigger and trigger.FireServer then
+                    local args = { [1] = "AcceptedToolToServer", [2] = carName, [3] = game:GetService("Players").LocalPlayer }
+                    trigger:FireServer(unpack(args))
+                end
             end)
         end
-    end
-
-    -- Module tetikleme (VFX + MarkerReached)
-    local success, EmoteModule = pcall(function()
-        return require(ReplicatedStorage.Modules.Client.Emotes.Scripts.SixSevenEmote)
-    end)
-
-    if success then
-        local char = plr.Character or plr.CharacterAdded:Wait()
-        local humanoid = char:WaitForChild("Humanoid")
-        local Animator = humanoid:WaitForChild("Animator")
-
-        local emoteInstance = EmoteModule.new()
-        local animation = Instance.new("Animation")
-        animation.AnimationId = "rbxassetid://<Emote67AnimationId>" -- Buraya gerçek Animation ID gelmeli
-
-        local animTrack = Animator:LoadAnimation(animation)
-        emoteInstance:start(char, Animator, animTrack)
-    end
-end)
-
--- === BROOKHAVEN LEGIT FIRE HOUSE (BOZMADAN) ===
-
-local FireHouseBtn = Instance.new("TextButton")
-FireHouseBtn.Size = UDim2.new(0.96, 0, 0, 38)
-FireHouseBtn.BackgroundColor3 = Color3.fromRGB(180, 40, 40)
-FireHouseBtn.Text = "KENDİ EVİMİ YAK 🔥"
-FireHouseBtn.TextColor3 = Color3.new(1,1,1)
-FireHouseBtn.Font = Enum.Font.GothamBold
-FireHouseBtn.TextSize = 13
-FireHouseBtn.Parent = LeftFrame
-Instance.new("UICorner", FireHouseBtn)
-
-local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
-
-local function pressFireButton()
-    local gui = LocalPlayer:WaitForChild("PlayerGui")
-
-    for _, v in ipairs(gui:GetDescendants()) do
-        if v:IsA("TextButton") then
-            local t = v.Text:lower()
-            if t:find("fire") or t:find("burn") or t:find("yak") then
-                -- Brookhaven'deki gerçek yangın butonu
-                pcall(function()
-                    firesignal(v.MouseButton1Click)
-                end)
-                return true
-            end
-        end
-    end
-    return false
-end
-
-FireHouseBtn.MouseButton1Click:Connect(function()
-    local success = pressFireButton()
-
-    game:GetService("StarterGui"):SetCore("SendNotification", {
-        Title = "Fire House",
-        Text = success and "Kendi evin yakıldı." or "Ev sahibi değilsen çalışmaz.",
-        Duration = 3
-    })
-end)
-        -- 4. ARAÇLAR (Car Spawner - Daha Küçük Liste)
-
--- === START: GetCar compatibility helper (does NOT change other settings) ===
-local function spawnCarFixed(carName)
-    local remote = ReplicatedStorage:FindFirstChild("RE") or ReplicatedStorage:FindFirstChild("Remotes") or ReplicatedStorage
-
-    -- 1) Try original VehicleSpawn (preserve existing behavior)
-    pcall(function()
-        if remote and remote:FindFirstChild("VehicleSpawn") and remote.VehicleSpawn.FireServer then
-            remote.VehicleSpawn:FireServer(carName)
-        end
-    end)
-
-    -- 2) Try common alternative GetCar/Get_Car names
-    pcall(function()
-        local candidates = {"GetCar", "Get_Car", "GetCarToServer", "GetCarServer"}
-        for _, name in ipairs(candidates) do
-            local r = remote:FindFirstChild(name)
-            if r and r.FireServer then
-                r:FireServer(carName)
-                break
-            end
-        end
-    end)
-
-    -- 3) Brookhaven-style fallback (1Ca1r expects PickingCar)
-    pcall(function()
-        local r = remote:FindFirstChild("1Ca1r")
-        if r and r.FireServer then
-            r:FireServer("PickingCar", carName)
-        end
-    end)
-
-    -- 4) Generic trigger fallback (some scripts use an AcceptedTool trigger)
-    pcall(function()
-        local trigger = remote:FindFirstChild("1Playe1rTrigge1rEven1t") or remote:FindFirstChild("1PlayerTriggerEvent") or remote:FindFirstChild("RemoteEvent") or remote:FindFirstChild("GetItem")
-        if trigger and trigger.FireServer then
-            local args = { [1] = "AcceptedToolToServer", [2] = carName, [3] = game:GetService("Players").LocalPlayer }
-            trigger:FireServer(unpack(args))
-        end
-    end)
-end
--- === END: GetCar compatibility helper ===
+        -- === END: GetCar compatibility helper ===
 
         local vehicles = {"RollsRoyce", "SemiPass", "DragBike", "CopChallenger", "CopLambo", "Halloween2025GhostBikeFire", "Halloween2025CoffinCarPumpkin", "PajeroSUV", "Ambulance", "KeiTruck", "FireTruck", "67FordTruck"}
         for _, car in pairs(vehicles) do
