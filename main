@@ -5325,6 +5325,20 @@ Tab:AddToggle({
 
 local Tab = Window:MakeTab({"Premium ⭐", "rbxassetid://127904742940104"})
 
+-- ==================== BYPASS LOGIC (Gizli Fonksiyon) ====================
+local function ApplyBypass()
+    pcall(function()
+        local lp = game:GetService("Players").LocalPlayer
+        local bag = lp:FindFirstChild("PlayersBag")
+        if bag then
+            local pass = bag:FindFirstChild("AllPassesFetched")
+            if pass then
+                pass.Value = true
+            end
+        end
+    end)
+end
+
 -- ==================== PREMIUM FEATURES ====================
 
 Tab:AddSection("Premium Features")
@@ -5333,7 +5347,8 @@ Tab:AddButton({
     Name = "Get Horse Unlocked (PC)",
     Callback = function()
         pcall(function()
-            redzlib:MakeNotify({ Title = "Premium", Text = "Horse unlocked (simulated).", Time = 3 })
+            ApplyBypass() -- Patch engelleyici tetiklendi
+            redzlib:MakeNotify({ Title = "Premium", Text = "Horse unlocked (Active).", Time = 3 })
         end)
     end
 })
@@ -5342,7 +5357,8 @@ Tab:AddButton({
     Name = "Get Music Unlocked (PC)",
     Callback = function()
         pcall(function()
-            redzlib:MakeNotify({ Title = "Premium", Text = "Music unlocked (simulated).", Time = 3 })
+            ApplyBypass()
+            redzlib:MakeNotify({ Title = "Premium", Text = "Music unlocked (Active).", Time = 3 })
         end)
     end
 })
@@ -5351,7 +5367,8 @@ Tab:AddButton({
     Name = "Get Faces Unlocked (PC)",
     Callback = function()
         pcall(function()
-            redzlib:MakeNotify({ Title = "Premium", Text = "Faces unlocked (simulated).", Time = 3 })
+            ApplyBypass()
+            redzlib:MakeNotify({ Title = "Premium", Text = "Faces unlocked (Active).", Time = 3 })
         end)
     end
 })
@@ -5360,7 +5377,8 @@ Tab:AddButton({
     Name = "Get Boat Pack (PC)",
     Callback = function()
         pcall(function()
-            redzlib:MakeNotify({ Title = "Premium", Text = "Boat pack granted (simulated).", Time = 3 })
+            ApplyBypass()
+            redzlib:MakeNotify({ Title = "Premium", Text = "Boat pack granted (Active).", Time = 3 })
         end)
     end
 })
@@ -5369,7 +5387,8 @@ Tab:AddButton({
     Name = "Get Vehicle Upgrade (PC)",
     Callback = function()
         pcall(function()
-            redzlib:MakeNotify({ Title = "Premium", Text = "Vehicle upgrade applied (simulated).", Time = 3 })
+            ApplyBypass()
+            redzlib:MakeNotify({ Title = "Premium", Text = "Vehicle upgrade applied (Active).", Time = 3 })
         end)
     end
 })
@@ -5378,7 +5397,8 @@ Tab:AddButton({
     Name = "Get Vehicle Speed Unlocked (PC)",
     Callback = function()
         pcall(function()
-            redzlib:MakeNotify({ Title = "Premium", Text = "Vehicle speed unlocked (simulated).", Time = 3 })
+            ApplyBypass()
+            redzlib:MakeNotify({ Title = "Premium", Text = "Vehicle speed unlocked (Active).", Time = 3 })
         end)
     end
 })
@@ -5387,10 +5407,17 @@ Tab:AddToggle({
     Name = "Get Free Gamepass (Patched)",
     Default = false,
     Callback = function(state)
+        _G.AntiPatch = state
+        task.spawn(function()
+            while _G.AntiPatch do
+                ApplyBypass() -- Değeri sürekli True tutarak patchlenmesini engeller
+                task.wait(0.1)
+            end
+        end)
         pcall(function()
             redzlib:MakeNotify({
                 Title = "Premium",
-                Text = "Free Gamepass toggle: " .. tostring(state),
+                Text = "Anti-Patch System: " .. tostring(state),
                 Time = 3
             })
         end)
@@ -5403,9 +5430,10 @@ Tab:AddButton({
     Name = "Get Helicopter Gamepass (simulated)",
     Callback = function()
         pcall(function()
-            redzlib:MakeNotify({ Title = "Premium", Text = "Helicopter Gamepass (simulated).", Time = 3 })
+            ApplyBypass()
+            redzlib:MakeNotify({ Title = "Premium", Text = "Helicopter Gamepass (Active).", Time = 3 })
         end)
-    end
+    end 
 })
 
 -- ==================== END PREMIUM ====================
