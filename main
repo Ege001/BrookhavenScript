@@ -5657,53 +5657,244 @@ Tab:AddButton({
     end
 })
 
-local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
+--[[
+    CARTOLA HUB - Orijinal Tasarım Birebir Kodlama
+    Tasarım: Koyu Tema, Mor Aksanlar, Yuvarlak Köşeler
+]]
 
--- Ana Pencere Oluşturma (Görseldeki koyu tema için)
-local Window = OrionLib:MakeWindow({
-    Name = "Cartola Hub | Brookhaven RP", 
-    HidePremium = false, 
-    SaveConfig = true, 
-    ConfigFolder = "CartolaConfig",
-    IntroEnabled = true,
-    IntroText = "Cartola Hub Yükleniyor..."
+local ScreenGui = Instance.new("ScreenGui")
+local MainFrame = Instance.new("Frame")
+local LeftSidebar = Instance.new("Frame")
+local TabContainer = Instance.new("ScrollingFrame")
+local ContentArea = Instance.new("Frame")
+
+-- UI Ayarları
+ScreenGui.Name = "CartolaHubV2"
+ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+ScreenGui.ResetOnSpawn = false
+
+-- Ana Pencere (Main Frame)
+MainFrame.Name = "MainFrame"
+MainFrame.Parent = ScreenGui
+MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15) -- Daha derin siyah
+MainFrame.Position = UDim2.new(0.5, -260, 0.5, -165)
+MainFrame.Size = UDim2.new(0, 520, 0, 330)
+MainFrame.BorderSizePixel = 0
+
+local MainCorner = Instance.new("UICorner")
+MainCorner.CornerRadius = UDim.new(0, 12)
+MainCorner.Parent = MainFrame
+
+local MainStroke = Instance.new("UIStroke")
+MainStroke.Color = Color3.fromRGB(40, 40, 40)
+MainStroke.Thickness = 1.2
+MainStroke.Parent = MainFrame
+
+-- Sol Menü (Sidebar)
+LeftSidebar.Name = "LeftSidebar"
+LeftSidebar.Parent = MainFrame
+LeftSidebar.BackgroundColor3 = Color3.fromRGB(22, 22, 22)
+LeftSidebar.Size = UDim2.new(0, 150, 1, 0)
+LeftSidebar.BorderSizePixel = 0
+
+local SidebarCorner = Instance.new("UICorner")
+SidebarCorner.CornerRadius = UDim.new(0, 12)
+SidebarCorner.Parent = LeftSidebar
+
+-- Logo / Başlık (Mor Detaylı)
+local Logo = Instance.new("TextLabel")
+Logo.Parent = LeftSidebar
+Logo.Size = UDim2.new(1, 0, 0, 55)
+Logo.BackgroundTransparency = 1
+Logo.Text = "CARTOLA HUB"
+Logo.TextColor3 = Color3.fromRGB(160, 80, 255) -- Mor
+Logo.Font = Enum.Font.GothamBold
+Logo.TextSize = 15
+
+-- Sekme Listesi
+TabContainer.Name = "TabContainer"
+TabContainer.Parent = LeftSidebar
+TabContainer.Position = UDim2.new(0, 8, 0, 60)
+TabContainer.Size = UDim2.new(1, -16, 1, -70)
+TabContainer.BackgroundTransparency = 1
+TabContainer.BorderSizePixel = 0
+TabContainer.ScrollBarThickness = 0
+
+local TabListLayout = Instance.new("UIListLayout")
+TabListLayout.Parent = TabContainer
+TabListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+TabListLayout.Padding = UDim.new(0, 6)
+
+-- İçerik Alanı
+ContentArea.Name = "ContentArea"
+ContentArea.Parent = MainFrame
+ContentArea.Position = UDim2.new(0, 160, 0, 10)
+ContentArea.Size = UDim2.new(1, -170, 1, -20)
+ContentArea.BackgroundTransparency = 1
+
+-- Sistem Değişkenleri
+local Pages = {}
+local Window = {}
+local FirstTab = nil
+
+function Window:MakeTab(tabData)
+    local tabName = tabData[1]
+    local tabIcon = tabData[2]
+    
+    -- Sayfa (Page)
+    local Page = Instance.new("ScrollingFrame")
+    Page.Name = tabName .. "Page"
+    Page.Parent = ContentArea
+    Page.Size = UDim2.new(1, 0, 1, 0)
+    Page.BackgroundTransparency = 1
+    Page.BorderSizePixel = 0
+    Page.ScrollBarThickness = 2
+    Page.Visible = false
+    
+    local PageLayout = Instance.new("UIListLayout")
+    PageLayout.Parent = Page
+    PageLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    PageLayout.Padding = UDim.new(0, 8)
+    
+    Pages[tabName] = Page
+    if not FirstTab then FirstTab = Page end
+    
+    -- Menü Butonu
+    local TabBtn = Instance.new("TextButton")
+    TabBtn.Parent = TabContainer
+    TabBtn.Size = UDim2.new(1, 0, 0, 36)
+    TabBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 28)
+    TabBtn.Text = "        " .. tabName
+    TabBtn.TextColor3 = Color3.fromRGB(220, 220, 220)
+    TabBtn.Font = Enum.Font.GothamMedium
+    TabBtn.TextSize = 13
+    TabBtn.TextXAlignment = Enum.TextXAlignment.Left
+    
+    local IconImg = Instance.new("ImageLabel")
+    IconImg.Parent = TabBtn
+    IconImg.Position = UDim2.new(0, 10, 0.5, -9)
+    IconImg.Size = UDim2.new(0, 18, 0, 18)
+    IconImg.BackgroundTransparency = 1
+    IconImg.Image = tabIcon
+    IconImg.ImageColor3 = Color3.fromRGB(255, 255, 255)
+    
+    local BtnCorner = Instance.new("UICorner")
+    BtnCorner.CornerRadius = UDim.new(0, 8)
+    BtnCorner.Parent = TabBtn
+
+    TabBtn.MouseButton1Click:Connect(function()
+        for _, p in pairs(Pages) do p.Visible = false end
+        Page.Visible = true
+        
+        for _, b in pairs(TabContainer:GetChildren()) do
+            if b:IsA("TextButton") then 
+                b.BackgroundColor3 = Color3.fromRGB(28, 28, 28)
+                b.TextColor3 = Color3.fromRGB(200, 200, 200)
+            end
+        end
+        TabBtn.BackgroundColor3 = Color3.fromRGB(160, 80, 255) -- Aktif renk Mor
+        TabBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    end)
+    
+    local TabFunctions = {}
+
+    -- Görseldeki Buton Stili
+    function TabFunctions:AddButton(btnData)
+        local btnName = btnData.Name
+        local callback = btnData.Callback
+        
+        local BtnFrame = Instance.new("Frame")
+        BtnFrame.Size = UDim2.new(1, -10, 0, 42)
+        BtnFrame.BackgroundColor3 = Color3.fromRGB(28, 28, 28)
+        BtnFrame.Parent = Page
+        
+        local Corner = Instance.new("UICorner")
+        Corner.CornerRadius = UDim.new(0, 8)
+        Corner.Parent = BtnFrame
+        
+        local Label = Instance.new("TextLabel")
+        Label.Size = UDim2.new(1, -35, 1, 0)
+        Label.Position = UDim2.new(0, 12, 0, 0)
+        Label.BackgroundTransparency = 1
+        Label.Text = btnName
+        Label.TextColor3 = Color3.fromRGB(255, 255, 255)
+        Label.TextXAlignment = Enum.TextXAlignment.Left
+        Label.Font = Enum.Font.Gotham
+        Label.TextSize = 12
+        Label.Parent = BtnFrame
+        
+        local Arrow = Instance.new("TextLabel")
+        Arrow.Size = UDim2.new(0, 20, 1, 0)
+        Arrow.Position = UDim2.new(1, -25, 0, 0)
+        Arrow.BackgroundTransparency = 1
+        Arrow.Text = ">"
+        Arrow.TextColor3 = Color3.fromRGB(100, 100, 100)
+        Arrow.Font = Enum.Font.GothamBold
+        Arrow.TextSize = 14
+        Arrow.Parent = BtnFrame
+
+        local Clicker = Instance.new("TextButton")
+        Clicker.Size = UDim2.new(1, 0, 1, 0)
+        Clicker.BackgroundTransparency = 1
+        Clicker.Text = ""
+        Clicker.Parent = BtnFrame
+        Clicker.MouseButton1Click:Connect(callback)
+    end
+
+    function TabFunctions:AddSection(secData)
+        local Label = Instance.new("TextLabel")
+        Label.Size = UDim2.new(1, 0, 0, 30)
+        Label.BackgroundTransparency = 1
+        Label.Text = "  " .. secData.Name
+        Label.TextColor3 = Color3.fromRGB(160, 80, 255)
+        Label.Font = Enum.Font.GothamBold
+        Label.TextSize = 13
+        Label.TextXAlignment = Enum.TextXAlignment.Left
+        Label.Parent = Page
+    end
+    
+    return TabFunctions
+end
+
+-- KULLANIM (Birebir Görseldeki Ayarlar)
+local Tab = Window:MakeTab({"Premium/fun", "rbxassetid://127904742940104"})
+
+Tab:AddSection({Name = "Free Gamepass:"})
+
+Tab:AddButton({
+    Name = "Get All Gamepasses (Best) (Mobile) (60% Visual)",
+    Callback = function()
+        print("All Gamepasses triggered")
+    end
 })
 
--- PREMIUM SEKMESİ (Görseldeki mor yıldızlı bölüm)
-local PremiumTab = Window:MakeTab({
-	Name = "Premium",
-	Icon = "rbxassetid://4483345998", -- Yıldız ikonu
-	PremiumOnly = false
+Tab:AddButton({
+    Name = "Get VIP (Best) (PC)",
+    Callback = function()
+        print("VIP triggered")
+    end
 })
 
--- Görseldeki Başlık (Free Gamepass)
-PremiumTab:AddSection({
-	Name = "Free Gamepass:"
-})
+-- Sürükle-Bırak Mantığı
+local UIS = game:GetService("UserInputService")
+local drag, dragInput, dragStart, startPos
+MainFrame.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        drag = true; dragStart = input.Position; startPos = MainFrame.Position
+    end
+end)
+UIS.InputChanged:Connect(function(input)
+    if drag and input.UserInputType == Enum.UserInputType.MouseMovement then
+        local delta = input.Position - dragStart
+        MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    end
+end)
+UIS.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then drag = false end
+end)
 
--- Görseldeki butonların birebir isimleri
-PremiumTab:AddButton({
-	Name = "Get All Gamepasses (Best) (Mobile) (60% Visual) >",
-	Callback = function()
-        print("Tüm Passler Tetiklendi")
-	end    
-})
-
-PremiumTab:AddButton({
-	Name = "Get VIP (Best) (PC) >",
-	Callback = function()
-        -- Fonksiyon buraya
-	end    
-})
-
--- ALT SEÇENEKLER (Görseldeki Checkbox/Toggle yapısı)
-PremiumTab:AddToggle({
-	Name = "Get Free Gamepass (Patched)",
-	Default = false,
-	Callback = function(Value)
-		print("Durum: ", Value)
-	end
-})
+if FirstTab then FirstTab.Visible = true end
+print("Cartola Hub Birebir UI Yüklendi.")
 
 Tab:AddButton({
     Title = "MoneyGun",
