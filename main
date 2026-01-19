@@ -5322,16 +5322,15 @@ Tab:AddToggle({
         end
     end
 })
+local Tab = Window:MakeTab({"Premium ⭐", "rbxassetid://127904742940104"})
 
-		local Tab = Window:MakeTab({"Premium ⭐", "rbxassetid://127904742940104"})
-
--- ==================== PREMIUM BUTTON (Added) ====================
-Tab:AddButton({
+-- ==================== PREMIUM BUTTON ====================
+local PremiumButton = Tab:AddButton({
     Name = "Premium",
     Description = "Aç Premium menüsü (simüle edilmiş özellikler)",
     Callback = function()
-        -- Create a dedicated Premium tab (simulated features)
-				PremiumTab:AddSection("Premium Features")
+
+        PremiumTab:AddSection("Premium Features")
 
         PremiumTab:AddButton({
             Name = "Get Horse Unlocked (PC)",
@@ -5398,6 +5397,7 @@ Tab:AddButton({
         })
 
         PremiumTab:AddSection("Options")
+
         PremiumTab:AddButton({
             Name = "Get Helicopter Gamepass (simulated)",
             Callback = function()
@@ -5407,7 +5407,10 @@ Tab:AddButton({
             end
         })
 
-        -- End of PremiumTab
+        -- 🔒 Premium butonu kaybolur
+        PremiumButton:SetVisible(false)
+        -- Eğer çalışmazsa: PremiumButton:Destroy()
+
     end
 })
 -- ==================== END PREMIUM BUTTON ====================
