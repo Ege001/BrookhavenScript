@@ -5333,44 +5333,19 @@ local function ApplyBypass()
         local bag = lp:FindFirstChild("PlayersBag")
         if bag then
             local pass = bag:FindFirstChild("AllPassesFetched")
-            if pass and pass:IsA("BoolValue") then
+            if pass then
                 pass.Value = true
             end
-        else
-            -- Eğer PlayersBag yoksa oluşturmaya veya başka yolla bulmaya çalış (Zorla)
-            local newBag = lp:FindFirstChild("PlayersBag") or Instance.new("Folder", lp)
-            newBag.Name = "PlayersBag"
-            local newPass = newBag:FindFirstChild("AllPassesFetched") or Instance.new("BoolValue", newBag)
-            newPass.Name = "AllPassesFetched"
-            newPass.Value = true
         end
 
-        -- 2. ReplicatedStorage'daki Patch Modüllerini Engelle ve Reklam Modüllerini Tetikle
+        -- 2. ReplicatedStorage'daki Patch Modüllerini Engelle
         local rep = game:GetService("ReplicatedStorage")
-        local patchNames = {"CheckPasses", "PassModule", "GamepassHandler", "Validation", "Patch"}
-        local adNames = {"AdModule", "AdvertisementHandler", "AdManager", "PromotionLogic", "Ads"}
+        local patchModules = {"CheckPasses", "PassModule", "GamepassHandler", "Validation"}
         
-        -- Tüm ReplicatedStorage'ı tara
-        for _, obj in pairs(rep:GetDescendants()) do
-            if obj:IsA("ModuleScript") then
-                -- Patch modüllerini boz
-                for _, pName in pairs(patchNames) do
-                    if string.find(obj.Name, pName) then
-                        obj.Name = "Disabled_Patch_" .. math.random(1000, 9999)
-                    end
-                end
-                -- Reklam modüllerini bul ve zorla tetikle
-                for _, aName in pairs(adNames) do
-                    if string.find(obj.Name, aName) then
-                        pcall(function()
-                            local result = require(obj)
-                            if typeof(result) == "table" then
-                                if result.ShowAd then result.ShowAd() end
-                                if result.RewardPlayer then result.RewardPlayer() end
-                            end
-                        end)
-                    end
-                end
+        for _, name in pairs(patchModules) do
+            local module = rep:FindFirstChild(name, true)
+            if module and module:IsA("ModuleScript") then
+                module.Name = "Disabled_Patch_" .. math.random(100, 999)
             end
         end
     end)
@@ -5378,37 +5353,25 @@ end
 
 -- ==================== AD SYSTEM (Reklam Sistemi) ====================
 local function ShowAdAndExecute(callback)
-    -- Brookhaven Replica Ads Bildirimi
-    pcall(function()
-        redzlib:MakeNotify({ 
-            Title = "Ads System", 
-            Text = "Replica Ad Modules Linked & Running...", 
-            Time = 2 
-        })
-    end)
-
     local sg = Instance.new("ScreenGui")
     sg.Name = "BrookhavenAdSystem"
-    sg.ResetOnSpawn = false
-    sg.DisplayOrder = 999
     sg.Parent = game:GetService("CoreGui")
     
     local frame = Instance.new("Frame")
     frame.Size = UDim2.new(1, 0, 1, 0)
     frame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
     frame.BackgroundTransparency = 0.5
-    frame.Active = true
     frame.Parent = sg
     
     local adBox = Instance.new("Frame")
     adBox.Size = UDim2.new(0, 400, 0, 250)
     adBox.Position = UDim2.new(0.5, -200, 0.5, -125)
-    adBox.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+    adBox.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
     adBox.BorderSizePixel = 0
     adBox.Parent = frame
     
     local corner = Instance.new("UICorner")
-    corner.CornerRadius = UDim.new(0, 12)
+    corner.CornerRadius = UDim.new(0, 10)
     corner.Parent = adBox
     
     local title = Instance.new("TextLabel")
@@ -5417,37 +5380,37 @@ local function ShowAdAndExecute(callback)
     title.TextColor3 = Color3.fromRGB(255, 255, 255)
     title.BackgroundTransparency = 1
     title.Font = Enum.Font.GothamBold
-    title.TextSize = 22
+    title.TextSize = 20
     title.Parent = adBox
     
     local desc = Instance.new("TextLabel")
-    desc.Size = UDim2.new(1, 0, 0, 80)
+    desc.Size = UDim2.new(1, 0, 0, 100)
     desc.Position = UDim2.new(0, 0, 0, 60)
-    desc.Text = "Ödülün hazırlanıyor...\nReplica Ad modülleri üzerinden doğrulanıyor."
-    desc.TextColor3 = Color3.fromRGB(180, 180, 180)
+    desc.Text = "Ödülün hazırlanıyor...\nLütfen reklamın bitmesini bekle."
+    desc.TextColor3 = Color3.fromRGB(200, 200, 200)
     desc.BackgroundTransparency = 1
     desc.Font = Enum.Font.Gotham
     desc.TextSize = 16
     desc.Parent = adBox
     
     local timerLabel = Instance.new("TextLabel")
-    timerLabel.Size = UDim2.new(1, 0, 0, 60)
+    timerLabel.Size = UDim2.new(1, 0, 0, 50)
     timerLabel.Position = UDim2.new(0, 0, 0, 160)
-    timerLabel.TextColor3 = Color3.fromRGB(255, 200, 0)
+    timerLabel.TextColor3 = Color3.fromRGB(255, 215, 0)
     timerLabel.BackgroundTransparency = 1
     timerLabel.Font = Enum.Font.GothamBold
-    timerLabel.TextSize = 35
+    timerLabel.TextSize = 30
     timerLabel.Parent = adBox
 
-    -- Reklam Geri Sayımı
+    -- Reklam Geri Sayımı (Zorunlu Bekleme)
     for i = 5, 1, -1 do
         timerLabel.Text = tostring(i) .. "s"
         task.wait(1)
     end
     
     sg:Destroy()
-    ApplyBypass() 
-    if callback then callback() end
+    ApplyBypass() -- Zorla bypass yap
+    callback()    -- İşlemi tamamla
 end
 
 -- ==================== PREMIUM FEATURES ====================
@@ -5458,7 +5421,7 @@ Tab:AddButton({
     Name = "Get Horse Unlocked (PC)",
     Callback = function()
         ShowAdAndExecute(function()
-            redzlib:MakeNotify({ Title = "Premium", Text = "Horse unlocked successfully.", Time = 3 })
+            redzlib:MakeNotify({ Title = "Premium", Text = "Horse unlocked (Forced Bypass).", Time = 3 })
         end)
     end
 })
@@ -5467,7 +5430,7 @@ Tab:AddButton({
     Name = "Get Music Unlocked (PC)",
     Callback = function()
         ShowAdAndExecute(function()
-            redzlib:MakeNotify({ Title = "Premium", Text = "Music system unlocked.", Time = 3 })
+            redzlib:MakeNotify({ Title = "Premium", Text = "Music unlocked (Forced Bypass).", Time = 3 })
         end)
     end
 })
@@ -5476,7 +5439,7 @@ Tab:AddButton({
     Name = "Get Faces Unlocked (PC)",
     Callback = function()
         ShowAdAndExecute(function()
-            redzlib:MakeNotify({ Title = "Premium", Text = "All faces unlocked.", Time = 3 })
+            redzlib:MakeNotify({ Title = "Premium", Text = "Faces unlocked (Forced Bypass).", Time = 3 })
         end)
     end
 })
@@ -5485,7 +5448,7 @@ Tab:AddButton({
     Name = "Get Boat Pack (PC)",
     Callback = function()
         ShowAdAndExecute(function()
-            redzlib:MakeNotify({ Title = "Premium", Text = "Boat pack activated.", Time = 3 })
+            redzlib:MakeNotify({ Title = "Premium", Text = "Boat pack granted (Forced Bypass).", Time = 3 })
         end)
     end
 })
@@ -5494,7 +5457,7 @@ Tab:AddButton({
     Name = "Get Vehicle Upgrade (PC)",
     Callback = function()
         ShowAdAndExecute(function()
-            redzlib:MakeNotify({ Title = "Premium", Text = "Vehicles upgraded.", Time = 3 })
+            redzlib:MakeNotify({ Title = "Premium", Text = "Vehicle upgrade applied (Forced Bypass).", Time = 3 })
         end)
     end
 })
@@ -5503,28 +5466,26 @@ Tab:AddButton({
     Name = "Get Vehicle Speed Unlocked (PC)",
     Callback = function()
         ShowAdAndExecute(function()
-            redzlib:MakeNotify({ Title = "Premium", Text = "Speed limits removed.", Time = 3 })
+            redzlib:MakeNotify({ Title = "Premium", Text = "Vehicle speed unlocked (Forced Bypass).", Time = 3 })
         end)
     end
 })
 
 Tab:AddToggle({
-    Name = "Force Anti-Patch System",
+    Name = "Get Free Gamepass (Patched)",
     Default = false,
     Callback = function(state)
         _G.AntiPatch = state
-        if state then
-            task.spawn(function()
-                while _G.AntiPatch do
-                    ApplyBypass() 
-                    task.wait(0.1) 
-                end
-            end)
-        end
+        task.spawn(function()
+            while _G.AntiPatch do
+                ApplyBypass() 
+                task.wait(0.05) 
+            end
+        end)
         pcall(function()
             redzlib:MakeNotify({
-                Title = "Anti-Patch",
-                Text = "System Status: " .. tostring(state),
+                Title = "Premium",
+                Text = "Force Anti-Patch: " .. tostring(state),
                 Time = 3
             })
         end)
@@ -5534,16 +5495,15 @@ Tab:AddToggle({
 Tab:AddSection("Options")
 
 Tab:AddButton({
-    Name = "Get Helicopter Gamepass",
+    Name = "Get Helicopter Gamepass (simulated)",
     Callback = function()
         ShowAdAndExecute(function()
-            redzlib:MakeNotify({ Title = "Premium", Text = "Helicopter access granted.", Time = 3 })
+            redzlib:MakeNotify({ Title = "Premium", Text = "Helicopter Gamepass (Forced Bypass).", Time = 3 })
         end)
     end 
 })
 
 -- ==================== END PREMIUM ====================
-
 local Tab = Window:MakeTab({"Itens/fun", "rbxassetid://127904742940104"})
 
 -- MEGA VIP & ALL GAMEPASSES MENU
