@@ -5323,6 +5323,7 @@ Tab:AddToggle({
     end
 })
 
+local Tab = Window:MakeTab({"Itens/fun", "rbxassetid://127904742940104"})
 -- ==================== PREMIUM BUTTON (Added) ====================
 Tab:AddButton({
     Name = "Premium",
@@ -5410,6 +5411,9 @@ Tab:AddButton({
     end
 })
 -- ==================== END PREMIUM BUTTON ====================
+
+
+
 
 local Tab = Window:MakeTab({"Itens/fun", "rbxassetid://127904742940104"})
 
