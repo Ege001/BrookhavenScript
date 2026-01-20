@@ -4155,7 +4155,7 @@ scriptsTab:AddButton({
 scriptsTab:AddSection("🎥 Freecam Tool")
 
 scriptsTab:AddButton({
-    Name = "🎥 FreeCam Tool (UI + Mobile)",
+    Name = "🎮 Full FreeCam (PC + Mobile + Gamepad)",
     Callback = function()
 
         local Players = game:GetService("Players")
@@ -4167,34 +4167,29 @@ scriptsTab:AddButton({
         local humanoid = character:WaitForChild("Humanoid")
         local cam = workspace.CurrentCamera
 
-        -- Karakter düşmesin
-        humanoid:SetStateEnabled(Enum.HumanoidStateType.FallingDown, false)
-        humanoid:SetStateEnabled(Enum.HumanoidStateType.Ragdoll, false)
         humanoid.PlatformStand = true
+        humanoid.AutoRotate = false
 
-        -- Tool oluştur
         local tool = Instance.new("Tool")
         tool.Name = "FreeCamTool"
         tool.RequiresHandle = false
         tool.Parent = player.Backpack
 
-        -- UI oluştur
-        local screenGui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
-        screenGui.Name = "FreeCamUI"
+        local gui = Instance.new("ScreenGui", player.PlayerGui)
+        gui.Name = "FreeCamUI"
+        gui.Enabled = false
 
-        -- Hız göstergesi
-        local speedLabel = Instance.new("TextLabel", screenGui)
+        local speedLabel = Instance.new("TextLabel", gui)
         speedLabel.Size = UDim2.new(0, 200, 0, 40)
         speedLabel.Position = UDim2.new(0.5, -100, 0, 10)
-        speedLabel.BackgroundTransparency = 0.3
         speedLabel.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+        speedLabel.BackgroundTransparency = 0.3
         speedLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
         speedLabel.TextScaled = true
         speedLabel.Text = "Speed: 1"
 
-        -- Mobil W A S D butonları
-        local function createButton(txt, pos)
-            local b = Instance.new("TextButton", screenGui)
+        local function createBtn(txt, pos)
+            local b = Instance.new("TextButton", gui)
             b.Size = UDim2.new(0, 60, 0, 60)
             b.Position = pos
             b.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
@@ -4204,25 +4199,14 @@ scriptsTab:AddButton({
             return b
         end
 
-        local btnW = createButton("W", UDim2.new(0, 80, 0.7, -60))
-        local btnA = createButton("A", UDim2.new(0, 20, 0.7, 0))
-        local btnS = createButton("S", UDim2.new(0, 80, 0.7, 0))
-        local btnD = createButton("D", UDim2.new(0, 140, 0.7, 0))
+        local btnW = createBtn("W", UDim2.new(0.1, 0, 0.65, -60))
+        local btnA = createBtn("A", UDim2.new(0.05, 0, 0.65, 0))
+        local btnS = createBtn("S", UDim2.new(0.1, 0, 0.65, 60))
+        local btnD = createBtn("D", UDim2.new(0.15, 0, 0.65, 0))
 
-        btnW.Visible = false
-        btnA.Visible = false
-        btnS.Visible = false
-        btnD.Visible = false
-        speedLabel.Visible = false
+        local btnPlus = createBtn("+", UDim2.new(0.85, 0, 0.1, 0))
+        local btnMinus = createBtn("-", UDim2.new(0.75, 0, 0.1, 0))
 
-        -- Freecam değişkenleri
-        local freecam = false
-        local speed = 1
-        local rotation = Vector2.new(0, 0)
-        local rotSpeed = 0.002
-        local conn
-
-        -- Mobil buton inputları
         local mobileInput = {W=false, A=false, S=false, D=false}
 
         btnW.MouseButton1Down:Connect(function() mobileInput.W = true end)
@@ -4237,67 +4221,99 @@ scriptsTab:AddButton({
         btnD.MouseButton1Down:Connect(function() mobileInput.D = true end)
         btnD.MouseButton1Up:Connect(function() mobileInput.D = false end)
 
-        -- Scroll ile hız ayarı
+        local freecam = false
+        local speed = 1
+        local rotation = Vector2.new(0, 0)
+        local rotSpeed = 1 -- SENİN İSTEDİĞİN GİBİ ÇOK HIZLI DÖNÜŞ
+        local conn
+
+        btnPlus.MouseButton1Click:Connect(function()
+            speed = math.clamp(speed + 0.5, 0.5, 10)
+            speedLabel.Text = "Speed: " .. speed
+        end)
+
+        btnMinus.MouseButton1Click:Connect(function()
+            speed = math.clamp(speed - 0.5, 0.5, 10)
+            speedLabel.Text = "Speed: " .. speed
+        end)
+
         UserInputService.InputChanged:Connect(function(input)
             if freecam and input.UserInputType == Enum.UserInputType.MouseWheel then
                 speed = math.clamp(speed + input.Position.Z * 0.5, 0.5, 10)
-                speedLabel.Text = "Speed: " .. tostring(math.floor(speed * 10) / 10)
+                speedLabel.Text = "Speed: " .. speed
             end
         end)
 
-        local function getMoveDirection()
+        -- GAMEPAD SPEED PRESETS (1,2,3)
+        UserInputService.InputBegan:Connect(function(input)
+            if not freecam then return end
+
+            if input.KeyCode == Enum.KeyCode.One then
+                speed = 1
+            elseif input.KeyCode == Enum.KeyCode.Two then
+                speed = 3
+            elseif input.KeyCode == Enum.KeyCode.Three then
+                speed = 6
+            end
+
+            speedLabel.Text = "Speed: " .. speed
+        end)
+
+        local function getMoveDir()
             local dir = Vector3.zero
 
-            -- PC
             if UserInputService:IsKeyDown(Enum.KeyCode.W) or mobileInput.W then dir += Vector3.new(0, 0, -1) end
             if UserInputService:IsKeyDown(Enum.KeyCode.S) or mobileInput.S then dir += Vector3.new(0, 0, 1) end
             if UserInputService:IsKeyDown(Enum.KeyCode.A) or mobileInput.A then dir += Vector3.new(-1, 0, 0) end
             if UserInputService:IsKeyDown(Enum.KeyCode.D) or mobileInput.D then dir += Vector3.new(1, 0, 0) end
 
+            -- GAMEPAD JOYSTICK
+            local gp = UserInputService:GetGamepadState(Enum.UserInputType.Gamepad1)
+            if gp and gp[1] then
+                local stick = gp[1].Position
+                dir += Vector3.new(stick.X, 0, -stick.Y)
+            end
+
             return dir
+        end
+
+        local function getGamepadRotation()
+            local gp = UserInputService:GetGamepadState(Enum.UserInputType.Gamepad1)
+            if gp and gp[2] then
+                local stick = gp[2].Position
+                return Vector2.new(-stick.Y, -stick.X)
+            end
+            return Vector2.zero
         end
 
         local function enableFreecam()
             freecam = true
-
-            btnW.Visible = true
-            btnA.Visible = true
-            btnS.Visible = true
-            btnD.Visible = true
-            speedLabel.Visible = true
+            gui.Enabled = true
 
             cam.CameraType = Enum.CameraType.Scriptable
             UserInputService.MouseBehavior = Enum.MouseBehavior.LockCenter
 
             conn = RunService.RenderStepped:Connect(function(dt)
                 local delta = UserInputService:GetMouseDelta()
-                rotation = rotation + Vector2.new(-delta.Y, -delta.X) * rotSpeed
+                local gpRot = getGamepadRotation()
 
-                rotation = Vector2.new(
-                    math.clamp(rotation.X, -math.rad(85), math.rad(85)),
-                    rotation.Y
-                )
+                rotation = rotation + (Vector2.new(-delta.Y, -delta.X) + gpRot) * rotSpeed * dt
 
                 local cf =
                     CFrame.new(cam.CFrame.Position)
                     * CFrame.Angles(0, rotation.Y, 0)
                     * CFrame.Angles(rotation.X, 0, 0)
 
-                local moveDir = getMoveDirection()
-                cam.CFrame = cf + cf:VectorToWorldSpace(moveDir * speed)
+                cam.CFrame = cf + cf:VectorToWorldSpace(getMoveDir() * speed)
             end)
         end
 
         local function disableFreecam()
             freecam = false
-
-            btnW.Visible = false
-            btnA.Visible = false
-            btnS.Visible = false
-            btnD.Visible = false
-            speedLabel.Visible = false
+            gui.Enabled = false
 
             if conn then conn:Disconnect() end
+
             cam.CameraType = Enum.CameraType.Custom
             UserInputService.MouseBehavior = Enum.MouseBehavior.Default
         end
