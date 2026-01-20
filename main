@@ -4152,7 +4152,7 @@ scriptsTab:AddButton({
     end
 })
 
-scriptsTab:AddSection({ "🎥 Freecam Tool" })
+scriptsTab:AddSection("🎥 Freecam Tool")
 
 scriptsTab:AddButton({
     Name = "🎥 FreeCam Tool Al",
@@ -4160,6 +4160,7 @@ scriptsTab:AddButton({
         local Players = game:GetService("Players")
         local UserInputService = game:GetService("UserInputService")
         local RunService = game:GetService("RunService")
+
         local player = Players.LocalPlayer
         local character = player.Character or player.CharacterAdded:Wait()
         local humanoid = character:WaitForChild("Humanoid")
@@ -4174,20 +4175,15 @@ scriptsTab:AddButton({
         tool.Parent = player.Backpack
 
         local freecamEnabled = false
-        local baseSpeed = 1
-        local speed = baseSpeed
+        local moveSpeed = 1
         local rotSpeed = 0.002
-        local rotation = Vector2.zero
+        local rotation = Vector2.new(0, 0)
         local conn
-        local scrollConn
-
-        -- Karakter sabit kalacak
-        local originalPlatformStand = humanoid.PlatformStand
 
         -- Scroll ile hız ayarı
-        scrollConn = UserInputService.InputChanged:Connect(function(input, gp)
+        UserInputService.InputChanged:Connect(function(input)
             if freecamEnabled and input.UserInputType == Enum.UserInputType.MouseWheel then
-                speed = math.clamp(speed + input.Position.Z * 0.5, 0.5, 10)
+                moveSpeed = math.clamp(moveSpeed + input.Position.Z * 0.5, 0.5, 10)
             end
         end)
 
@@ -4198,6 +4194,8 @@ scriptsTab:AddButton({
             if UserInputService:IsKeyDown(Enum.KeyCode.S) then dir += Vector3.new(0, 0, 1) end
             if UserInputService:IsKeyDown(Enum.KeyCode.A) then dir += Vector3.new(-1, 0, 0) end
             if UserInputService:IsKeyDown(Enum.KeyCode.D) then dir += Vector3.new(1, 0, 0) end
+            if UserInputService:IsKeyDown(Enum.KeyCode.Space) then dir += Vector3.new(0, 1, 0) end
+            if UserInputService:IsKeyDown(Enum.KeyCode.LeftControl) then dir += Vector3.new(0, -1, 0) end
 
             return dir
         end
@@ -4206,29 +4204,28 @@ scriptsTab:AddButton({
             if freecamEnabled then return end
             freecamEnabled = true
 
-            -- Karakter hareket etmesin
             humanoid.PlatformStand = true
 
             cam.CameraType = Enum.CameraType.Scriptable
-            cam.CFrame = cam.CFrame
-
             UserInputService.MouseBehavior = Enum.MouseBehavior.LockCenter
             UserInputService.MouseIconEnabled = false
 
             conn = RunService.RenderStepped:Connect(function(dt)
                 local delta = UserInputService:GetMouseDelta()
                 rotation = rotation + Vector2.new(-delta.Y, -delta.X) * rotSpeed
+
                 rotation = Vector2.new(
                     math.clamp(rotation.X, -math.rad(85), math.rad(85)),
                     rotation.Y
                 )
 
-                local cf = CFrame.new(cam.CFrame.Position)
+                local cf =
+                    CFrame.new(cam.CFrame.Position)
                     * CFrame.Angles(0, rotation.Y, 0)
                     * CFrame.Angles(rotation.X, 0, 0)
 
                 local moveDir = getMoveDirection()
-                cam.CFrame = cf + cf:VectorToWorldSpace(moveDir * speed)
+                cam.CFrame = cf + cf:VectorToWorldSpace(moveDir * moveSpeed)
             end)
         end
 
@@ -4236,8 +4233,7 @@ scriptsTab:AddButton({
             if not freecamEnabled then return end
             freecamEnabled = false
 
-            -- Karakter hareket tekrar aktif
-            humanoid.PlatformStand = originalPlatformStand
+            humanoid.PlatformStand = false
 
             if conn then conn:Disconnect() end
             conn = nil
