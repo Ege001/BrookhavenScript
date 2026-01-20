@@ -3697,7 +3697,7 @@ Tab:AddButton({
     end
 })
 
-local scriptsTab = Window:MakeTab({"🎭 Scripts Troll", "rbxassetid://6862780932"})
+local scriptsTab = Window:MakeTab({"Scripts Troll 🎭", "rbxassetid://6862780932"})
 
 scriptsTab:AddSection({ "🕳️ Black Hole" })
 
