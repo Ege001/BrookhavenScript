@@ -420,7 +420,7 @@ Tab:AddButton({
 
 Tab:AddButton({
     Title = "Camera De Carro",
-    Desc = "carro no roblox kkj",
+    Desc = "carro Hayır roblox kkj",
     Locked = false,
     Callback = function()
 loadstring(game:HttpGet("https://raw.githubusercontent.com/repositoryredzlib/Carfling/refs/heads/main/Main.txt"))()
@@ -626,7 +626,7 @@ Tab:AddButton({
 
 Tab:AddButton({
     Title = "Minecraft",
-    Desc = "Minecraft no roblox kk",
+    Desc = "Minecraft Hayır roblox kk",
     Locked = false,
     Callback = function()
         local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -2643,7 +2643,7 @@ local function UpdateDropdown()
             print("Nenhum jogador disponível (exceto você).")
         end
     else
-        print("Erro: Dropdown não encontrado.")
+        print("Erro: Dropdown Hayır encontrado.")
     end
 end
 
@@ -2673,7 +2673,7 @@ Tab:AddButton({
                 print("Nenhum jogador disponível (exceto você).")
             end
         else
-            print("Erro: Dropdown não encontrado.")
+            print("Erro: Dropdown Hayır encontrado.")
         end
     end
 })
@@ -2938,7 +2938,7 @@ Tab:AddDropdown({
 
 Tab:AddButton({
     Name = "Equipar Parte Selecionada",
-    Description = "Equipa apenas a parte escolhida no dropdown",
+    Description = "Equipa apenas a parte escolhida Hayır dropdown",
     Callback = function()
         local args = {
             [1] = {
@@ -3086,7 +3086,7 @@ Tab:AddButton({
 
             print("Equipado: " .. selectedColor .. " Fire")
         else
-            warn("Erro: Cor não encontrada!")
+            warn("Erro: Cor Hayır encontrada!")
         end
     end
 })
@@ -3195,7 +3195,7 @@ Tab:AddButton({
             
             print("Equipado: " .. selectedSmokeColor .. " Smoke")
         else
-            warn("Erro: Cor de smoke não encontrada!")
+            warn("Erro: Cor de smoke Hayır encontrada!")
         end
     end
 })
@@ -4269,7 +4269,7 @@ local function playAudio()
         if sound.Parent then
             sound:Play()
         else
-            warn("HumanoidRootPart não encontrado")
+            warn("HumanoidRootPart Hayır encontrado")
             break
         end
 
@@ -4297,7 +4297,7 @@ print("Barco PirateFree gerado!")
 
 local Seat = PCar:FindFirstChild("Vücut") and PCar.Body:FindFirstChild("VehicleSeat")
 if not Seat then
-    warn("Seat não encontrado")
+    warn("Seat Hayır encontrado")
     return
 end
 
@@ -5103,7 +5103,7 @@ Tab:AddToggle({
 local antiSitActive = false
 Tab:AddToggle({
     Name = "Oturma Engelleme",
-    Description = "Não deixa seu personagem sentar",
+    Description = "Hayır deixa seu personagem sentar",
     Default = false,
     Callback = function(state)
         antiSitActive = state
@@ -5323,17 +5323,17 @@ Tab:AddToggle({
     end
 })
 
-local Tab = Window:MakeTab({"Premium ⭐", "rbxassetid://127904742940104"})
+local Tab = Window:MakeTab({"premium ⭐", "rbxassetid://127904742940104"})
 
 -- ==================== PREMIUM FEATURES ====================
 
-Tab:AddSection("Premium Features")
+Tab:AddSection("premium Features")
 
 Tab:AddButton({
     Name = "Get Horse Unlocked (PC)",
     Callback = function()
         pcall(function()
-            redzlib:MakeNotify({ Title = "Premium", Text = "Horse unlocked (simulated).", Time = 3 })
+            redzlib:MakeNotify({ Title = "premium", Text = "Horse unlocked (simulated).", Time = 3 })
         end)
     end
 })
@@ -5342,7 +5342,7 @@ Tab:AddButton({
     Name = "Get Music Unlocked (PC)",
     Callback = function()
         pcall(function()
-            redzlib:MakeNotify({ Title = "Premium", Text = "Music unlocked (simulated).", Time = 3 })
+            redzlib:MakeNotify({ Title = "premium", Text = "Music unlocked (simulated).", Time = 3 })
         end)
     end
 })
@@ -5351,7 +5351,7 @@ Tab:AddButton({
     Name = "Get Faces Unlocked (PC)",
     Callback = function()
         pcall(function()
-            redzlib:MakeNotify({ Title = "Premium", Text = "Faces unlocked (simulated).", Time = 3 })
+            redzlib:MakeNotify({ Title = "premium", Text = "Faces unlocked (simulated).", Time = 3 })
         end)
     end
 })
@@ -5360,7 +5360,7 @@ Tab:AddButton({
     Name = "Get Boat Pack (PC)",
     Callback = function()
         pcall(function()
-            redzlib:MakeNotify({ Title = "Premium", Text = "Boat pack granted (simulated).", Time = 3 })
+            redzlib:MakeNotify({ Title = "premium", Text = "Boat pack granted (simulated).", Time = 3 })
         end)
     end
 })
@@ -5369,7 +5369,7 @@ Tab:AddButton({
     Name = "Get Vehicle Upgrade (PC)",
     Callback = function()
         pcall(function()
-            redzlib:MakeNotify({ Title = "Premium", Text = "Vehicle upgrade applied (simulated).", Time = 3 })
+            redzlib:MakeNotify({ Title = "premium", Text = "Vehicle upgrade applied (simulated).", Time = 3 })
         end)
     end
 })
@@ -5378,7 +5378,7 @@ Tab:AddButton({
     Name = "Get Vehicle Speed Unlocked (PC)",
     Callback = function()
         pcall(function()
-            redzlib:MakeNotify({ Title = "Premium", Text = "Vehicle speed unlocked (simulated).", Time = 3 })
+            redzlib:MakeNotify({ Title = "premium", Text = "Vehicle speed unlocked (simulated).", Time = 3 })
         end)
     end
 })
@@ -5389,7 +5389,7 @@ Tab:AddToggle({
     Callback = function(state)
         pcall(function()
             redzlib:MakeNotify({
-                Title = "Premium",
+                Title = "premium",
                 Text = "Free Gamepass toggle: " .. tostring(state),
                 Time = 3
             })
@@ -5403,7 +5403,7 @@ Tab:AddButton({
     Name = "Get Helicopter Gamepass (simulated)",
     Callback = function()
         pcall(function()
-            redzlib:MakeNotify({ Title = "Premium", Text = "Helicopter Gamepass (simulated).", Time = 3 })
+            redzlib:MakeNotify({ Title = "premium", Text = "Helicopter Gamepass (simulated).", Time = 3 })
         end)
     end
 })
@@ -5486,7 +5486,7 @@ Tab:AddButton({
             lbl.BackgroundTransparency = 1
             lbl.Parent = MainFrame
         end
-        createHeader("PREMIUM & PASSES", UDim2.new(0.02, 0, 0.04, 0))
+        createHeader("premium & PASSES", UDim2.new(0.02, 0, 0.04, 0))
         createHeader("VEHICLE SPAWNER", UDim2.new(0.52, 0, 0.04, 0))
 
         -- Kapatma Butonu
@@ -5814,7 +5814,7 @@ Tab:AddButton({
             end
 
             -- If nothing worked, notify user
-            tryNotify("MoneyGun", "No suitable remote found to request MoneyGun.")
+            tryNotify("MoneyGun", "Hayır suitable remote found to request MoneyGun.")
         end)
 
         if not ok then
@@ -6036,7 +6036,7 @@ local musicList = {
     ["Ronaldo"] = "112094885967128",
     ["380 HZ"] = "6486261822",
     ["1 HZ"] = "128118682266898",
-    ["Não, não (Chaves)"] = "74393167344888",
+    ["Hayır, Hayır (Chaves)"] = "74393167344888",
     ["Chupeta"] = "132235711219080",
     ["Freeza, por que você matou o Kuririn?"] = "74563462700748",
     ["E morreu"] = "71700111426066",
@@ -6057,7 +6057,7 @@ local musicList = {
     ["Fala Baixo"] = "85146723313238",
     ["É o Menino de Papai é?"] = "117434960434893",
     ["Deita Aqui"] = "86126187308121",
-    ["Slk, Não Compensa"] = "101242461910421",
+    ["Slk, Hayır Compensa"] = "101242461910421",
     ["Prowler Sound 1"] = "8374059857",
     ["Prowler Sound 2"] = "82132507008392",
     ["Buhhhh (Minguado)"] = "83788010495185",
@@ -6076,11 +6076,11 @@ local musicList = {
     ["Rapaz ele tá sem Zap"] = "99782709356719",
     ["The Boiled One"] = "137177653817621",
     ["I Ghost The Down Cool"] = "84663543883498",
-    ["Toma Jack no Sol Quente"] = "97476487963273",
+    ["Toma Jack Hayır Sol Quente"] = "97476487963273",
     ["Chicken Jockey"] = "109689455115234",
     ["The Nether"] = "92539999916114",
     ["Flint and Steel"] = "121022461879318",
-    ["Rápido, eu não quero morrer"] = "76119124192580",
+    ["Rápido, eu Hayır quero morrer"] = "76119124192580",
     ["Ai Ai Ai"] = "127588453749028",
     ["Ai Chega Chega"] = "96649978398443",
     ["Ai Meu C*zinho"] = "113413619114733",
@@ -6881,78 +6881,3 @@ MusicTab:AddButton({
         end
     end
 })
-
-
--- ===== Turkish confirmation & title fix (non-destructive patch) =====
--- This patch watches for GUI elements created by the hub (or the redzlib window)
--- and replaces Portuguese/Arabic/English "close script" texts and "LYRA HUB" title
--- with Turkish texts and "XENO HUB". It's non-destructive: it only updates text fields.
-do
-    local Players = game:GetService("Players")
-    local player = Players.LocalPlayer
-    if not player then return end
-    local playerGui = player:WaitForChild("PlayerGui")
-
-    local function safeSetText(inst, text)
-        pcall(function()
-            if inst and (inst:IsA("TextLabel") or inst:IsA("TextButton") or inst:IsA("TextBox")) then
-                inst.Text = text
-            end
-        end)
-    end
-
-    local function fixGuiText(gui)
-        if not gui or type(gui.Name) ~= "string" then return end
-        local txt = tostring(gui.Text or "")
-        -- Replace known Portuguese confirmation phrase
-        if string.find(txt, "fechar o script") or string.find(txt, "fechar o script%?") or string.find(txt, "Você realmente deseja") then
-            safeSetText(gui, "Scripti gerçekten kapatmak istiyor musunuz?")
-        end
-
-        -- Replace common variants/literals (in case different languages appear)
-        if txt == "Are you sure you want to close the script?" or txt == "Are you sure?" then
-            safeSetText(gui, "Scripti gerçekten kapatmak istiyor musunuz?")
-        end
-
-        -- Replace LYRA HUB title if present
-        if txt:match("LYRA%s*HUB") then
-            safeSetText(gui, "XENO HUB")
-        end
-
-        -- Replace Arabic/Portuguese/English yes/no buttons with Turkish
-        if txt == "نعم" or txt == "Yes" or txt == "Sim" or txt == "Evet" then
-            safeSetText(gui, "Evet")
-        end
-        if txt == "لا" or txt == "No" or txt == "Não" or txt == "Hayır" then
-            safeSetText(gui, "Hayır")
-        end
-    end
-
-    local function scanDescendants(root)
-        for _, v in ipairs(root:GetDescendants()) do
-            fixGuiText(v)
-        end
-    end
-
-    -- Initial scan (safe, read-only except for text changes)
-    pcall(function() scanDescendants(playerGui) end)
-
-    -- Watch for newly created GUI pieces and attempt to fix them shortly after creation
-    playerGui.DescendantAdded:Connect(function(desc)
-        -- small delay to allow libraries to finish constructing complex modals
-        task.delay(0.03, function()
-            pcall(function()
-                fixGuiText(desc)
-                -- also check its siblings/parent for titles/buttons
-                local p = desc.Parent
-                if p then
-                    for _, s in ipairs(p:GetChildren()) do
-                        fixGuiText(s)
-                    end
-                end
-            end)
-        end)
-    end)
-end
-
--- ===== End of patch =====
