@@ -2278,6 +2278,34 @@ RGBTab:AddToggle({
 })
 
 RGBTab:AddToggle({
+    Name = "🌑 Nome Dark RGB",
+    Desc = "Dark RGB",
+    Default = false,
+    Callback = function(v)
+        rgbNomeDark = v
+        if v then
+            startRGBLoop(function() return rgbNomeDark end, function(color)
+                RE["1RPNam1eColo1r"]:FireServer("PickingRPNameColor", color)
+            end, 0.03, "dark")
+        end
+    end
+})
+
+RGBTab:AddToggle({
+    Name = "👑 Nome VIP Dark RGB",
+    Desc = "VIP Dark RGB",
+    Default = false,
+    Callback = function(v)
+        rgbNomeVIP = v
+        if v then
+            startRGBLoop(function() return rgbNomeVIP end, function(color)
+                RE["1RPNam1eColo1r"]:FireServer("PickingRPNameColor", color)
+            end, 0.03, "vip")
+        end
+    end
+})
+
+RGBTab:AddToggle({
     Name = "Bio RGB",
     Desc = "Bio RGB",
     Default = false,
