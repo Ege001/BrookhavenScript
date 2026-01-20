@@ -217,7 +217,7 @@ Window:AddMinimizeButton({
     },
 })
 
-local infoTab = Window:MakeTab({ "💎 Bilgi", "info" })
+local infoTab = Window:MakeTab({ "Bilgi 💎", "info" })
 
 infoTab:AddDiscordInvite({
     Name = "XENO HUB",
