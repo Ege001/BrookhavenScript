@@ -2099,15 +2099,14 @@ TabNuke:AddToggle({
 })
 
 local PlayerTab = Window:MakeTab({
-    Title = "Oyuncu 👤",
+    Title = "Oyuncu",
     Icon = "rbxassetid://17132521951"
 })
 
---================ HAREKETLER =================--
-PlayerTab:AddSection({ "🏃‍♂️ Hareketler" })
+PlayerTab:AddSection({ "Hareketler" })
 
 PlayerTab:AddSlider({
-    Name = "🏃 Yürüme Hızı",
+    Name = "Yürüme Hızı",
     Min = 16,
     Max = 500,
     Default = humanoid.WalkSpeed,
@@ -2117,7 +2116,7 @@ PlayerTab:AddSlider({
 })
 
 PlayerTab:AddSlider({
-    Name = "🦘 Zıplama Gücü",
+    Name = "Zıplama Gücü",
     Min = 50,
     Max = 500,
     Default = humanoid.JumpPower,
@@ -2127,7 +2126,7 @@ PlayerTab:AddSlider({
 })
 
 PlayerTab:AddSlider({
-    Name = "🌍 Yerçekimi",
+    Name = "Yerçekimi",
     Min = 10,
     Max = 500,
     Default = Workspace.Gravity,
@@ -2137,7 +2136,7 @@ PlayerTab:AddSlider({
 })
 
 PlayerTab:AddButton({
-    Name = "♻️ Oyuncu İstatistiklerini Sıfırla",
+    Name = "Oyuncu İstatistiklerini Sıfırla",
     Callback = function()
         humanoid.WalkSpeed = 16
         humanoid.JumpPower = 50
@@ -2145,14 +2144,13 @@ PlayerTab:AddButton({
     end
 })
 
---================ DÖNME =================--
 local spinning = false
 local spinSpeed = 50
 
-PlayerTab:AddSection({ "🌀 Dönme" })
+PlayerTab:AddSection({ "Dönme" })
 
 PlayerTab:AddToggle({
-    Name = "🔄 Dönme",
+    Name = "Dönme",
     Default = false,
     Callback = function(v)
         spinning = v
@@ -2160,7 +2158,7 @@ PlayerTab:AddToggle({
 })
 
 PlayerTab:AddSlider({
-    Name = "⚡ Dönme Hızı",
+    Name = "Dönme Hızı",
     Min = 1,
     Max = 1000,
     Default = spinSpeed,
@@ -2175,11 +2173,10 @@ RunService.RenderStepped:Connect(function(dt)
     end
 end)
 
---================ ÇARPIŞMA =================--
 local noclip = false
 
 PlayerTab:AddToggle({
-    Name = "🚫 Çarpışma Yok",
+    Name = "Çarpışma Yok",
     Default = false,
     Callback = function(v)
         noclip = v
@@ -2196,11 +2193,10 @@ RunService.Stepped:Connect(function()
     end
 end)
 
---================ SONSUS ZIPLAMA =================--
 local infJump = false
 
 PlayerTab:AddToggle({
-    Name = "🦅 Sonsuz Zıplama",
+    Name = "Sonsuz Zıplama",
     Default = false,
     Callback = function(v)
         infJump = v
@@ -2306,7 +2302,6 @@ RGBTab:AddToggle({
         end
     end
 })
-
 
 local CarTab = Window:MakeTab({"Veiculo", "car"})
 
