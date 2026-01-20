@@ -2235,27 +2235,6 @@ RGBTab:AddTextBox({
     end
 })
 
--- Genel RGB loop fonksiyonu
-local function startRGBLoop(flagFunc, actionFunc, delayTime, mode)
-    task.spawn(function()
-        while flagFunc() do
-            local hue = (tick() * rgbSpeed % 5) / 5
-            local color
-            if mode == "normal" then
-                color = Color3.fromHSV(hue, 1, 1)
-            elseif mode == "dark" then
-                color = Color3.fromHSV(hue, 0.8, 0.4)
-            elseif mode == "vip" then
-                color = Color3.fromHSV(hue, 0.9, 0.3)
-            end
-            pcall(function()
-                actionFunc(color)
-            end)
-            task.wait(delayTime)
-        end
-    end)
-end
-
 -- Toggle flagları
 local rgbNome, rgbNomeDark, rgbNomeVIP = false, false, false
 local rgbBio, rgbBioDark, rgbBioVIP = false, false, false
@@ -2273,6 +2252,34 @@ RGBTab:AddToggle({
             startRGBLoop(function() return rgbNome end, function(color)
                 RE["1RPNam1eColo1r"]:FireServer("PickingRPNameColor", color)
             end, 0.03, "normal")
+        end
+    end
+})
+
+RGBTab:AddToggle({
+    Name = "🌑 Nome Dark RGB",
+    Desc = "Dark RGB",
+    Default = false,
+    Callback = function(v)
+        rgbNomeDark = v
+        if v then
+            startRGBLoop(function() return rgbNomeDark end, function(color)
+                RE["1RPNam1eColo1r"]:FireServer("PickingRPNameColor", color)
+            end, 0.03, "dark")
+        end
+    end
+})
+
+RGBTab:AddToggle({
+    Name = "👑 Nome VIP Dark RGB",
+    Desc = "VIP Dark RGB",
+    Default = false,
+    Callback = function(v)
+        rgbNomeVIP = v
+        if v then
+            startRGBLoop(function() return rgbNomeVIP end, function(color)
+                RE["1RPNam1eColo1r"]:FireServer("PickingRPNameColor", color)
+            end, 0.03, "vip")
         end
     end
 })
