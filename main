@@ -2256,21 +2256,23 @@ local function startRGBLoop(flagFunc, actionFunc, delayTime, mode)
     end)
 end
 
-local rgbNome = false
-local rgbBio = false
-local rgbCasa = false
-local rgbCarro = false
+-- Toggle flagları
+local rgbNome, rgbNomeDark, rgbNomeVIP = false, false, false
+local rgbBio, rgbBioDark, rgbBioVIP = false, false, false
+local rgbCasa, rgbCasaDark, rgbCasaVIP = false, false, false
+local rgbCarro, rgbCarroDark, rgbCarroVIP = false, false, false
 
+-- ========== NOME ==========
 RGBTab:AddToggle({
-    Name = "Nome RGB",
-    Desc = "Nome RGB",
+    Name = "📝 Nome RGB",
+    Desc = "Normal RGB",
     Default = false,
     Callback = function(v)
         rgbNome = v
         if v then
             startRGBLoop(function() return rgbNome end, function(color)
                 RE["1RPNam1eColo1r"]:FireServer("PickingRPNameColor", color)
-            end, 0.03)
+            end, 0.03, "normal")
         end
     end
 })
