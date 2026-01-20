@@ -344,7 +344,7 @@ end)
 
 local RE = ReplicatedStorage:WaitForChild("RE")
 
-local Tab = Window:MakeTab({"Fe Scripts", "rbxassetid://121106070017957"})
+local Tab = Window:MakeTab({"FE Scripts ⚡", "rbxassetid://121106070017957"})
 
 Tab:AddButton({
     Name = "7yd7",
