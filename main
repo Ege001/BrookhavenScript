@@ -947,7 +947,7 @@ Tab:AddButton({
 
 Tab:AddParagraph({ "os scripts FE foi patched,ent so a skin que e FE e o martelo(ou outros equipamentos)" })
 
-local FunTab = Window:MakeTab({"Fun", "rbxassetid://105212753583689"})
+local FunTab = Window:MakeTab({"📷 Fun", "rbxassetid://105212753583689"})
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
