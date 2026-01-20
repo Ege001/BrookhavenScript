@@ -198,8 +198,8 @@ ScreenGui:Destroy()
 local redzlib = loadstring(game:HttpGet("https://raw.githubusercontent.com/kayrus999/kayrus99/refs/heads/main/kayrusLINDO"))()
 
 local Window = redzlib:MakeWindow({
-  Title = "XENO HUB",
-  SubTitle = "By:EgeKazak_Real1",
+  Title = "🔥 XENO HUB 🔥",
+  SubTitle = "By EgeKazak_Real1",
   SaveFolder = "LinuxHub_Brookhaven"
 })
 
