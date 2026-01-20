@@ -4170,7 +4170,8 @@ scriptsTab:AddButton({
 
         -- Tool
         local tool = Instance.new("Tool")
-        tool.Name = "FreeCamTool"
+        tool.Name = "FreeCamByXenoHub"
+		tool.TextureId = "rbxassetid://106398840014061"
         tool.RequiresHandle = false
         tool.Parent = player.Backpack
 
