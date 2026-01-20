@@ -6881,3 +6881,78 @@ MusicTab:AddButton({
         end
     end
 })
+
+
+-- ===== Turkish confirmation & title fix (non-destructive patch) =====
+-- This patch watches for GUI elements created by the hub (or the redzlib window)
+-- and replaces Portuguese/Arabic/English "close script" texts and "LYRA HUB" title
+-- with Turkish texts and "XENO HUB". It's non-destructive: it only updates text fields.
+do
+    local Players = game:GetService("Players")
+    local player = Players.LocalPlayer
+    if not player then return end
+    local playerGui = player:WaitForChild("PlayerGui")
+
+    local function safeSetText(inst, text)
+        pcall(function()
+            if inst and (inst:IsA("TextLabel") or inst:IsA("TextButton") or inst:IsA("TextBox")) then
+                inst.Text = text
+            end
+        end)
+    end
+
+    local function fixGuiText(gui)
+        if not gui or type(gui.Name) ~= "string" then return end
+        local txt = tostring(gui.Text or "")
+        -- Replace known Portuguese confirmation phrase
+        if string.find(txt, "fechar o script") or string.find(txt, "fechar o script%?") or string.find(txt, "Você realmente deseja") then
+            safeSetText(gui, "Scripti gerçekten kapatmak istiyor musunuz?")
+        end
+
+        -- Replace common variants/literals (in case different languages appear)
+        if txt == "Are you sure you want to close the script?" or txt == "Are you sure?" then
+            safeSetText(gui, "Scripti gerçekten kapatmak istiyor musunuz?")
+        end
+
+        -- Replace LYRA HUB title if present
+        if txt:match("LYRA%s*HUB") then
+            safeSetText(gui, "XENO HUB")
+        end
+
+        -- Replace Arabic/Portuguese/English yes/no buttons with Turkish
+        if txt == "نعم" or txt == "Yes" or txt == "Sim" or txt == "Evet" then
+            safeSetText(gui, "Evet")
+        end
+        if txt == "لا" or txt == "No" or txt == "Não" or txt == "Hayır" then
+            safeSetText(gui, "Hayır")
+        end
+    end
+
+    local function scanDescendants(root)
+        for _, v in ipairs(root:GetDescendants()) do
+            fixGuiText(v)
+        end
+    end
+
+    -- Initial scan (safe, read-only except for text changes)
+    pcall(function() scanDescendants(playerGui) end)
+
+    -- Watch for newly created GUI pieces and attempt to fix them shortly after creation
+    playerGui.DescendantAdded:Connect(function(desc)
+        -- small delay to allow libraries to finish constructing complex modals
+        task.delay(0.03, function()
+            pcall(function()
+                fixGuiText(desc)
+                -- also check its siblings/parent for titles/buttons
+                local p = desc.Parent
+                if p then
+                    for _, s in ipairs(p:GetChildren()) do
+                        fixGuiText(s)
+                    end
+                end
+            end)
+        end)
+    end)
+end
+
+-- ===== End of patch =====
