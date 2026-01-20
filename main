@@ -416,7 +416,7 @@ Tab:AddButton({
     Desc = "Guest666 FE",
     Locked = false,
     Callback = function()
-       loadstring(game:HttpGet("https://raw.githubusercontent.com/lyrarepositorio-afk/swsw/refs/heads/main/Main.txt"))()
+       loadstring(game:HttpGet("https://raw.githubusercontent.com/xenorepositorio-afk/swsw/refs/heads/main/Main.txt"))()
     end
 })
 
@@ -481,7 +481,7 @@ Tab:AddButton({
 	Desc = "Executa o Goner fe",
 	Callback = function()
 		pcall(function()
-			loadstring(game:HttpGet("https://raw.githubusercontent.com/lyrarepositorio-afk/GONER/refs/heads/main/Main.txt"))()
+			loadstring(game:HttpGet("https://raw.githubusercontent.com/xenorepositorio-afk/GONER/refs/heads/main/Main.txt"))()
 		end)
 	end
 })
@@ -491,7 +491,7 @@ Tab:AddButton({
 	Desc = "Noly FE",
 	Callback = function()
 		pcall(function()
-			loadstring(game:HttpGet("https://raw.githubusercontent.com/lyrarepositorio-afk/gubby/refs/heads/main/Main.txt"))()
+			loadstring(game:HttpGet("https://raw.githubusercontent.com/xenorepositorio-afk/gubby/refs/heads/main/Main.txt"))()
 		end)
 	end
 })
@@ -530,13 +530,12 @@ Tab:AddButton({
     end
 })
 
-
 Tab:AddButton({
 	Name = "Herobrine",
 	Desc = "Herobrine FE",
 	Callback = function()
 		pcall(function()
-			loadstring(game:HttpGet("https://raw.githubusercontent.com/lyrarepositorio-afk/hEROBRINE/refs/heads/main/Main.txt"))()
+			loadstring(game:HttpGet("https://raw.githubusercontent.com/xenorepositorio-afk/hEROBRINE/refs/heads/main/Main.txt"))()
 		end)
 	end
 })
@@ -575,7 +574,7 @@ Tab:AddButton({
 	Description = "CARTOON CAT FE",
 	Callback = function()
 		pcall(function()
-			loadstring(game:HttpGet("https://raw.githubusercontent.com/lyrarepositorio-afk/cartoon-cat/refs/heads/main/Main.txt"))()
+			loadstring(game:HttpGet("https://raw.githubusercontent.com/xenorepositorio-afk/cartoon-cat/refs/heads/main/Main.txt"))()
 		end)
 	end
 })
