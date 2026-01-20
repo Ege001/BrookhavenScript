@@ -223,9 +223,9 @@ infoTab:AddDiscordInvite({
     Invite = "https://discord.gg/FxQzXqzH",
 })
 
-infoTab:AddSection({ "komut dosyası bilgisi" })
-infoTab:AddParagraph({ "Roblox Sahipleri: EgeKazak_Real1" })
-infoTab:AddParagraph({ "Roblox Sahipleri:", "XENO HUB" })
+infoTab:AddSection({ "📜 Komut Dosyası Bilgileri" })
+infoTab:AddParagraph({ "👤 Script Sahibi:", "EgeKazak_Real1" })
+infoTab:AddParagraph({ "🏷️ Hub & Geliştirici:", "XENO HUB & EgeKazak_Real1" })
 
 infoTab:AddSection({ "Bilgi" })
 
