@@ -4959,7 +4959,7 @@ scriptsTab:AddButton({
     end
 })
 
-local Tab = Window:MakeTab({"Koruma", "rbxassetid://11322093465"})
+local Tab = Window:MakeTab({"🛡️ Koruma", "rbxassetid://11322093465"})
 
 local LocalPlayer = game:GetService("Players").LocalPlayer
 local Workspace = game:GetService("Workspace")
@@ -4978,6 +4978,7 @@ function TeleportCarro:MostrarNotificacao(msg)
     print("🔔 "..msg)
 end
 
+-- 🛡️ Anti Fling Genel Fonksiyonu
 local function AntiFlingLoop(name, getFolderFunc)
     local active = false
     task.spawn(function()
@@ -5012,7 +5013,7 @@ local function AntiFlingLoop(name, getFolderFunc)
     end)
     return function(state)
         active = state
-        TeleportCarro:MostrarNotificacao(name.." "..(state and "ativado!" or "desativado!"))
+        TeleportCarro:MostrarNotificacao(name.." "..(state and "🟢 Aktif!" or "🔴 Devre Dışı!"))
         if not state then
             for _, item in ipairs(backupTables[name]) do
                 local parentFolder = getFolderFunc()
@@ -5023,36 +5024,51 @@ local function AntiFlingLoop(name, getFolderFunc)
     end
 end
 
--- BOTÕES DE PROTEÇÃO
+-- 🛠️ Butonlar
 Tab:AddButton({
-    Name = "AntiBug",
-    Description = "Devs: cahh,Night",
+    Name = "AntiBug 🐞",
+    Description = "Oyunu kastırmadan AntiBug'u uygular",
     Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/BRENOPOOF/Antglitch/refs/heads/main/Main.txt"))()
+        task.spawn(function()
+            local success, err = pcall(function()
+                local scriptCode = game:HttpGet("https://raw.githubusercontent.com/BRENOPOOF/Antglitch/refs/heads/main/Main.txt")
+                loadstring(scriptCode)()
+            end)
+            if success then
+                print("✅ AntiBug başarıyla yüklendi!")
+            else
+                warn("⚠️ AntiBug yüklenirken hata oluştu: "..tostring(err))
+            end
+        end)
     end
 })
 
 Tab:AddButton({
-    Name = "Anti Som",
-    Description = "anti som",
+    Name = "Anti Ses 🔇",
+    Description = "Tüm sesleri devre dışı bırakır",
     Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/BRENOPOOF/antaudiosdefdps/refs/heads/main/Main.txt"))()
+        local success, err = pcall(function()
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/BRENOPOOF/antaudiosdefdps/refs/heads/main/Main.txt"))()
+        end)
+        if success then
+            print("✅ AntiSes başarıyla aktif!")
+        else
+            warn("⚠️ AntiSes yüklenirken hata: "..tostring(err))
+        end
     end
 })
 
--- TOGGLES DE ANTI-FLING / SIT
+-- 🔒 Toggles: Anti Fling
 Tab:AddToggle({
-    Name = "Anti flings",
-    Description = "Remove Veiculos de outros jogadores automaticamente",
+    Name = "Anti Fling Araçlar 🚗",
+    Description = "Diğer oyuncuların araçlarını otomatik kaldırır",
     Default = false,
-    Callback = AntiFlingLoop("Vehicles", function()
-        return Workspace:FindFirstChild("Vehicles")
-    end)
+    Callback = AntiFlingLoop("Vehicles", function() return Workspace:FindFirstChild("Vehicles") end)
 })
 
 Tab:AddToggle({
-    Name = "Anti Canoe Fling",
-    Description = "Remove canoas de outros players automaticamente (reaparecem ao desativar)",
+    Name = "Anti Kano 🛶",
+    Description = "Diğer oyuncuların kanolarını kaldırır",
     Default = false,
     Callback = AntiFlingLoop("Canoes", function()
         local workspaceCom = Workspace:FindFirstChild("WorkspaceCom")
@@ -5061,21 +5077,18 @@ Tab:AddToggle({
 })
 
 Tab:AddToggle({
-    Name = "Anti Fling Jets",
-    Description = "Remove jets de outros jogadores automaticamente",
+    Name = "Anti Jet ✈️",
+    Description = "Diğer oyuncuların jetlerini kaldırır",
     Default = false,
     Callback = AntiFlingLoop("Jets", function()
         local folder = Workspace:FindFirstChild("WorkspaceCom")
-        if folder and folder:FindFirstChild("001_Airport") then
-            local storage = folder["001_Airport"]:FindFirstChild("AirportHanger")
-            if storage then return storage:FindFirstChild("001_JetStorage") and storage["001_JetStorage"]:FindFirstChild("JetAirport") end
-        end
+        return folder and folder:FindFirstChild("001_Airport") and folder["001_Airport"]:FindFirstChild("AirportHanger") and folder["001_Airport"]["AirportHanger"]:FindFirstChild("001_JetStorage") and folder["001_Airport"]["AirportHanger"]["001_JetStorage"]:FindFirstChild("JetAirport")
     end)
 })
 
 Tab:AddToggle({
-    Name = "Anti Fling Helicopteros",
-    Description = "Remove helicópteros de outros jogadores automaticamente",
+    Name = "Anti Helikopter 🚁",
+    Description = "Diğer oyuncuların helikopterlerini kaldırır",
     Default = false,
     Callback = AntiFlingLoop("Helis", function()
         local folder = Workspace:FindFirstChild("WorkspaceCom")
@@ -5084,8 +5097,8 @@ Tab:AddToggle({
 })
 
 Tab:AddToggle({
-    Name = "Top Fling Engelleme",
-    Description = "Remove SoccerBalls automaticamente",
+    Name = "Top Fling Engelleme ⚽",
+    Description = "Diğer oyuncuların toplarını kaldırır",
     Default = false,
     Callback = AntiFlingLoop("Balls", function()
         local folder = Workspace:FindFirstChild("WorkspaceCom")
@@ -5093,15 +5106,15 @@ Tab:AddToggle({
     end)
 })
 
--- Anti Sit
+-- 🪑 Anti Sit
 local antiSitActive = false
 Tab:AddToggle({
-    Name = "Oturma Engelleme",
-    Description = "Hayır deixa seu personagem sentar",
+    Name = "Oturma Engelleme 🪑",
+    Description = "Karakterinizin oturmasını engeller",
     Default = false,
     Callback = function(state)
         antiSitActive = state
-        TeleportCarro:MostrarNotificacao("Oturma Engelleme"..(state and "ativado!" or "desativado!"))
+        TeleportCarro:MostrarNotificacao("Oturma Engelleme "..(state and "🟢 Aktif!" or "🔴 Devre Dışı!"))
         task.spawn(function()
             while antiSitActive and LocalPlayer.Character do
                 local humanoid = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
@@ -5123,9 +5136,10 @@ Tab:AddToggle({
     end
 })
 
+-- 🔧 Lag Engelleme
 Tab:AddToggle({
-    Name = "Lag Engelleme",
-    Description = "Deduplicaçao automaticamente de ferramentas",
+    Name = "Lag Engelleme ⚡",
+    Description = "Araç ve ekipman tekrarlarını otomatik kaldırır",
     Default = false,
     Callback = function(state)
         local Players = game:GetService("Players")
@@ -5134,17 +5148,11 @@ Tab:AddToggle({
 
         if not state then return end
 
-        local function marcarIgnorado(player)
-            IGNORED_PLAYER = player
-        end
-
-        local function isTargetTool(inst)
-            return inst:IsA("Tool")
-        end
+        local function marcarIgnorado(player) IGNORED_PLAYER = player end
+        local function isTargetTool(inst) return inst:IsA("Tool") end
 
         local function gatherTools(player)
-            local found = {}
-            local containers = {}
+            local found, containers = {}, {}
             if player.Character then table.insert(containers, player.Character) end
             local backpack = player:FindFirstChildOfClass("Backpack")
             if backpack then table.insert(containers, backpack) end
@@ -5206,9 +5214,10 @@ Tab:AddToggle({
     end
 })
 
+-- 🔐 Anti Fling Kapı ve Blok
 Tab:AddToggle({
-    Name = "Anti Fling Portas",
-    Description = "Esconde/restaura todas as portas do mapa",
+    Name = "Anti Fling Kapılar 🚪",
+    Description = "Tüm kapıları gizler / geri getirir",
     Default = false,
     Callback = function(state)
         if not _G.hiddenDoors then _G.hiddenDoors = {} end
@@ -5236,7 +5245,7 @@ Tab:AddToggle({
                     table.insert(_G.hiddenDoors, doorData)
                 end
             end
-            print("🔧 " .. #_G.hiddenDoors .. " portas escondidas!")
+            print("🔧 " .. #_G.hiddenDoors .. " kapı gizlendi!")
         else
             for _, doorData in ipairs(_G.hiddenDoors or {}) do
                 if doorData.door and doorData.door.Parent then
@@ -5253,30 +5262,21 @@ Tab:AddToggle({
                     end
                 end
             end
-            print("✅ " .. #(_G.hiddenDoors or {}) .. " portas restauradas com funcionalidade!")
+            print("✅ Kapılar geri getirildi!")
             _G.hiddenDoors = {}
         end
     end
 })
 
 Tab:AddToggle({
-    Name = "Anti Fling Bloco",
-    Description = "Remove O Bloco Bugado",
+    Name = "Anti Fling Blok 🧱",
+    Description = "Hatalı blokları kaldırır / geri getirir",
     Default = false,
     Callback = function(state)
-        local Players = game:GetService("Players")
-        local player = Players.LocalPlayer
-        
-        if not _G.playerDoorData then 
-            _G.playerDoorData = {}
-        end
-        
+        if not _G.playerDoorData then _G.playerDoorData = {} end
         local function findPlayerDoor()
             local lotsFolder = workspace:FindFirstChild("001_Lots")
-            if not lotsFolder then 
-                return nil 
-            end
-            
+            if not lotsFolder then return nil end
             for _, lot in pairs(lotsFolder:GetChildren()) do
                 if lot:FindFirstChild("HousePickedByPlayer") then
                     local houseModel = lot.HousePickedByPlayer:FindFirstChild("HouseModel")
@@ -5286,30 +5286,22 @@ Tab:AddToggle({
                             local noLockDoor = model:FindFirstChild("NoLockHouseDoor")
                             if noLockDoor then
                                 local door = noLockDoor:FindFirstChild("Door")
-                                if door then
-                                    return door, noLockDoor
-                                end
+                                if door then return door, noLockDoor end
                             end
                         end
                     end
                 end
             end
-            
             return nil
         end
-        
         if state then
             local door, parent = findPlayerDoor()
             if door then
-                _G.playerDoorData = {
-                    door = door,
-                    parent = parent,
-                    name = door.Name
-                }
+                _G.playerDoorData = {door = door, parent = parent, name = door.Name}
                 door.Parent = nil
             end
         else
-            if _G.playerDoorData and _G.playerDoorData.door and _G.playerDoorData.parent then
+            if _G.playerDoorData.door and _G.playerDoorData.parent then
                 _G.playerDoorData.door.Parent = _G.playerDoorData.parent
                 _G.playerDoorData = {}
             end
