@@ -2305,29 +2305,60 @@ RGBTab:AddToggle({
     end
 })
 
+-- ========== BIO ==========
 RGBTab:AddToggle({
-    Name = "Bio RGB",
-    Desc = "Bio RGB",
+    Name = "💬 Bio RGB",
+    Desc = "Normal RGB",
     Default = false,
     Callback = function(v)
         rgbBio = v
         if v then
             startRGBLoop(function() return rgbBio end, function(color)
                 RE["1RPNam1eColo1r"]:FireServer("PickingRPBioColor", color)
-            end, 0.03)
+            end, 0.03, "normal")
         end
     end
 })
 
 RGBTab:AddToggle({
-    Name = "RGB Casa",
+    Name = "🌑 Bio Dark RGB",
+    Desc = "Dark RGB",
+    Default = false,
+    Callback = function(v)
+        rgbBioDark = v
+        if v then
+            startRGBLoop(function() return rgbBioDark end, function(color)
+                RE["1RPNam1eColo1r"]:FireServer("PickingRPBioColor", color)
+            end, 0.03, "dark")
+        end
+    end
+})
+
+RGBTab:AddToggle({
+    Name = "👑 Bio VIP Dark RGB",
+    Desc = "VIP Dark RGB",
+    Default = false,
+    Callback = function(v)
+        rgbBioVIP = v
+        if v then
+            startRGBLoop(function() return rgbBioVIP end, function(color)
+                RE["1RPNam1eColo1r"]:FireServer("PickingRPBioColor", color)
+            end, 0.03, "vip")
+        end
+    end
+})
+
+-- ========== CASA ==========
+RGBTab:AddToggle({
+    Name = "🏠 RGB Casa",
+    Desc = "Normal RGB",
     Default = false,
     Callback = function(v)
         rgbCasa = v
         if v then
             startRGBLoop(function() return rgbCasa end, function(color)
                 RE["1Player1sHous1e"]:FireServer("ColorPickHouse", color)
-            end, 0.1)
+            end, 0.1, "normal")
         end
     end
 })
