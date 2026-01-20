@@ -4152,119 +4152,105 @@ scriptsTab:AddButton({
     end
 })
 
--- FreeCamByXenoHub Tool
+scriptsTab:AddSection({ "🎥 Freecam Tool" })
 
-local Players = game:GetService("Players")
-local UserInputService = game:GetService("UserInputService")
-local RunService = game:GetService("RunService")
-local Workspace = game:GetService("Workspace")
-local TweenService = game:GetService("TweenService")
+scriptsTab:AddButton({
+    Name = "🎥 FreeCam Tool Al",
+    Callback = function()
+        local Players = game:GetService("Players")
+        local UserInputService = game:GetService("UserInputService")
+        local RunService = game:GetService("RunService")
+        local player = Players.LocalPlayer
+        local character = player.Character or player.CharacterAdded:Wait()
+        local humanoid = character:WaitForChild("Humanoid")
+        local cam = workspace.CurrentCamera
 
-local LocalPlayer = Players.LocalPlayer
-local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
-local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
-local Camera = Workspace.CurrentCamera
+        -- Tool oluştur
+        local tool = Instance.new("Tool")
+        tool.Name = "FreeCamByXenoHub"
+        tool.RequiresHandle = false
+        tool.CanBeDropped = true
+        tool.TextureId = "rbxassetid://130069738634749"
+        tool.Parent = player.Backpack
 
--- TOOL SETUP
-local Tool = Instance.new("Tool")
-Tool.Name = "FreeCamByXenoHub"
-Tool.TextureId = "rbxassetid://130069738634749"
-Tool.RequiresHandle = false
-Tool.Parent = LocalPlayer.Backpack
+        local freecamEnabled = false
+        local baseSpeed = 1
+        local speed = baseSpeed
+        local rotSpeed = 0.002
+        local rotation = Vector2.zero
+        local conn
+        local scrollConn
 
--- FREECAM VARIABLES
-local freecamActive = false
-local camSpeed = 1
-local camDirection = Vector3.new(0,0,0)
-local camCFrame = Camera.CFrame
-local originalControl = {}
+        -- Karakter sabit kalacak
+        local originalPlatformStand = humanoid.PlatformStand
 
--- UI SETUP
-local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
-ScreenGui.Name = "FreeCamUI"
-
-local SpeedLabel = Instance.new("TextLabel", ScreenGui)
-SpeedLabel.Size = UDim2.new(0, 120, 0, 30)
-SpeedLabel.Position = UDim2.new(0.5, -60, 0, 10)
-SpeedLabel.BackgroundTransparency = 0.5
-SpeedLabel.BackgroundColor3 = Color3.fromRGB(30,30,30)
-SpeedLabel.TextColor3 = Color3.fromRGB(255,255,255)
-SpeedLabel.Font = Enum.Font.SourceSansBold
-SpeedLabel.TextScaled = true
-SpeedLabel.Text = "Speed: "..camSpeed
-
--- INPUT
-local keys = {W=false,A=false,S=false,D=false}
-
-UserInputService.InputBegan:Connect(function(input,gpe)
-    if freecamActive then
-        if input.KeyCode == Enum.KeyCode.W then keys.W = true end
-        if input.KeyCode == Enum.KeyCode.A then keys.A = true end
-        if input.KeyCode == Enum.KeyCode.S then keys.S = true end
-        if input.KeyCode == Enum.KeyCode.D then keys.D = true end
-    end
-end)
-
-UserInputService.InputEnded:Connect(function(input,gpe)
-    if freecamActive then
-        if input.KeyCode == Enum.KeyCode.W then keys.W = false end
-        if input.KeyCode == Enum.KeyCode.A then keys.A = false end
-        if input.KeyCode == Enum.KeyCode.S then keys.S = false end
-        if input.KeyCode == Enum.KeyCode.D then keys.D = false end
-    end
-end)
-
--- TOOL ACTIVATION
-Tool.Equipped:Connect(function()
-    if freecamActive then return end
-    freecamActive = true
-
-    -- SAVE ORIGINAL CAMERA
-    camCFrame = Camera.CFrame
-    HumanoidRootPart.Anchored = true
-
-    -- SHOW SPEED UI
-    SpeedLabel.Visible = true
-
-    -- FREECAM LOOP
-    RunService.RenderStepped:Connect(function(delta)
-        if freecamActive then
-            local move = Vector3.new(0,0,0)
-            local camLook = Camera.CFrame.LookVector
-            local camRight = Camera.CFrame.RightVector
-
-            if keys.W then move = move + camLook end
-            if keys.S then move = move - camLook end
-            if keys.A then move = move - camRight end
-            if keys.D then move = move + camRight end
-
-            if move.Magnitude > 0 then
-                move = move.Unit * camSpeed
-                Camera.CFrame = Camera.CFrame + move
+        -- Scroll ile hız ayarı
+        scrollConn = UserInputService.InputChanged:Connect(function(input, gp)
+            if freecamEnabled and input.UserInputType == Enum.UserInputType.MouseWheel then
+                speed = math.clamp(speed + input.Position.Z * 0.5, 0.5, 10)
             end
-        end
-    end)
-end)
+        end)
 
-Tool.Unequipped:Connect(function()
-    freecamActive = false
-    HumanoidRootPart.Anchored = false
-    Camera.CFrame = camCFrame
-    SpeedLabel.Visible = false
-end)
+        local function getMoveDirection()
+            local dir = Vector3.zero
 
--- SPEED ADJUSTMENT
-UserInputService.InputBegan:Connect(function(input,gpe)
-    if freecamActive then
-        if input.KeyCode == Enum.KeyCode.Q then
-            camSpeed = math.max(1, camSpeed-1)
-            SpeedLabel.Text = "Speed: "..camSpeed
-        elseif input.KeyCode == Enum.KeyCode.E then
-            camSpeed = camSpeed+1
-            SpeedLabel.Text = "Speed: "..camSpeed
+            if UserInputService:IsKeyDown(Enum.KeyCode.W) then dir += Vector3.new(0, 0, -1) end
+            if UserInputService:IsKeyDown(Enum.KeyCode.S) then dir += Vector3.new(0, 0, 1) end
+            if UserInputService:IsKeyDown(Enum.KeyCode.A) then dir += Vector3.new(-1, 0, 0) end
+            if UserInputService:IsKeyDown(Enum.KeyCode.D) then dir += Vector3.new(1, 0, 0) end
+
+            return dir
         end
+
+        local function enableFreecam()
+            if freecamEnabled then return end
+            freecamEnabled = true
+
+            -- Karakter hareket etmesin
+            humanoid.PlatformStand = true
+
+            cam.CameraType = Enum.CameraType.Scriptable
+            cam.CFrame = cam.CFrame
+
+            UserInputService.MouseBehavior = Enum.MouseBehavior.LockCenter
+            UserInputService.MouseIconEnabled = false
+
+            conn = RunService.RenderStepped:Connect(function(dt)
+                local delta = UserInputService:GetMouseDelta()
+                rotation = rotation + Vector2.new(-delta.Y, -delta.X) * rotSpeed
+                rotation = Vector2.new(
+                    math.clamp(rotation.X, -math.rad(85), math.rad(85)),
+                    rotation.Y
+                )
+
+                local cf = CFrame.new(cam.CFrame.Position)
+                    * CFrame.Angles(0, rotation.Y, 0)
+                    * CFrame.Angles(rotation.X, 0, 0)
+
+                local moveDir = getMoveDirection()
+                cam.CFrame = cf + cf:VectorToWorldSpace(moveDir * speed)
+            end)
+        end
+
+        local function disableFreecam()
+            if not freecamEnabled then return end
+            freecamEnabled = false
+
+            -- Karakter hareket tekrar aktif
+            humanoid.PlatformStand = originalPlatformStand
+
+            if conn then conn:Disconnect() end
+            conn = nil
+
+            cam.CameraType = Enum.CameraType.Custom
+            UserInputService.MouseBehavior = Enum.MouseBehavior.Default
+            UserInputService.MouseIconEnabled = true
+        end
+
+        tool.Equipped:Connect(enableFreecam)
+        tool.Unequipped:Connect(disableFreecam)
     end
-end)
+})
 
 scriptsTab:AddSection({ "🚁 Drone Xeno" })
 
