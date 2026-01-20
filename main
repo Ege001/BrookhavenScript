@@ -1645,7 +1645,7 @@ end)()
 
 UpdateDropdown()
 
-local TabNuke = Window:MakeTab({"Skybox", "cloud"})
+local TabNuke = Window:MakeTab({"Skybox ☁️", "cloud"})
 
 TabNuke:AddSection({"Nuke"})
 
