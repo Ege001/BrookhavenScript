@@ -2099,7 +2099,7 @@ TabNuke:AddToggle({
 })
 
 local PlayerTab = Window:MakeTab({
-    Title = "👤 Oyuncu",
+    Title = "Oyuncu 👤",
     Icon = "rbxassetid://17132521951"
 })
 
