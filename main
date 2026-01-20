@@ -2213,7 +2213,7 @@ UserInputService.JumpRequest:Connect(function()
     end
 end)
 
-local RGBTab = Window:MakeTab({ "🌈 RGB", "rbxassetid://97889814027474" })
+local RGBTab = Window:MakeTab({ "RGB 🌈", "rbxassetid://97889814027474" })
 
 RGBTab:AddSection({ "🎨 ÁREA RGB" })
 
@@ -2428,7 +2428,7 @@ RGBTab:AddToggle({
     end
 })
 
-local CarTab = Window:MakeTab({"🚗 Veículo", "car"})
+local CarTab = Window:MakeTab({"Car 🚗 ", "car"})
 
 CarTab:AddSection({ "🛞 Decal Pneu" })
 
