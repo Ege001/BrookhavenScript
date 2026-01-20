@@ -4165,20 +4165,23 @@ scriptsTab:AddButton({
         local player = Players.LocalPlayer
         local character = player.Character or player.CharacterAdded:Wait()
         local humanoid = character:WaitForChild("Humanoid")
+        local root = character:WaitForChild("HumanoidRootPart")
         local cam = workspace.CurrentCamera
 
-        humanoid.PlatformStand = true
-        humanoid.AutoRotate = false
-
+        -- Tool
         local tool = Instance.new("Tool")
         tool.Name = "FreeCamTool"
         tool.RequiresHandle = false
         tool.Parent = player.Backpack
 
-        local gui = Instance.new("ScreenGui", player.PlayerGui)
+        -- UI
+        local gui = Instance.new("ScreenGui")
         gui.Name = "FreeCamUI"
+        gui.ResetOnSpawn = false
         gui.Enabled = false
+        gui.Parent = player:WaitForChild("PlayerGui")
 
+        -- Speed label
         local speedLabel = Instance.new("TextLabel", gui)
         speedLabel.Size = UDim2.new(0, 200, 0, 40)
         speedLabel.Position = UDim2.new(0.5, -100, 0, 10)
@@ -4186,6 +4189,7 @@ scriptsTab:AddButton({
         speedLabel.BackgroundTransparency = 0.3
         speedLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
         speedLabel.TextScaled = true
+        speedLabel.Font = Enum.Font.GothamBold
         speedLabel.Text = "Speed: 1"
 
         local function createBtn(txt, pos)
@@ -4195,15 +4199,19 @@ scriptsTab:AddButton({
             b.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
             b.TextColor3 = Color3.fromRGB(255, 255, 255)
             b.TextScaled = true
+            b.Font = Enum.Font.GothamBold
             b.Text = txt
+            b.AutoButtonColor = true
             return b
         end
 
+        -- Mobile WASD
         local btnW = createBtn("W", UDim2.new(0.1, 0, 0.65, -60))
         local btnA = createBtn("A", UDim2.new(0.05, 0, 0.65, 0))
         local btnS = createBtn("S", UDim2.new(0.1, 0, 0.65, 60))
         local btnD = createBtn("D", UDim2.new(0.15, 0, 0.65, 0))
 
+        -- Speed + / -
         local btnPlus = createBtn("+", UDim2.new(0.85, 0, 0.1, 0))
         local btnMinus = createBtn("-", UDim2.new(0.75, 0, 0.1, 0))
 
@@ -4221,12 +4229,14 @@ scriptsTab:AddButton({
         btnD.MouseButton1Down:Connect(function() mobileInput.D = true end)
         btnD.MouseButton1Up:Connect(function() mobileInput.D = false end)
 
+        -- Freecam vars
         local freecam = false
         local speed = 1
         local rotation = Vector2.new(0, 0)
-        local rotSpeed = 1 -- SENİN İSTEDİĞİN GİBİ ÇOK HIZLI DÖNÜŞ
+        local rotSpeed = 1 -- hızlı dönüş
         local conn
 
+        -- Speed buttons (mobile)
         btnPlus.MouseButton1Click:Connect(function()
             speed = math.clamp(speed + 0.5, 0.5, 10)
             speedLabel.Text = "Speed: " .. speed
@@ -4237,6 +4247,7 @@ scriptsTab:AddButton({
             speedLabel.Text = "Speed: " .. speed
         end)
 
+        -- Scroll speed (PC)
         UserInputService.InputChanged:Connect(function(input)
             if freecam and input.UserInputType == Enum.UserInputType.MouseWheel then
                 speed = math.clamp(speed + input.Position.Z * 0.5, 0.5, 10)
@@ -4244,9 +4255,9 @@ scriptsTab:AddButton({
             end
         end)
 
-        -- GAMEPAD SPEED PRESETS (1,2,3)
-        UserInputService.InputBegan:Connect(function(input)
-            if not freecam then return end
+        -- Speed presets 1 / 2 / 3
+        UserInputService.InputBegan:Connect(function(input, gp)
+            if not freecam or gp then return end
 
             if input.KeyCode == Enum.KeyCode.One then
                 speed = 1
@@ -4262,15 +4273,16 @@ scriptsTab:AddButton({
         local function getMoveDir()
             local dir = Vector3.zero
 
+            -- Keyboard + mobile
             if UserInputService:IsKeyDown(Enum.KeyCode.W) or mobileInput.W then dir += Vector3.new(0, 0, -1) end
             if UserInputService:IsKeyDown(Enum.KeyCode.S) or mobileInput.S then dir += Vector3.new(0, 0, 1) end
             if UserInputService:IsKeyDown(Enum.KeyCode.A) or mobileInput.A then dir += Vector3.new(-1, 0, 0) end
             if UserInputService:IsKeyDown(Enum.KeyCode.D) or mobileInput.D then dir += Vector3.new(1, 0, 0) end
 
-            -- GAMEPAD JOYSTICK
-            local gp = UserInputService:GetGamepadState(Enum.UserInputType.Gamepad1)
-            if gp and gp[1] then
-                local stick = gp[1].Position
+            -- Gamepad left stick
+            local states = UserInputService:GetGamepadState(Enum.UserInputType.Gamepad1)
+            if states[1] then
+                local stick = states[1].Position
                 dir += Vector3.new(stick.X, 0, -stick.Y)
             end
 
@@ -4278,17 +4290,21 @@ scriptsTab:AddButton({
         end
 
         local function getGamepadRotation()
-            local gp = UserInputService:GetGamepadState(Enum.UserInputType.Gamepad1)
-            if gp and gp[2] then
-                local stick = gp[2].Position
+            local states = UserInputService:GetGamepadState(Enum.UserInputType.Gamepad1)
+            if states[2] then
+                local stick = states[2].Position
                 return Vector2.new(-stick.Y, -stick.X)
             end
             return Vector2.zero
         end
 
         local function enableFreecam()
+            if freecam then return end
             freecam = true
             gui.Enabled = true
+
+            -- Karakteri sabitle ama animasyonları bozma
+            root.Anchored = true
 
             cam.CameraType = Enum.CameraType.Scriptable
             UserInputService.MouseBehavior = Enum.MouseBehavior.LockCenter
@@ -4309,10 +4325,17 @@ scriptsTab:AddButton({
         end
 
         local function disableFreecam()
+            if not freecam then return end
             freecam = false
             gui.Enabled = false
 
-            if conn then conn:Disconnect() end
+            if conn then
+                conn:Disconnect()
+                conn = nil
+            end
+
+            -- Karakteri geri aç
+            root.Anchored = false
 
             cam.CameraType = Enum.CameraType.Custom
             UserInputService.MouseBehavior = Enum.MouseBehavior.Default
