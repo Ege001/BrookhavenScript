@@ -4897,7 +4897,7 @@ Tab:AddButton({
 -- ==================== END PREMIUM ====================
 
 
-local Tab = Window:MakeTab({"Itens/fun", "rbxassetid://127904742940104"})
+local Tab = Window:MakeTab({"🎉 İtems / Fun 🎮", "rbxassetid://127904742940104"})
 
 -- MEGA VIP & ALL GAMEPASSES MENU
 Tab:AddButton({
