@@ -4899,6 +4899,77 @@ Tab:AddButton({
 
 local Tab = Window:MakeTab({"Itens/fun", "rbxassetid://127904742940104"})
 
+-- VIP EMOTE 67 (TAB BUTTON | GUI YOK)
+
+Tab:AddButton({
+    Title = "VIP EMOTE 67",
+    Locked = false,
+    Callback = function()
+
+        local Players = game:GetService("Players")
+        local ReplicatedStorage = game:GetService("ReplicatedStorage")
+        local plr = Players.LocalPlayer
+
+        -- 🔍 Brookhaven trigger bul
+        local trigger =
+            ReplicatedStorage:FindFirstChild("1Playe1rTrigge1rEven1t")
+            or ReplicatedStorage:FindFirstChild("1PlayerTriggerEvent")
+            or ReplicatedStorage:FindFirstChild("RemoteEvent")
+
+        if not trigger then
+            for _,v in ipairs(ReplicatedStorage:GetDescendants()) do
+                if v:IsA("RemoteEvent") then
+                    trigger = v
+                    break
+                end
+            end
+        end
+
+        -- 🔥 FireServer spam (VIP / ADS / PATCH ZORLAMA)
+        if trigger and trigger.FireServer then
+            local calls = {
+                {"PlayEmote","67",plr},
+                {"PlayEmote",67,plr},
+                {"Emote","67"},
+                {"Emotes","67",true},
+                {"AcceptedToolToServer","67",plr},
+                {"GetButton","67"},
+                {"AdsReward","Emote67"},
+            }
+
+            for _,args in ipairs(calls) do
+                pcall(function()
+                    trigger:FireServer(unpack(args))
+                end)
+            end
+        end
+
+        -- 🎬 ZORLA ANİMASYON (VİDEODAKİ GİBİ)
+        pcall(function()
+            local char = plr.Character or plr.CharacterAdded:Wait()
+            local hum = char:FindFirstChildOfClass("Humanoid")
+            if not hum then return end
+
+            local animator = hum:FindFirstChildOfClass("Animator") or Instance.new("Animator", hum)
+
+            local emotes = ReplicatedStorage:FindFirstChild("Emotes")
+            if not emotes then return end
+
+            local e67 = emotes:FindFirstChild("67")
+            if not e67 then return end
+
+            local anim = e67:FindFirstChildWhichIsA("Animation", true)
+            if not anim then return end
+
+            local track = animator:LoadAnimation(anim)
+            track.Looped = true
+            track.Priority = Enum.AnimationPriority.Action
+            track:Play()
+        end)
+
+    end
+})
+
 -- MEGA VIP & ALL GAMEPASSES MENU
 Tab:AddButton({
     Title = "Mega VIP & Gamepass Menüsünü Aç",
