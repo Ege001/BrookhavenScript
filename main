@@ -8,21 +8,28 @@ local ROXO_PRINCIPAL = Color3.fromRGB(145, 90, 230)
 local ROXO_MEDIO     = Color3.fromRGB(110, 70, 190)
 local ROXO_ESCURO    = Color3.fromRGB(55, 35, 110)
 
+
+-- ========== XENO HUB LOADING v2.0 ==========
+local XENO_VERSION = "v2.0"
+
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "XenoHubLoading"
+ScreenGui.Name = "XenoHubLoading_v2"
 ScreenGui.IgnoreGuiInset = true
+ScreenGui.ResetOnSpawn = false
 ScreenGui.Parent = player:WaitForChild("PlayerGui")
 
 local Sound = Instance.new("Sound")
 Sound.SoundId = "rbxassetid://14145620056"
 Sound.Volume = 0.7
 Sound.Looped = true
+Sound.Name = "XenoLoadingSound"
 Sound.Parent = ScreenGui
-Sound:Play()
+pcall(function() Sound:Play() end)
 
 local Frame = Instance.new("Frame")
 Frame.Size = UDim2.new(1,0,1,0)
 Frame.BackgroundColor3 = Color3.fromRGB(0,0,0)
+Frame.BackgroundTransparency = 1
 Frame.Parent = ScreenGui
 
 local Gradient = Instance.new("UIGradient")
@@ -34,7 +41,12 @@ Gradient.Color = ColorSequence.new{
 Gradient.Rotation = 90
 Gradient.Parent = Frame
 
--- Noktalar
+-- soft fade-in
+Frame:TweenSizeAndPosition(UDim2.new(1,0,1,0), Frame.Position, Enum.EasingDirection.InOut, Enum.EasingStyle.Sine, 0.5, true)
+
+-- decorative dots (kept but optimized)
+local dotsFolder = Instance.new("Folder", Frame)
+dotsFolder.Name = "LoadingDots_v2"
 for i = 1, 35 do
     local ponto = Instance.new("Frame")
     ponto.Size = UDim2.new(0, math.random(4,7), 0, math.random(4,7))
@@ -42,7 +54,7 @@ for i = 1, 35 do
     ponto.AnchorPoint = Vector2.new(0.5,0.5)
     ponto.BackgroundColor3 = ROXO_PRINCIPAL
     ponto.BackgroundTransparency = 0.25
-    ponto.Parent = Frame
+    ponto.Parent = dotsFolder
     Instance.new("UICorner", ponto).CornerRadius = UDim.new(1,0)
 
     local stroke = Instance.new("UIStroke")
@@ -53,15 +65,17 @@ for i = 1, 35 do
 
     task.spawn(function()
         while ScreenGui.Parent do
-            TweenService:Create(ponto,TweenInfo.new(math.random(2,3),Enum.EasingStyle.Sine,Enum.EasingDirection.InOut),{Size=UDim2.new(0,9,0,9),BackgroundTransparency=0.05}):Play()
-            task.wait(1.5)
-            TweenService:Create(ponto,TweenInfo.new(math.random(2,3),Enum.EasingStyle.Sine,Enum.EasingDirection.InOut),{Size=UDim2.new(0,5,0,5),BackgroundTransparency=0.35}):Play()
-            task.wait(1.5)
+            TweenService:Create(ponto,TweenInfo.new(math.random(2,4),Enum.EasingStyle.Sine,Enum.EasingDirection.InOut),{Size=UDim2.new(0,9,0,9),BackgroundTransparency=0.05}):Play()
+            task.wait(1 + math.random() * 0.5)
+            TweenService:Create(ponto,TweenInfo.new(math.random(2,4),Enum.EasingStyle.Sine,Enum.EasingDirection.InOut),{Size=UDim2.new(0,5,0,5),BackgroundTransparency=0.35}):Play()
+            task.wait(1 + math.random() * 0.5)
         end
     end)
 end
 
--- Çizgiler
+-- animated lines
+local linesFolder = Instance.new("Folder", Frame)
+linesFolder.Name = "LoadingLines_v2"
 for i=1,20 do
     local line = Instance.new("Frame")
     line.Size = UDim2.new(0, math.random(60,200), 0, 2)
@@ -69,7 +83,7 @@ for i=1,20 do
     line.AnchorPoint = Vector2.new(0,0.5)
     line.BackgroundColor3 = ROXO_PRINCIPAL
     line.BackgroundTransparency = 0.35
-    line.Parent = Frame
+    line.Parent = linesFolder
     Instance.new("UICorner", line).CornerRadius = UDim.new(1,0)
 
     task.spawn(function()
@@ -82,22 +96,23 @@ for i=1,20 do
     end)
 end
 
--- Başlık
+-- Title
 local Title = Instance.new("TextLabel")
 Title.Size = UDim2.new(0.7,0,0.12,0)
-Title.Position = UDim2.new(0.5,0,0.1,0)
+Title.Position = UDim2.new(0.5,0,0.08,0)
 Title.AnchorPoint = Vector2.new(0.5,0)
 Title.BackgroundTransparency = 1
-Title.Text = "💎 XENO HUB 🚀"
+Title.Text = "💎 XENO HUB "..XENO_VERSION.." 🚀"
 Title.Font = Enum.Font.GothamBlack
 Title.TextScaled = true
 Title.TextColor3 = ROXO_PRINCIPAL
 Title.Parent = Frame
+Instance.new("UICorner", Title).CornerRadius = UDim.new(0.05,0)
 
--- Avatar
+-- Avatar + rotation (kept)
 local LogoFrame = Instance.new("Frame")
 LogoFrame.Size = UDim2.new(0,110,0,110)
-LogoFrame.Position = UDim2.new(0.5,0,0.35,0)
+LogoFrame.Position = UDim2.new(0.5,0,0.34,0)
 LogoFrame.AnchorPoint = Vector2.new(0.5,0.5)
 LogoFrame.BackgroundTransparency = 1
 LogoFrame.Parent = Frame
@@ -116,17 +131,20 @@ Stroke.Color = ROXO_PRINCIPAL
 Stroke.Transparency = 0.15
 Stroke.Parent = Avatar
 
--- Döndürme
 local angle = 0
-RunService.RenderStepped:Connect(function(dt)
+local rotateConn = RunService.RenderStepped:Connect(function(dt)
     angle += dt * 30
-    LogoFrame.Rotation = angle % 360
+    if LogoFrame and LogoFrame.Parent then
+        LogoFrame.Rotation = angle % 360
+    else
+        rotateConn:Disconnect()
+    end
 end)
 
--- Kullanıcı adı
+-- Username & subtitle
 local Nick = Instance.new("TextLabel")
 Nick.Size = UDim2.new(0.45,0,0.05,0)
-Nick.Position = UDim2.new(0.5,0,0.53,0)
+Nick.Position = UDim2.new(0.5,0,0.51,0)
 Nick.AnchorPoint = Vector2.new(0.5,0)
 Nick.BackgroundTransparency = 1
 Nick.Text = "👑 "..player.Name
@@ -135,10 +153,9 @@ Nick.TextScaled = true
 Nick.TextColor3 = ROXO_PRINCIPAL
 Nick.Parent = Frame
 
--- Alt yazı animasyonu
 local Sub = Instance.new("TextLabel")
 Sub.Size = UDim2.new(0.6,0,0.05,0)
-Sub.Position = UDim2.new(0.5,0,0.6,0)
+Sub.Position = UDim2.new(0.5,0,0.58,0)
 Sub.AnchorPoint = Vector2.new(0.5,0)
 Sub.BackgroundTransparency = 1
 Sub.Font = Enum.Font.Gotham
@@ -146,32 +163,30 @@ Sub.TextScaled = true
 Sub.TextColor3 = ROXO_MEDIO
 Sub.Parent = Frame
 
+-- animated subtitle (keeps previous behavior)
 task.spawn(function()
-    local dots = ""
     while ScreenGui.Parent do
         for i=1,3 do
-            dots = string.rep(".", i)
-            Sub.Text = "Brookhaven'a giriliyor"..dots
-            task.wait(0.5)
+            Sub.Text = "Brookhaven'a giriliyor" .. string.rep(".", i)
+            task.wait(0.45)
         end
     end
 end)
 
--- Loading bar
+-- Loading bar v2: smoother tween + percent text
 local BarBG = Instance.new("Frame")
-BarBG.Size = UDim2.new(0.6,0,0.05,0)
-BarBG.Position = UDim2.new(0.2,0,0.8,0)
+BarBG.Size = UDim2.new(0.6,0,0.04,0)
+BarBG.Position = UDim2.new(0.2,0,0.78,0)
 BarBG.BackgroundColor3 = ROXO_ESCURO
 BarBG.Parent = Frame
-Instance.new("UICorner", BarBG).CornerRadius = UDim.new(0.3,0)
+Instance.new("UICorner", BarBG).CornerRadius = UDim.new(0.25,0)
 
 local Bar = Instance.new("Frame")
 Bar.Size = UDim2.new(0,0,1,0)
 Bar.BackgroundColor3 = ROXO_PRINCIPAL
 Bar.Parent = BarBG
-Instance.new("UICorner", Bar).CornerRadius = UDim.new(0.3,0)
+Instance.new("UICorner", Bar).CornerRadius = UDim.new(0.25,0)
 
--- Glow efekti
 local Glow = Instance.new("UIGradient")
 Glow.Color = ColorSequence.new({ColorSequenceKeypoint.new(0, Color3.fromRGB(200,150,255)), ColorSequenceKeypoint.new(1, ROXO_PRINCIPAL)})
 Glow.Rotation = 90
@@ -179,7 +194,7 @@ Glow.Parent = Bar
 
 local Percent = Instance.new("TextLabel")
 Percent.Size = UDim2.new(0.6,0,0.05,0)
-Percent.Position = UDim2.new(0.2,0,0.87,0)
+Percent.Position = UDim2.new(0.2,0,0.83,0)
 Percent.BackgroundTransparency = 1
 Percent.Text = "0%"
 Percent.Font = Enum.Font.GothamBold
@@ -187,16 +202,34 @@ Percent.TextScaled = true
 Percent.TextColor3 = Color3.new(1,1,1)
 Percent.Parent = Frame
 
--- Progress
+-- Helper functions
+local function updateProgress(value)
+    value = math.clamp(value, 0, 100)
+    local newWidth = UDim2.new(value/100, 0, 1, 0)
+    TweenService:Create(Bar, TweenInfo.new(0.35, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = newWidth}):Play()
+    Percent.Text = tostring(math.floor(value)) .. "%"
+end
+
+local function closeLoadingScreen()
+    pcall(function() Sound:Stop() end)
+    -- fade out
+    TweenService:Create(Frame, TweenInfo.new(0.5, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {BackgroundTransparency = 1}):Play()
+    TweenService:Create(Title, TweenInfo.new(0.4, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {TextTransparency = 1}):Play()
+    task.wait(0.55)
+    if ScreenGui and ScreenGui.Parent then
+        ScreenGui:Destroy()
+    end
+end
+
+-- Progress simulation (kept timing similar but tweens for smoothness)
 for i=1,100 do
-    Bar.Size = UDim2.new(i/100,0,1,0)
-    Percent.Text = i.."%"
-    task.wait(0.04)
+    updateProgress(i)
+    task.wait(0.035)
 end
 
 task.wait(0.5)
-Sound:Stop()
-ScreenGui:Destroy()
+closeLoadingScreen()
+-- ========== End loading v2 ==========
 
 local redzlib = loadstring(game:HttpGet("https://raw.githubusercontent.com/kayrus999/kayrus99/refs/heads/main/kayrusLINDO"))()
 
