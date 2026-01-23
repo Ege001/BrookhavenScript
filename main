@@ -4900,7 +4900,7 @@ Tab:AddButton({
 local Tab = Window:MakeTab({"🎉 İtems / Fun 🎮", "rbxassetid://127904742940104"})
 
 Tab:AddButton({
-    Title = "Futuristic Theme (Client-only)",
+    Title = "Futuristic Theme (PATCH)",
     Locked = false,
     Callback = function()
         local Players = game:GetService("Players")
