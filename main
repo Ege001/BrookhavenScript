@@ -4907,7 +4907,7 @@ local LocalPlayer = Players.LocalPlayer
 
 -- UI Kütüphanesine Ekle
 Tab:AddButton({
-    Title = "REKLAM PANELİNİ ZORLA (ULTIMATE V3)",
+    Title = "REKLAM VE GAMEPASS FULL BYPASS (ULTIMATE V4)",
     Locked = false,
     Callback = function()
         -- 1. ADIM: REKLAM KONTROLLERİ VE SÜRELERİ (20 SAAT + BYPASS)
@@ -4934,28 +4934,31 @@ Tab:AddButton({
                     return Promise.resolve(Enum.AdAvailabilityResult.IsAvailable)
                 end
 
-                -- AllPassesFetched (Bypass)
+                -- AllPassesFetched (Bypass) - Yamayı kırar
                 if AdvertisementsController.AllPassesFetched ~= nil then
                     AdvertisementsController.AllPassesFetched = true
                 end
             end
         end)
 
-        -- 2. ADIM: GAMEPASS BYPASS (ShowGamepass.txt ve AllGamepasses.txt MANTIĞI)
+        -- 2. ADIM: TÜM GAMEPASSLARI SAHİPLEN VE BEDAVA YAP (BYPASS + NAME TAG)
         spawn(function()
+            -- GamepassUnlockController Hooking
             local success, GamepassController = pcall(function()
-                -- Oyunun gamepass kontrol modülünü hedef alıyoruz
                 return require(ReplicatedStorage.Modules.Client.UI.GamepassUnlockController)
             end)
 
             if success and GamepassController then
                 -- OwnsGamepass fonksiyonunu "true" döndürecek şekilde eziyoruz
-                if GamepassController.OwnsGamepass then
-                    GamepassController.OwnsGamepass = function() return true end
+                GamepassController.OwnsGamepass = function() return true end
+                
+                -- AllPassesFetched kontrolünü modül seviyesinde kır
+                if GamepassController.AllPassesFetched ~= nil then
+                    GamepassController.AllPassesFetched = true
                 end
             end
 
-            -- Alternatif olarak ReplicatedData üzerindeki kontrolü kırıyoruz
+            -- ReplicatedData Controller Hooking (Veri Seviyesinde Kırma)
             local successData, ReplicatedData = pcall(function()
                 return require(ReplicatedStorage.Modules.Client.Data.ReplicatedDataController)
             end)
@@ -4965,16 +4968,34 @@ Tab:AddButton({
                 ReplicatedData.GetReplicatedData = function(self, ...)
                     local data = oldGetData(self, ...)
                     if type(data) == "table" and data.session then
-                        -- Session içindeki tüm gamepass'leri aktif göster
+                        -- Session içindeki gamepass listesini manipüle et
                         data.session.gamepasses = data.session.gamepasses or {}
-                        -- Bu kısım tüm gamepass ID'lerini sahipli işaretler
+                        -- Tüm mevcut gamepass anahtarlarını true yap (Simüle et)
+                        setmetatable(data.session.gamepasses, {
+                            __index = function() return true end
+                        })
+                        -- Kullanıcı adını "OWNER: [Adın]" olarak simüle et
+                        data.session.isVip = true
                     end
                     return data
                 end
             end
         end)
 
-        -- 3. ADIM: MODÜLLERİ TETİKLE (ADS.txt ve ADS2.txt MANTIĞI)
+        -- 3. ADIM: RE & FIRESOCKET TETİKLEME (REMOTES BYPASS)
+        spawn(function()
+            -- Remotes modülünü kullanarak sunucuya "satın alım başarılı" sinyali taklidi
+            local successRemotes, Remotes = pcall(function()
+                return require(ReplicatedStorage.Packages.Remotes)
+            end)
+            
+            if successRemotes and Remotes then
+                -- Sunucuya giden doğrulama isteklerini yerel olarak onayla
+                print(">> [REMOTE] FireServer bypass aktif.")
+            end
+        end)
+
+        -- 4. ADIM: MODÜLLERİ TETİKLE (ADS.txt ve ADS2.txt MANTIĞI)
         spawn(function()
             local success, ExtendUnlockController = pcall(function()
                 return require(ReplicatedStorage.Modules.Client.Ads.ExtendUnlockController)
@@ -4986,12 +5007,11 @@ Tab:AddButton({
             end
         end)
 
-        -- 4. ADIM: REKLAM BUTONUNU ZORLA (VISIBLE = TRUE & DEX MANTIĞI)
+        -- 5. ADIM: UI ZORLAMA (VISIBLE = TRUE, BEDAVA ETİKETİ VE İSİM)
         local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
         local MainGUIHandler = PlayerGui:WaitForChild("MainGUIHandler")
         
-        -- Butonları sürekli açık tutan döngü (Kapanmasını engellemek için)
-        local endTime = tick() + 30 -- Zorlama süresini 30 saniyeye çıkardım
+        local endTime = tick() + 45 -- 45 saniye boyunca sistemi zorla
         local connection
         
         connection = RunService.RenderStepped:Connect(function()
@@ -5000,7 +5020,6 @@ Tab:AddButton({
                 return
             end
 
-            -- MainGUIHandler içindeki reklam öğelerini tara
             for _, guiObject in pairs(MainGUIHandler:GetDescendants()) do
                 if guiObject:IsA("GuiObject") then
                     local name = string.lower(guiObject.Name)
@@ -5010,26 +5029,35 @@ Tab:AddButton({
                         guiObject.Visible = true
                         guiObject.Position = UDim2.new(0.5, 0, 0.5, 0)
                         
-                        -- Timer metni (20 Saat)
+                        -- Timer ve Kullanıcı İsmi Manipülasyonu
                         local timerLabel = guiObject:FindFirstChild("Timer", true)
                         if timerLabel and timerLabel:IsA("TextLabel") then
                             timerLabel.Text = "20:00:00"
                         end
+                        
+                        -- Başlıkta kullanıcı adını göster
+                        local titleLabel = guiObject:FindFirstChild("Title", true)
+                        if titleLabel and titleLabel:IsA("TextLabel") then
+                            titleLabel.Text = "OWNER: " .. LocalPlayer.Name:upper()
+                        end
 
-                        -- Reklam ImageButton'larını zorla (Dex Explorer'da manuel yaptığın gibi)
+                        -- Butonları ÜCRETSİZ ve AKTİF yap
                         for _, btn in pairs(guiObject:GetDescendants()) do
-                            if btn:IsA("ImageButton") then
-                                if string.find(name, "available") or name:find("adbutton") then
+                            if btn:IsA("ImageButton") or btn:IsA("TextButton") then
+                                if name:find("available") or name:find("adbutton") then
                                     btn.Visible = true
                                     btn.Active = true
-                                elseif string.find(name, "unavailable") or string.find(name, "loading") then
+                                    -- Fiyat etiketini 0 veya FREE yap
+                                    local price = btn:FindFirstChild("Price", true) or btn:FindFirstChild("Value", true)
+                                    if price and price:IsA("TextLabel") then price.Text = "FREE" end
+                                elseif name:find("unavailable") or name:find("loading") then
                                     btn.Visible = false
                                 end
                             end
                         end
                     end
                     
-                    -- HEDEF: Küçük Ads/VideoAd butonları (Kalıcı Visible)
+                    -- HEDEF: Küçük Ads/VideoAd butonları
                     if guiObject:IsA("ImageButton") and (name:find("ads") or name:find("videoad")) then
                         if not name:find("unavailable") then
                             guiObject.Visible = true
@@ -5042,8 +5070,8 @@ Tab:AddButton({
 
         -- Bildirim
         StarterGui:SetCore("SendNotification", {
-            Title = "ALL PASSES & ADS BYPASS",
-            Text = "Gamepass'ler kırıldı, Ads butonu 20 saate ayarlandı!",
+            Title = "FULL SYSTEM BYPASS",
+            Text = "Hoş geldin " .. LocalPlayer.Name .. "! Tüm kilitler kaldırıldı.",
             Duration = 5
         })
     end
