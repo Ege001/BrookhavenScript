@@ -4848,6 +4848,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local StarterGui = game:GetService("StarterGui")
+local UserInputService = game:GetService("UserInputService")
 local LocalPlayer = Players.LocalPlayer
 
 -- UI Kütüphanesine Ekle
@@ -4864,48 +4865,49 @@ Tab:AddButton({
             if success and AdvertisementsController then
                 local Promise = require(ReplicatedStorage.Packages.Promise)
                 
-                -- Reklam süresini 10 dakika (600 saniye) veya 20 saat olarak tetikle
-                -- Oyunun beklediği ödül süresini burada manipüle ediyoruz
+                -- Reklam süresini 20 saat olarak ayarla (PC & Mobil Uyumluluk)
                 AdvertisementsController.GetUnlockedDuration = function()
-                    return 72000 -- 20 Saatlik tam yetki
+                    return 72000 
                 end
 
-                -- Reklamların her zaman uygun ve hazır olmasını sağla
+                -- Reklamların her zaman hazır olduğunu simüle et
                 AdvertisementsController.IsEligibleForRewardedVideoAd = function() return true end
                 AdvertisementsController.IsRewardedVideoAdReady = function()
                     return Promise.resolve(Enum.AdAvailabilityResult.IsAvailable)
                 end
 
-                -- AllPassesFetched Yamasını Kır (ADS.txt içindeki kontrolü atlar)
+                -- AllPassesFetched Yamasını Kır
                 if AdvertisementsController.AllPassesFetched ~= nil then
                     AdvertisementsController.AllPassesFetched = true
+                end
+
+                -- REKLAM BİTİNCE EŞYAYI VERME MANTIĞI (PC/Mobile Fix)
+                -- Bir reklam butonuna basıldığında beklemeden ödülü tetikler
+                local oldShowVideo = AdvertisementsController.ShowRewardedVideoAd
+                AdvertisementsController.ShowRewardedVideoAd = function(self, ...)
+                    -- Reklam izleme sürecini bypass et ve direkt "Başarılı" döndür
+                    return Promise.resolve(true)
                 end
             end
         end)
 
-        -- 2. ADIM: PREMIUM ÖZELLİKLERİ VE GAMEPASSLERİ TETİKLE (FIRESERVER & RE)
+        -- 2. ADIM: PREMIUM ÖZELLİKLERİ VE GAMEPASSLERİ TETİKLE
         spawn(function()
-            -- Sunucu tarafındaki doğrulamaları (RemoteEvent) bypass et
             local successRemotes, Remotes = pcall(function()
                 return require(ReplicatedStorage.Packages.Remotes)
             end)
             
             if successRemotes and Remotes then
-                -- Reklam izleme ve satın alım sinyallerini (FireServer) sunucuya "Başarılı" olarak gönder
-                -- Bu, butonun ötesinde sistemin çalıştığını doğrular
                 print(">> [BYPASS] RemoteEvent ve FireServer yetkileri aktif.")
             end
 
-            -- TÜM GAMEPASS MODÜLLERİNİ EZ (HORSE, MUSIC, SPEED, HELICOPTER)
+            -- TÜM GAMEPASS MODÜLLERİNİ EZ
             local successG, GamepassController = pcall(function()
                 return require(ReplicatedStorage.Modules.Client.UI.GamepassUnlockController)
             end)
 
             if successG and GamepassController then
-                -- OwnsGamepass'i her zaman True yap (Tüm kilitli içerikleri açar)
                 GamepassController.OwnsGamepass = function() return true end
-                
-                -- Modül seviyesinde AllPassesFetched bypass (Yama engelini kaldırır)
                 if GamepassController.AllPassesFetched ~= nil then
                     GamepassController.AllPassesFetched = true
                 end
@@ -4922,7 +4924,6 @@ Tab:AddButton({
                     local data = oldGetData(self, ...)
                     if type(data) == "table" and data.session then
                         data.session.gamepasses = data.session.gamepasses or {}
-                        -- Tüm gamepass ID'lerini sahipli olarak işaretle (Metatable bypass)
                         setmetatable(data.session.gamepasses, {
                             __index = function() return true end
                         })
@@ -4933,11 +4934,10 @@ Tab:AddButton({
             end
         end)
 
-        -- 3. ADIM: REKLAM TETİKLEME (DEX MANTIĞI İLE TÜM ADS'LERİ ÇALIŞTIR)
+        -- 3. ADIM: MOBİL VE PC UYUMLU DÖNGÜSEL GÖRÜNÜRLÜK (DEX MANTIĞI)
         local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
         local MainGUIHandler = PlayerGui:WaitForChild("MainGUIHandler")
         
-        -- Sistemin sürekliliğini sağlayan döngü
         local endTime = tick() + 60 
         local connection
         
@@ -4961,16 +4961,15 @@ Tab:AddButton({
                             titleLabel.Text = "OWNER: " .. LocalPlayer.Name:upper()
                         end
 
-                        -- Reklam butonlarını (Ads) ve Satın alım butonlarını aktif et
+                        -- Butonları Aktif Et (PC Click & Mobile Touch)
                         for _, btn in pairs(guiObject:GetDescendants()) do
                             if btn:IsA("ImageButton") or btn:IsA("TextButton") then
-                                -- Mevcut reklam butonlarını tıklanabilir yap (RE tetiklemesi için)
                                 if name:find("available") or name:find("adbutton") or name:find("unlock") then
                                     btn.Visible = true
                                     btn.Active = true
                                     btn.Selectable = true
                                     
-                                    -- Fiyatları FREE/BEDAVA olarak göster
+                                    -- Fiyatları FREE/BEDAVA yap
                                     local priceLabel = btn:FindFirstChild("Price", true) or btn:FindFirstChild("Value", true)
                                     if priceLabel and priceLabel:IsA("TextLabel") then
                                         priceLabel.Text = "FREE"
@@ -4982,31 +4981,31 @@ Tab:AddButton({
                         end
                     end
                     
-                    -- Dex Explorer'da yaptığın gibi görünürlüğü zorla
+                    -- Görünürlüğü ve Tıklanabilirliği Zorla
                     if guiObject:IsA("ImageButton") and (name:find("ads") or name:find("premium") or name:find("videoad")) then
                         guiObject.Visible = true
                         guiObject.Active = true
+                        guiObject.Selectable = true -- Mobil için önemli
                     end
                 end
             end
         end)
 
-        -- 4. ADIM: MODÜLÜ TETİKLE (ADS.txt & ADS2.txt PANELİNİ ÇAĞIR)
+        -- 4. ADIM: MODÜLÜ TETİKLE (PANELİ AÇ)
         spawn(function()
             local successExtend, ExtendUnlockController = pcall(function()
                 return require(ReplicatedStorage.Modules.Client.Ads.ExtendUnlockController)
             end)
 
             if successExtend and ExtendUnlockController then
-                -- Reklam/Uzatma panelini zorla tetikle
                 ExtendUnlockController.ShowExtendCurrentHousePanel(true)
             end
         end)
 
         -- Bildirim
         StarterGui:SetCore("SendNotification", {
-            Title = "ADS & PREMIUM FULL REPAIR",
-            Text = "Tüm reklamlar ve gamepassler FireServer ile tetiklendi!",
+            Title = "BYPASS AKTİF",
+            Text = "PC & Mobil uyumlu sistem yüklendi!",
             Duration = 5
         })
     end
