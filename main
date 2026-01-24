@@ -4900,106 +4900,33 @@ Tab:AddButton({
 local Tab = Window:MakeTab({"🎉 İtems / Fun 🎮", "rbxassetid://127904742940104"})
 
 Tab:AddButton({
-    Title = "Futuristic Theme (PATCH)",
+    Title = "Futuristic Theme",
     Locked = false,
     Callback = function()
         local Players = game:GetService("Players")
-        local localPlayer = Players.LocalPlayer
-        local PlayerGui = localPlayer:WaitForChild("PlayerGui")
-        local Workspace = game:GetService("Workspace")
-        local StarterGui = game:GetService("StarterGui")
+        local ReplicatedStorage = game:GetService("ReplicatedStorage")
+        local LocalPlayer = Players.LocalPlayer
 
-        local function tryNotify(title, text)
-            pcall(function()
-                StarterGui:SetCore("SendNotification", {
-                    Title = title,
-                    Text = text,
-                    Duration = 4
-                })
-            end)
-        end
+        local Game8Settings = require(
+            game:GetService("StarterGui")
+                :WaitForChild("Player8Handler")
+                :WaitForChild("Game8Settings")
+        )
 
-        -- LocalThemes kontrol / oluştur
-        local themesFolder = PlayerGui:FindFirstChild("LocalThemes")
-        if not themesFolder then
-            themesFolder = Instance.new("Folder")
-            themesFolder.Name = "LocalThemes"
-            themesFolder.Parent = PlayerGui
+        local ThemeRemote = Game8Settings.ThemeRemote
+        local THEME_NAME = "Futuristic" -- buton adıyla aynı olmalı
 
-            -- Örnek futuristik frame (isteğe göre düzenle)
-            local sampleTheme = Instance.new("ScreenGui")
-            sampleTheme.Name = "Futuristic_Sample"
-            sampleTheme.ResetOnSpawn = false
-            sampleTheme.IgnoreGuiInset = true
-            sampleTheme.Parent = themesFolder
+        pcall(function()
+            ThemeRemote:FireServer("AskForTheme", THEME_NAME)
+        end)
 
-            local frm = Instance.new("Frame")
-            frm.Size = UDim2.new(1,0,1,0)
-            frm.BackgroundColor3 = Color3.fromRGB(6,12,30)
-            frm.BackgroundTransparency = 0
-            frm.Parent = sampleTheme
-
-            local glow = Instance.new("ImageLabel")
-            glow.Size = UDim2.new(0.6,0,0.6,0)
-            glow.Position = UDim2.new(0.2,0,0.2,0)
-            glow.BackgroundTransparency = 1
-            glow.Image = "rbxassetid://0" -- değiştirebilirsin
-            glow.Parent = frm
-        end
-
-        -- WorkspaceCom kontrol / oluştur
-        local wc = Workspace:FindFirstChild("WorkspaceCom")
-        if not wc then
-            wc = Instance.new("Folder")
-            wc.Name = "WorkspaceCom"
-            wc.Parent = Workspace
-
-            -- Örnek: futuristik ışık (sadece görsel)
-            local lightPart = Instance.new("Part")
-            lightPart.Name = "FuturisticLight"
-            lightPart.Size = Vector3.new(2,2,2)
-            lightPart.Anchored = true
-            lightPart.CanCollide = false
-            lightPart.Position = localPlayer.Character and (localPlayer.Character:FindFirstChild("HumanoidRootPart") and localPlayer.Character.HumanoidRootPart.Position + Vector3.new(0,5,0)) or Vector3.new(0,5,0)
-            lightPart.Parent = wc
-
-            local pointLight = Instance.new("PointLight")
-            pointLight.Range = 20
-            pointLight.Brightness = 2
-            pointLight.Parent = lightPart
-        end
-
-        -- LocalThemes içindeki her şeyi VISIBLE/ENABLED yap
-        for _, themeObj in ipairs(themesFolder:GetDescendants()) do
-            pcall(function()
-                if themeObj:IsA("Frame") or themeObj:IsA("ImageLabel") or themeObj:IsA("ScreenGui") or themeObj:IsA("TextLabel") then
-                    if themeObj.Parent and themeObj.Parent:IsA("ScreenGui") then
-                        themeObj.Parent.Enabled = true
-                    end
-                    themeObj.Visible = true
-                elseif themeObj:IsA("ParticleEmitter") or themeObj:IsA("Beam") then
-                    themeObj.Enabled = true
-                elseif themeObj:IsA("Light") then
-                    themeObj.Enabled = true
-                end
-            end)
-        end
-
-        -- WorkspaceCom içindeki görsel objeleri aktif et
-        for _, v in ipairs(wc:GetDescendants()) do
-            pcall(function()
-                if v:IsA("BasePart") then
-                    v.Transparency = 0
-                    v.CanCollide = false
-                elseif v:IsA("ParticleEmitter") then
-                    v.Enabled = true
-                elseif v:IsA("Light") then
-                    v.Enabled = true
-                end
-            end)
-        end
-
-        tryNotify("Futuristic Theme", "Client-side tema uygulandı. (Server-side patch/bypass desteklenmez.)")
+        pcall(function()
+            game:GetService("StarterGui"):SetCore("SendNotification", {
+                Title = "Theme",
+                Text = "Tema isteği gönderildi: "..THEME_NAME,
+                Duration = 3
+            })
+        end)
     end
 })
 
