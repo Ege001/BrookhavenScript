@@ -4887,11 +4887,19 @@ Tab:AddButton({
                 return require(ReplicatedStorage.Modules.Client.UI.Gamepass.GamepassController)
             end)
 
-            if successG then GamepassUnlockController.AllPassesFetched = true end
+            if successG then 
+                GamepassUnlockController.AllPassesFetched = true 
+            end
+            
             if successGC then
-                -- Tüm gamepass sorgularına "EVET" cevabı ver
+                -- Tüm gamepass sorgularına "EVET" cevabı ver (Kullanım için kritik)
                 GamepassController.IsPermanentlyOwned = function() return true end
                 GamepassController.OwnsGamepass = function() return true end
+                -- Yeni: Gamepass açıldığında tetiklenen sinyalleri bypass et
+                if GamepassController.OnGamepassUnlocked then
+                    GamepassController.OnGamepassUnlocked:Fire("VIP")
+                    GamepassController.OnGamepassUnlocked:Fire("Premium")
+                end
             end
 
             -- REPLICATED DATA BYPASS (Sunucu verisini kandır)
@@ -4909,7 +4917,7 @@ Tab:AddButton({
                         data.session.hasPremium = true
                         data.session.gamepasses = data.session.gamepasses or {}
                         
-                        -- Metatable ile olmayan ID'leri bile 'true' döndür
+                        -- Metatable ile olmayan ID'leri bile 'true' döndür (Tüm Shop Ürünleri)
                         setmetatable(data.session.gamepasses, {
                             __index = function() return true end
                         })
@@ -4945,25 +4953,27 @@ Tab:AddButton({
                             obj.Visible = true
                             if obj:IsA("ImageButton") or obj:IsA("TextButton") then
                                 obj.Active = true
-                                obj.Interactable = true -- Bazı yeni sürümlerde bu özellik var
+                                -- Yeni: Bazı panellerde tıklanabilirliği engelleyen canvas gruplarını bypass et
+                                if obj:IsA("CanvasGroup") then obj.BlocksRaycasts = true end
                             end
                         end
 
                         -- 3. AdStore ve Premium Panellerini Düzenle
                         if name:find("adstore") or name:find("premium") or name:find("productunlock") then
-                            obj.Visible = obj.Visible -- Görünürlüğü koru ama içeriği düzelt
-                            
                             for _, child in pairs(obj:GetDescendants()) do
                                 -- Fiyatları BEDAVA yap
                                 if child:IsA("TextLabel") and (child.Text:find("R$") or child.Text:find("%d+")) then
-                                    if not child.Parent:FindFirstChild("Icon") then -- Sadece fiyat etiketleri
+                                    if not child.Parent:FindFirstChild("Icon") then 
                                         child.Text = "FREE"
                                     end
                                 end
-                                -- Butonları tıklanabilir yap
+                                -- Butonları tıklanabilir yap ve kilit simgelerini kaldır
                                 if child:IsA("ImageButton") or child:IsA("TextButton") then
                                     child.Active = true
                                     child.Visible = true
+                                end
+                                if child.Name == "Lock" or child.Name == "Locked" then
+                                    child.Visible = false
                                 end
                             end
                         end
@@ -4979,19 +4989,22 @@ Tab:AddButton({
             end)
             if successExtend then
                 -- Panel açıldığında bekleme callback'lerini temizle
-                debug.setconstant(ExtendUnlockController.ShowExtendCurrentHousePanel, 1, 0) 
+                if debug and debug.setconstant then
+                    pcall(function()
+                        debug.setconstant(ExtendUnlockController.ShowExtendCurrentHousePanel, 1, 0)
+                    end)
+                end
             end
         end)
 
         -- Bildirim
         StarterGui:SetCore("SendNotification", {
-            Title = "PREMIUM & VIP UNLOCKED",
-            Text = "Tüm kilitler açıldı, X butonları beklemesiz aktif!",
+            Title = "FULL SHOP UNLOCKED",
+            Text = "Premium, VIP ve tüm Gamepass özellikleri aktif!",
             Duration = 5
         })
     end
 })
-
 local Tab = Window:MakeTab({"🎉 İtems / Fun 🎮", "rbxassetid://127904742940104"})
 
 local Players = game:GetService("Players")
