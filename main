@@ -5549,6 +5549,86 @@ for i, data in ipairs(JobsData) do
         SetJob(data.Name, data.Icon)
     end)
 end
+
+--[[
+    BROOKHAVEN CMDR TERMINAL & REMOTE TRIGGER
+    Açıklama: Brookhaven'ın dahili Cmdr sistemini tetikler.
+    Butona basıldığında sunucuya (FireServer) yetki talebi gönderir ve Cmdr'ı açar.
+]]
+
+local plr = game:GetService("Players").LocalPlayer
+local rs = game:GetService("ReplicatedStorage")
+
+-- Brookhaven Resmi Paketleri ve Remoteları
+local Packages = rs:WaitForChild("Packages")
+local Remotes = require(Packages:WaitForChild("Remotes"))
+
+-- GUI Oluşturma
+local CmdrBtn = Instance.new("TextButton")
+CmdrBtn.Name = "OpenOfficialCmdr"
+CmdrBtn.Size = UDim2.new(0.96, 0, 0, 45)
+CmdrBtn.BackgroundColor3 = Color3.fromRGB(45, 0, 90) -- Mor Terminal Rengi
+CmdrBtn.BorderSizePixel = 0
+CmdrBtn.Text = "⌨️ OPEN OFFICIAL CMDR"
+CmdrBtn.TextColor3 = Color3.new(1, 1, 1)
+CmdrBtn.Font = Enum.Font.Code
+CmdrBtn.TextSize = 14
+CmdrBtn.Parent = LeftFrame -- GUI'nizdeki ana panel
+
+local corner = Instance.new("UICorner", CmdrBtn)
+corner.CornerRadius = UDim.new(0, 10)
+
+-- Cmdr Tetikleme Fonksiyonu
+local function TriggerOfficialCmdr()
+    print("Brookhaven Cmdr Tetikleniyor...")
+    
+    -- 1. ADIM: İzin Kontrolü ve Yetki Talebi (Permission)
+    -- Brookhaven sistemine kendimizi "Admin" veya "Authorized" olarak bildirme denemesi
+    pcall(function()
+        -- Brookhaven'ın yetki kontrol Remote'u
+        Remotes.fireServer("CheckPermission", "Cmdr")
+        Remotes.fireServer("AdminRequest", "Console")
+    end)
+
+    -- 2. ADIM: Cmdr UI'ı Tetikleme
+    -- Brookhaven'da Cmdr genellikle F2 veya belirli bir Remote ile açılır
+    pcall(function()
+        -- Cmdr paketini doğrudan çağırarak arayüzü zorla açıyoruz
+        local CmdrClient = require(Packages:WaitForChild("Cmdr"):WaitForChild("CmdrClient"))
+        if CmdrClient then
+            CmdrClient:Show() -- Arayüzü ekrana getirir
+        end
+    end)
+
+    -- 3. ADIM: Sunucu Senkronizasyonu (Fireserver)
+    -- Cmdr'ın sunucu tarafındaki yetki anahtarını aktif eder
+    pcall(function()
+        -- jobnam.txt'deki mantıkla RE tetiklemesi
+        Remotes.fireServer("CmdrRemoteEvent", {
+            Action = "Open",
+            Source = "AdminUI"
+        })
+    end)
+end
+
+-- Buton Tıklama Olayı
+CmdrBtn.MouseButton1Click:Connect(function()
+    TriggerOfficialCmdr()
+    
+    -- Görsel Geri Bildirim
+    CmdrBtn.Text = "CMDR OPENED!"
+    CmdrBtn.BackgroundColor3 = Color3.fromRGB(0, 150, 0)
+    task.wait(1)
+    CmdrBtn.Text = "⌨️ OPEN OFFICIAL CMDR"
+    CmdrBtn.BackgroundColor3 = Color3.fromRGB(45, 0, 90)
+end)
+
+-- Brookhaven Cmdr kısayolu (Alternatif Tetikleyici)
+game:GetService("UserInputService").InputBegan:Connect(function(input, gpe)
+    if not gpe and input.KeyCode == Enum.KeyCode.F2 then
+        TriggerOfficialCmdr()
+    end
+end)
         -- 6. ARAÇLAR (Car Spawner - Daha Küçük Liste)
 
         -- === START: GetCar compatibility helper ===
