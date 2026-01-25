@@ -4842,146 +4842,104 @@ Tab:AddToggle({
     end
 })
 
+local Tab = Window:MakeTab({"premium ⭐", "rbxassetid://127904742940104"})
+
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local StarterGui = game:GetService("StarterGui")
 local LocalPlayer = Players.LocalPlayer
 
--- UI Kütüphanesine Ekle (Tab değişkeninin tanımlı olduğu ana scriptinize entegre edin)
-local Tab = Window:MakeTab({"premium ⭐", "rbxassetid://127904742940104"})
-
+-- UI Kütüphanesine Ekle
 Tab:AddButton({
-    Title = "FULL PREMIUM & GAMEPASS BYPASS (ULTIMATE V6)",
+    Title = "FULL ADS & IMAGE BYPASS (ULTIMATE V6.6)",
     Locked = false,
     Callback = function()
-        -- 1. ADIM: REKLAM SİSTEMİNİ KÖKTEN DÜZELT (ADS.txt & ADS2.txt MANTIĞI)
+        -- 1. ADIM: REPLICA VE MODÜL KONTROLLERİNİ ELE GEÇİR
         spawn(function()
-            local success, AdvertisementsController = pcall(function()
+            local successReplica, ReplicaController = pcall(function()
+                return require(ReplicatedStorage.Modules.Client.Data.ReplicaController)
+            end)
+
+            if successReplica and ReplicaController then
+                local oldGetReplica = ReplicaController.GetReplica
+                ReplicaController.GetReplica = function(self, name)
+                    local replica = oldGetReplica(self, name)
+                    if replica and replica.Data then
+                        if type(replica.Data) == "table" then
+                            replica.Data.IsVip = true
+                            replica.Data.UnlockAds = true
+                            -- 799 Dakika Sabitleme
+                            replica.Data.AdFreeTimestamp = tick() + (799 * 60)
+                        end
+                    end
+                    return replica
+                end
+            end
+        end)
+
+        -- 2. ADIM: SADECE ADS BUTONLARINI VE GÖRSELLERİNİ TETİKLE
+        spawn(function()
+            local successAds, AdvertisementsController = pcall(function()
                 return require(ReplicatedStorage.Modules.Client.Ads.AdvertisementsController)
             end)
 
-            if success and AdvertisementsController then
+            if successAds and AdvertisementsController then
                 local Promise = require(ReplicatedStorage.Packages.Promise)
                 
-                -- Reklam süresini 20 saat (72000 saniye) olarak tetikle
+                -- Reklam süresini zorla 799 dk yap
                 AdvertisementsController.GetUnlockedDuration = function()
-                    return 72000 
+                    return 799 * 60 
                 end
 
-                -- Reklamların her zaman uygun ve hazır olmasını sağla
+                -- REKLAM BUTONUNA (IMAGE/TEXT) BASILDIĞINDA ANINDA ONAYLA
+                AdvertisementsController.ShowRewardedVideoAd = function(self, ...)
+                    pcall(function()
+                        local RewardClaim = require(ReplicatedStorage.Modules.Client.Ads.IncentivesRewardClaimController)
+                        if RewardClaim then
+                            RewardClaim.Show({
+                                rewardIcon = "rbxassetid://127904742940104",
+                                rewardName = "ADS BYPASSED",
+                                rewardTime = 799
+                            })
+                        end
+                    end)
+                    return Promise.resolve(true) 
+                end
+
                 AdvertisementsController.IsEligibleForRewardedVideoAd = function() return true end
-                AdvertisementsController.IsRewardedVideoAdReady = function()
-                    return Promise.resolve(Enum.AdAvailabilityResult.IsAvailable)
-                end
-
-                -- AllPassesFetched Yamasını Kır (ADS.txt içindeki kontrolü atlar)
-                if AdvertisementsController.AllPassesFetched ~= nil then
-                    AdvertisementsController.AllPassesFetched = true
-                end
-                
-                -- Sahte video kontrolü (varsa)
-                if AdvertisementsController.IsFakedVideo then
-                    AdvertisementsController.IsFakedVideo = function() return true end
-                end
-                
-                print(">> [V6] AdvertisementsController başarıyla yamalandı.")
+                AdvertisementsController.IsRewardedVideoAdReady = function() return Promise.resolve(Enum.AdAvailabilityResult.IsAvailable) end
+                AdvertisementsController.AllPassesFetched = true
             end
         end)
 
-        -- 2. ADIM: PREMIUM ÖZELLİKLERİ VE GAMEPASSLERİ TETİKLE (FIRESERVER & RE)
-        spawn(function()
-            -- Sunucu tarafındaki doğrulamaları (RemoteEvent) bypass et
-            local successRemotes, Remotes = pcall(function()
-                return require(ReplicatedStorage.Packages.Remotes)
-            end)
-            
-            if successRemotes and Remotes then
-                print(">> [BYPASS] RemoteEvent ve FireServer yetkileri aktif.")
-            end
-
-            -- TÜM GAMEPASS MODÜLLERİNİ EZ (Dosya yolunu GamepassUnlockController olarak güncelledik)
-            local successG, GamepassController = pcall(function()
-                return require(ReplicatedStorage.Modules.Client.UI.GamepassUnlockController)
-            end)
-
-            if not successG then
-                successG, GamepassController = pcall(function()
-                    return require(ReplicatedStorage.Modules.Client.UI.Gamepass.GamepassController)
-                end)
-            end
-
-            if successG and GamepassController then
-                -- OwnsGamepass'i her zaman True yap
-                GamepassController.OwnsGamepass = function() return true end
-                
-                if GamepassController.AllPassesFetched ~= nil then
-                    GamepassController.AllPassesFetched = true
-                end
-                print(">> [V6] Gamepass yetkileri sağlandı.")
-            end
-
-            -- VERİ SEVİYESİNDE BYPASS (REPLICATED DATA)
-            local successData, ReplicatedData = pcall(function()
-                return require(ReplicatedStorage.Modules.Client.Data.ReplicatedDataController)
-            end)
-            
-            if successData and ReplicatedData then
-                local oldGetData = ReplicatedData.GetReplicatedData
-                ReplicatedData.GetReplicatedData = function(self, ...)
-                    local data = oldGetData(self, ...)
-                    if type(data) == "table" and data.session then
-                        data.session.gamepasses = data.session.gamepasses or {}
-                        setmetatable(data.session.gamepasses, {
-                            __index = function() return true end
-                        })
-                        data.session.isVip = true
-                        data.session.premium = true
-                    end
-                    return data
-                end
-            end
-        end)
-
-        -- 3. ADIM: REKLAM TETİKLEME VE GÖRÜNÜRLÜK (DEX MANTIĞI)
+        -- 3. ADIM: UI ÜZERİNDEKİ SADECE REKLAM İLE İLGİLİ NESNELERİ AÇ
         local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
         local MainGUIHandler = PlayerGui:WaitForChild("MainGUIHandler")
         
-        local endTime = tick() + 60 
         local connection
-        
         connection = RunService.RenderStepped:Connect(function()
-            if tick() > endTime then
-                if connection then connection:Disconnect() end
-                return
-            end
-
             for _, guiObject in pairs(MainGUIHandler:GetDescendants()) do
-                if guiObject:IsA("GuiObject") then
+                -- Sadece butonları hedef al (ImageButton veya TextButton)
+                if guiObject:IsA("ImageButton") or guiObject:IsA("TextButton") then
                     local name = string.lower(guiObject.Name)
+                    local parentName = guiObject.Parent and string.lower(guiObject.Parent.Name) or ""
 
-                    -- HEDEF: Reklam Panelleri ve Premium İçerikler
-                    if name == "extendproductunlock" or name:find("adstore") or name:find("premium") or name:find("lock") then
-                        guiObject.Visible = true
+                    -- SADECE REKLAM (ADS) İLE İLGİLİ İSİMLERİ FİLTRELE
+                    if name:find("ad") or name:find("video") or name:find("unlock") or name:find("incentive") or 
+                       parentName:find("ad") or parentName:find("unlock") then
                         
-                        -- Başlıkta Kullanıcı Adını Göster
-                        local titleLabel = guiObject:FindFirstChild("Title", true)
-                        if titleLabel and titleLabel:IsA("TextLabel") then
-                            titleLabel.Text = "OWNER: " .. LocalPlayer.Name:upper()
-                        end
+                        -- Görünürlüğü ve etkileşimi zorla
+                        guiObject.Visible = true
+                        guiObject.Active = true
+                        guiObject.Selectable = true
+                        guiObject.ZIndex = 5000 -- Her şeyin önünde
 
-                        -- Butonları ve Fiyatları Düzenle
-                        for _, btn in pairs(guiObject:GetDescendants()) do
-                            if btn:IsA("ImageButton") or btn:IsA("TextButton") or btn:IsA("GuiButton") then
-                                btn.Visible = true
-                                btn.Active = true
-                                btn.Selectable = true
-                                
-                                local priceLabel = btn:FindFirstChild("Price", true) or btn:FindFirstChild("Value", true) or (btn:IsA("TextLabel") and btn)
-                                if priceLabel and priceLabel:IsA("TextLabel") and (priceLabel.Text:find("R$") or priceLabel.Text:find("%d")) then
-                                    priceLabel.Text = "FREE"
-                                    priceLabel.TextColor3 = Color3.fromRGB(0, 255, 0)
-                                end
+                        -- Yeşil butonu bul ve yazısını değiştir
+                        if guiObject.BackgroundColor3 == Color3.fromRGB(0, 255, 0) or name:find("adbutton") then
+                            local label = guiObject:FindFirstChildOfClass("TextLabel") or guiObject:FindFirstChild("Price", true)
+                            if label then
+                                label.Text = "799 MIN FREE"
                             end
                         end
                     end
@@ -4989,30 +4947,25 @@ Tab:AddButton({
             end
         end)
 
-        -- 4. ADIM: MODÜLÜ TETİKLE (ADS.txt & ADS2.txt PANELİNİ ÇAĞIR)
+        -- 4. ADIM: INCENTIVES VE REPLICA BYPASS
         spawn(function()
-            local successExtend, ExtendUnlockController = pcall(function()
-                return require(ReplicatedStorage.Modules.Client.Ads.ExtendUnlockController)
+            local successInc, IncentivesController = pcall(function()
+                return require(ReplicatedStorage.Modules.Client.Ads.IncentivesController)
             end)
-
-            if successExtend and ExtendUnlockController then
-                -- Reklam/Uzatma panelini zorla tetikle
-                pcall(function()
-                    ExtendUnlockController.ShowExtendCurrentHousePanel(true)
-                end)
+            if successInc and IncentivesController then
+                IncentivesController.IsRewardClaimable = function() return true end
+                IncentivesController.ClaimReward = function() return true end
             end
         end)
 
         -- Bildirim
         StarterGui:SetCore("SendNotification", {
-            Title = "ADS & PREMIUM FULL REPAIR",
-            Text = "V6: Tüm sistemler senin mantığınla başarıyla tetiklendi!",
-            Icon = "rbxassetid://127904742940104",
+            Title = "ADS ONLY BYPASS",
+            Text = "Sadece reklam butonları ve görselleri ele geçirildi!",
             Duration = 5
         })
     end
 })
-
 
 local Tab = Window:MakeTab({"🎉 İtems / Fun 🎮", "rbxassetid://127904742940104"})
 
