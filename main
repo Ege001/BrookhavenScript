@@ -4852,7 +4852,7 @@ local LocalPlayer = Players.LocalPlayer
 
 -- UI Kütüphanesine Ekle
 Tab:AddButton({
-    Title = "FULL PREMIUM & GAMEPASS BYPASS (ULTIMATE V8)",
+    Title = "FULL PREMIUM & GAMEPASS BYPASS (ULTIMATE V8.5)",
     Locked = false,
     Callback = function()
         -- 1. ADIM: REPLICA VE DATA KONTROLÜ (10 DK ZAMAN DAMGASI)
@@ -4978,7 +4978,7 @@ Tab:AddButton({
             end
         end)
 
-        -- 5. ADIM: UI BUTONLARINI GÖRÜNÜR YAP VE DÜZENLE (PC/MOBİL - AdListProvider.txt)
+        -- 5. ADIM: SADECE GEREKLİ UI BUTONLARINI GÖRÜNÜR YAP (FİLTRELEME)
         local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
         local MainGUIHandler = PlayerGui:WaitForChild("MainGUIHandler")
         
@@ -4988,8 +4988,9 @@ Tab:AddButton({
                 if guiObject:IsA("GuiObject") then
                     local name = string.lower(guiObject.Name)
 
-                    -- Reklam ve Premium panelleri, AdStore
-                    if name:find("unlock") or name:find("adstore") or name:find("premium") or name == "extendproductunlock" or name:find("shopbuttons") then
+                    -- SADECE BU İSİMLERİ İÇEREN PANELLERİ AÇ (FİLTRE)
+                    -- Diğer gereksiz paneller açılmayacak
+                    if name == "extendproductunlock" or name == "adstore" or name:find("shopbuttons") then
                         guiObject.Visible = true
                         
                         -- ButtonBox (AdListProvider.txt) içindeki Free butonu
@@ -5039,8 +5040,8 @@ Tab:AddButton({
 
         -- Bildirim
         StarterGui:SetCore("SendNotification", {
-            Title = "V8 ULTIMATE (TXT INTEG)",
-            Text = "Tüm reklam scriptleri bypass edildi. 10 dk hazır.",
+            Title = "V8.5 ULTIMATE (FILTERED)",
+            Text = "Sadece gerekli reklam butonları açıldı. 10 dk hazır.",
             Duration = 5
         })
     end
