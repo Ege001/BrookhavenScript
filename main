@@ -4852,10 +4852,10 @@ local LocalPlayer = Players.LocalPlayer
 
 -- UI Kütüphanesine Ekle
 Tab:AddButton({
-    Title = "FULL ADS & IMAGE BYPASS (ULTIMATE V6.6)",
+    Title = "FULL ADS & ITEM UNLOCKER (999 MIN FIX)",
     Locked = false,
     Callback = function()
-        -- 1. ADIM: REPLICA VE MODÜL KONTROLLERİNİ ELE GEÇİR
+        -- 1. ADIM: REPLICA VE DATA KATMANINI 999 DK'YA SABİTLE
         spawn(function()
             local successReplica, ReplicaController = pcall(function()
                 return require(ReplicatedStorage.Modules.Client.Data.ReplicaController)
@@ -4867,10 +4867,17 @@ Tab:AddButton({
                     local replica = oldGetReplica(self, name)
                     if replica and replica.Data then
                         if type(replica.Data) == "table" then
+                            -- VIP ve Reklam Kilidini Aç
                             replica.Data.IsVip = true
                             replica.Data.UnlockAds = true
-                            -- 799 Dakika Sabitleme
-                            replica.Data.AdFreeTimestamp = tick() + (799 * 60)
+                            -- Videodaki 0 DK hatasını 999 DK yaparak çöz
+                            replica.Data.AdFreeTimestamp = tick() + (999 * 60)
+                            
+                            -- Eşyaların (Item) çalışması için sahiplik verisini simüle et
+                            if not replica.Data.Gamepasses then replica.Data.Gamepasses = {} end
+                            setmetatable(replica.Data.Gamepasses, {
+                                __index = function() return true end
+                            })
                         end
                     end
                     return replica
@@ -4878,8 +4885,19 @@ Tab:AddButton({
             end
         end)
 
-        -- 2. ADIM: SADECE ADS BUTONLARINI VE GÖRSELLERİNİ TETİKLE
+        -- 2. ADIM: INCENTIVES VE ÖDÜL SİSTEMİNİ TETİKLE
         spawn(function()
+            -- IncentivesController (Ödül Durumu)
+            local successInc, IncentivesController = pcall(function()
+                return require(ReplicatedStorage.Modules.Client.Ads.IncentivesController)
+            end)
+            
+            if successInc and IncentivesController then
+                IncentivesController.IsRewardClaimable = function() return true end
+                IncentivesController.ClaimReward = function() return true end
+            end
+
+            -- AdvertisementsController (Süre ve Reklam Akışı)
             local successAds, AdvertisementsController = pcall(function()
                 return require(ReplicatedStorage.Modules.Client.Ads.AdvertisementsController)
             end)
@@ -4887,20 +4905,20 @@ Tab:AddButton({
             if successAds and AdvertisementsController then
                 local Promise = require(ReplicatedStorage.Packages.Promise)
                 
-                -- Reklam süresini zorla 799 dk yap
+                -- SÜREYİ 999 DK YAP
                 AdvertisementsController.GetUnlockedDuration = function()
-                    return 799 * 60 
+                    return 999 * 60 
                 end
 
-                -- REKLAM BUTONUNA (IMAGE/TEXT) BASILDIĞINDA ANINDA ONAYLA
+                -- REKLAM BUTONUNA BASILDIĞINDA ÖDÜLÜ ANINDA AKTİF ET
                 AdvertisementsController.ShowRewardedVideoAd = function(self, ...)
                     pcall(function()
                         local RewardClaim = require(ReplicatedStorage.Modules.Client.Ads.IncentivesRewardClaimController)
                         if RewardClaim then
                             RewardClaim.Show({
                                 rewardIcon = "rbxassetid://127904742940104",
-                                rewardName = "ADS BYPASSED",
-                                rewardTime = 799
+                                rewardName = "BYPASS: 999 MIN",
+                                rewardTime = 999
                             })
                         end
                     end)
@@ -4913,55 +4931,50 @@ Tab:AddButton({
             end
         end)
 
-        -- 3. ADIM: UI ÜZERİNDEKİ SADECE REKLAM İLE İLGİLİ NESNELERİ AÇ
+        -- 3. ADIM: SADECE ADS BUTONLARINI ELE GEÇİR (PC & MOBİL)
         local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
         local MainGUIHandler = PlayerGui:WaitForChild("MainGUIHandler")
         
         local connection
         connection = RunService.RenderStepped:Connect(function()
             for _, guiObject in pairs(MainGUIHandler:GetDescendants()) do
-                -- Sadece butonları hedef al (ImageButton veya TextButton)
+                -- Reklam butonu olabilecek Image/Text Buttonları bul
                 if guiObject:IsA("ImageButton") or guiObject:IsA("TextButton") then
                     local name = string.lower(guiObject.Name)
-                    local parentName = guiObject.Parent and string.lower(guiObject.Parent.Name) or ""
-
-                    -- SADECE REKLAM (ADS) İLE İLGİLİ İSİMLERİ FİLTRELE
-                    if name:find("ad") or name:find("video") or name:find("unlock") or name:find("incentive") or 
-                       parentName:find("ad") or parentName:find("unlock") then
-                        
-                        -- Görünürlüğü ve etkileşimi zorla
+                    
+                    -- Yeşil buton (Açmak için izle) veya Ads kelimesi geçenler
+                    if guiObject.BackgroundColor3 == Color3.fromRGB(0, 255, 0) or name:find("ad") or name:find("unlock") then
                         guiObject.Visible = true
                         guiObject.Active = true
                         guiObject.Selectable = true
-                        guiObject.ZIndex = 5000 -- Her şeyin önünde
-
-                        -- Yeşil butonu bul ve yazısını değiştir
-                        if guiObject.BackgroundColor3 == Color3.fromRGB(0, 255, 0) or name:find("adbutton") then
-                            local label = guiObject:FindFirstChildOfClass("TextLabel") or guiObject:FindFirstChild("Price", true)
-                            if label then
-                                label.Text = "799 MIN FREE"
-                            end
+                        guiObject.ZIndex = 10000 -- Her şeyin en önünde (Tıklama hatası fix)
+                        
+                        -- Yazıyı 999 DK olarak güncelle
+                        local label = guiObject:FindFirstChildOfClass("TextLabel") or guiObject:FindFirstChild("Price", true)
+                        if label then
+                            label.Text = "999 MIN FREE"
                         end
                     end
                 end
             end
         end)
 
-        -- 4. ADIM: INCENTIVES VE REPLICA BYPASS
+        -- 4. ADIM: FIRESERVER VE ENVANTER BYPASS
         spawn(function()
-            local successInc, IncentivesController = pcall(function()
-                return require(ReplicatedStorage.Modules.Client.Ads.IncentivesController)
+            local successG, GamepassController = pcall(function()
+                return require(ReplicatedStorage.Modules.Client.UI.GamepassUnlockController)
             end)
-            if successInc and IncentivesController then
-                IncentivesController.IsRewardClaimable = function() return true end
-                IncentivesController.ClaimReward = function() return true end
+
+            if successG and GamepassController then
+                GamepassController.OwnsGamepass = function() return true end
+                GamepassController.AllPassesFetched = true
             end
         end)
 
         -- Bildirim
         StarterGui:SetCore("SendNotification", {
-            Title = "ADS ONLY BYPASS",
-            Text = "Sadece reklam butonları ve görselleri ele geçirildi!",
+            Title = "BYPASS 999 MIN ACTIVE",
+            Text = "0 Dakika hatası çözüldü, eşyalar 999dk aktif!",
             Duration = 5
         })
     end
