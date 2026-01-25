@@ -4852,10 +4852,10 @@ local LocalPlayer = Players.LocalPlayer
 
 -- UI Kütüphanesine Ekle
 Tab:AddButton({
-    Title = "FULL ADS & PREMIUM BYPASS (ULTIMATE V8.5)",
+    Title = "FULL ADS & PREMIUM BYPASS (ULTIMATE V8.6)",
     Locked = false,
     Callback = function()
-        -- 1. ADIM: REKLAM SİSTEMİ ÇEKİRDEĞİ (AdvertisementsController.txt Mantığı)
+        -- 1. ADIM: REKLAM SİSTEMİ ÇEKİRDEĞİ (AdvertisementsController Düzeltmesi)
         spawn(function()
             local success, AdvertisementsController = pcall(function()
                 return require(ReplicatedStorage.Modules.Client.Ads.AdvertisementsController)
@@ -4866,33 +4866,36 @@ Tab:AddButton({
                 local Remotes = require(ReplicatedStorage.Packages.Remotes)
                 local IncentivesRewardClaimController = require(ReplicatedStorage.Modules.Client.UI.IncentivesRewardClaimController)
 
-                -- 10 Dakikalık (600 saniye) kilit açma süresini sabitle
+                -- Reklam süresini 10 dakika (600 saniye) olarak ayarla
                 AdvertisementsController.GetUnlockedDuration = function() return 600 end
                 AdvertisementsController.IsEligibleForRewardedVideoAd = function() return true end
                 AdvertisementsController.CanPlayerViewAdvertisements = function() return true end
+                
+                -- Reklamın her zaman 'Hazır' (Available) dönmesini sağla
                 AdvertisementsController.IsRewardedVideoAdReady = function() 
                     return Promise.resolve(Enum.AdAvailabilityResult.IsAvailable) 
                 end
                 
-                -- KRİTİK: REKLAM TIKLAMA VE ÖDÜL TETİKLEME (AdListProvider.txt Entegrasyonu)
-                -- Bu fonksiyon butonlara basıldığında ödülü anında verir
+                -- KRİTİK: REKLAM TIKLAMA VE ÖDÜL TETİKLEME (HİÇBİR ŞEYİ BOZMADAN)
+                -- Bu kısım butona basıldığında ödülün verilmesini garanti eder.
                 AdvertisementsController.RequestRewardedVideoAd = function(itemId, itemImage, gamepassId, category, source)
-                    print(">> [BYPASS] Reklam Ödülü Alınıyor: " .. tostring(itemId))
+                    print(">> [ADS-FIX] Reklam İsteği Tetiklendi: " .. tostring(itemId))
                     
-                    -- Sunucuya 'İzlendi' sinyali gönder
+                    -- A) Sunucuya 'İzlendi' sinyalini gönder (Böylece sunucu taraflı kilit açılır)
                     pcall(function()
                         Remotes.fireServer("Advertisements:Video:Request", itemId)
                     end)
 
-                    -- Ödül Panelini Göster (Ekranın üstündeki yeşil bar/bildirim)
+                    -- B) Ödül Alındı Panelini Manuel Tetikle (Görsel Onay)
                     pcall(function()
                         IncentivesRewardClaimController.Show({
                             rewardIcon = itemImage or "rbxassetid://127904742940104",
-                            duration = 600
+                            duration = 600,
+                            helipad = false
                         })
                     end)
 
-                    -- Sisteme ödülün alındığını bildir (Diğer modüllerin kilidi açması için)
+                    -- C) Sinyali Gönder (ExtendUnlockController gibi modüllerin haberdar olması için)
                     if AdvertisementsController.OnRewardedAdClaimed then
                         AdvertisementsController.OnRewardedAdClaimed:Fire(itemId)
                     end
@@ -4904,9 +4907,9 @@ Tab:AddButton({
             end
         end)
 
-        -- 2. ADIM: DATA VE PREMIUM BYPASS
+        -- 2. ADIM: VERİ VE PREMIUM KİMLİĞİ (VIP & Ads Unlock)
         spawn(function()
-            -- ReplicaController üzerinden VIP ve AdFree verilerini manipüle et
+            -- ReplicaController üzerinden yerel veride reklamları açılmış gibi göster
             local successReplica, ReplicaController = pcall(function()
                 return require(ReplicatedStorage.Modules.Client.Data.ReplicaController)
             end)
@@ -4917,8 +4920,10 @@ Tab:AddButton({
                     local replica = oldGet(self, name)
                     if replica and replica.Data then
                         if type(replica.Data) == "table" then
+                            -- VIP ve Reklam kilitlerini True yap
                             replica.Data.IsVip = true
                             replica.Data.UnlockAds = true
+                            -- Süreyi her zaman ileriye at (0 DK hatasını engeller)
                             replica.Data.AdFreeTimestamp = tick() + 600
                         end
                     end
@@ -4926,7 +4931,7 @@ Tab:AddButton({
                 end
             end
 
-            -- GamepassUnlockController Bypass
+            -- GamepassUnlockController Bypass (Tüm satın alım kontrollerini geçer)
             local successG, GamepassController = pcall(function()
                 return require(ReplicatedStorage.Modules.Client.UI.GamepassUnlockController)
             end)
@@ -4936,7 +4941,7 @@ Tab:AddButton({
             end
         end)
 
-        -- 3. ADIM: SADECE REKLAM BUTONLARINI GÖRÜNÜR YAP (TEMİZ EKRAN)
+        -- 3. ADIM: SADECE ADS/FREE BUTONLARINA ODAKLAN (EKRAN TEMİZLİĞİ)
         local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
         local MainGUIHandler = PlayerGui:WaitForChild("MainGUIHandler")
         
@@ -4946,21 +4951,24 @@ Tab:AddButton({
                 if guiObject:IsA("GuiObject") then
                     local name = string.lower(guiObject.Name)
 
-                    -- Sadece bu panelleri ve butonları etkile (Ekranı bozma)
+                    -- Sadece Reklam (Extend/AdStore) panellerini etkile
                     if name == "extendproductunlock" or name:find("adstore") or name == "buttonbox" then
                         guiObject.Visible = true
                         
-                        -- Butonların içindeki "Free" veya "Ad" kısımlarını zorla
+                        -- İçerideki butonları 'FREE' ve 'Tıklanabilir' yap
                         for _, btn in pairs(guiObject:GetDescendants()) do
                             if btn:IsA("GuiButton") then
-                                -- Yeşil/Reklam butonlarını her zaman aktif tut
-                                if btn.Name == "Free" or name:find("adbutton") or name:find("available") then
+                                -- Reklam butonları veya 'Free' ismindeki butonlar
+                                if btn.Name == "Free" or name:find("adbutton") or name:find("available") or btn.Name:find("Ad") then
                                     btn.Visible = true
                                     btn.Active = true
+                                    btn.Selectable = true
                                     
-                                    -- Yazıyı "FREE (10m)" yap
-                                    local txt = btn:FindFirstChildOfClass("TextLabel") or btn:FindFirstChild("Price", true)
-                                    if txt then txt.Text = "FREE (10M)" end
+                                    -- Metinleri "FREE (10M)" Olarak Güncelle
+                                    local label = btn:FindFirstChildOfClass("TextLabel") or btn:FindFirstChild("Price", true) or btn:FindFirstChild("Value", true)
+                                    if label then
+                                        label.Text = "FREE (10M)"
+                                    end
                                 end
                             end
                         end
@@ -4969,21 +4977,21 @@ Tab:AddButton({
             end
         end)
 
-        -- 4. ADIM: PANELİ ÇAĞIR (SİSTEMİ BAŞLAT)
+        -- 4. ADIM: PANELİ ZORLA AÇ (SİSTEMİ BAŞLAT)
         spawn(function()
             local successExtend, ExtendUnlockController = pcall(function()
                 return require(ReplicatedStorage.Modules.Client.Ads.ExtendUnlockController)
             end)
             if successExtend and ExtendUnlockController then
-                -- Reklam/Uzatma panelini aç (AdListProvider üzerinden)
+                -- Reklam/Uzatma listesini AdListProvider üzerinden çağırır
                 ExtendUnlockController.ShowExtendCurrentHousePanel(true)
             end
         end)
 
-        -- Bildirim
+        -- Bildirim Gönder
         StarterGui:SetCore("SendNotification", {
-            Title = "ADS BYPASS READY",
-            Text = "Sadece reklam butonları aktif. Ödül sistemi bağlandı.",
+            Title = "ADS SYSTEM FIXED (V8.6)",
+            Text = "Butonlar hazır ve ödül sistemine bağlandı!",
             Duration = 5
         })
     end
