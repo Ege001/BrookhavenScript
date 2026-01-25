@@ -5413,65 +5413,125 @@ Tab:AddButton({
             end
         end)
 
--- VIP JOB BUTONU
-local VIPJobBtn = Instance.new("TextButton")
-VIPJobBtn.Size = UDim2.new(0.96, 0, 0, 38)
-VIPJobBtn.BackgroundColor3 = Color3.fromRGB(230, 190, 0) -- Altın rengi
-VIPJobBtn.Text = "BECOME VIP JOB"
-VIPJobBtn.TextColor3 = Color3.new(0, 0, 0)
-VIPJobBtn.Font = Enum.Font.GothamBold
-VIPJobBtn.TextSize = 13
-VIPJobBtn.Parent = LeftFrame
-Instance.new("UICorner", VIPJobBtn)
+--[[
+    BROOKHAVEN SELECTABLE JOB SYSTEM (FULL VERSION)
+    Açıklama: Listedeki işlerden birini seçmenizi sağlar, kafa üstü yazısını günceller 
+    ve sunucuya (FireServer) senkronizasyon gönderir.
+]]
 
-VIPJobBtn.MouseButton1Click:Connect(function()
-    local plr = game:GetService("Players").LocalPlayer
-    local trigger = game:GetService("ReplicatedStorage"):FindFirstChild("1Playe1rTrigge1rEven1t") 
-        or game:GetService("ReplicatedStorage"):FindFirstChild("1PlayerTriggerEvent")
+local plr = game:GetService("Players").LocalPlayer
+local rs = game:GetService("ReplicatedStorage")
 
-    -- 1. VERİLERİ LOCALDE GÜNCELLE (Kendi ekranın ve Billboard için)
+-- İş Listesi (Jobs.txt dosyasındaki popüler verilerle)
+local JobsData = {
+    {Name = "VIP", Icon = "18458871100"},
+    {Name = "Police", Icon = "9893743955"},
+    {Name = "Hospital", Icon = "5183367120"},
+    {Name = "Dancer", Icon = "5650351691"},
+    {Name = "Firefighter", Icon = "5183368146"},
+    {Name = "Grocery Store", Icon = "5183368377"},
+    {Name = "Bank", Icon = "5183367502"},
+    {Name = "Teacher", Icon = "5183367873"},
+    {Name = "Photographer", Icon = "7592171969"},
+    {Name = "Construction", Icon = "14544396959"}
+}
+
+-- Ana Panel (Kaydırılabilir Liste İçin)
+local JobMenu = Instance.new("ScrollingFrame")
+JobMenu.Name = "JobSelectorMenu"
+JobMenu.Size = UDim2.new(0, 180, 0, 200)
+JobMenu.Position = UDim2.new(1, 10, 0, 0) -- Butonun yanına açılır
+JobMenu.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+JobMenu.BorderSizePixel = 0
+JobMenu.CanvasSize = UDim2.new(0, 0, 0, #JobsData * 35)
+JobMenu.ScrollBarThickness = 4
+JobMenu.Visible = false
+JobMenu.Parent = LeftFrame -- GUI'nizdeki sol panel
+Instance.new("UICorner", JobMenu)
+
+-- Ana Aç/Kapat Butonu
+local MainBtn = Instance.new("TextButton")
+MainBtn.Size = UDim2.new(0.96, 0, 0, 38)
+MainBtn.BackgroundColor3 = Color3.fromRGB(0, 120, 215)
+MainBtn.Text = "SELECT JOB (MENU)"
+MainBtn.TextColor3 = Color3.new(1, 1, 1)
+MainBtn.Font = Enum.Font.GothamBold
+MainBtn.TextSize = 14
+MainBtn.Parent = LeftFrame
+Instance.new("UICorner", MainBtn)
+
+-- Menü Açma/Kapama Fonksiyonu
+MainBtn.MouseButton1Click:Connect(function()
+    JobMenu.Visible = not JobMenu.Visible
+end)
+
+-- İş Seçme Fonksiyonu (Tüm İşlemler Burada)
+local function SetJob(jobName, jobIcon)
+    -- 1. Remote Event Bulma
+    local trigger = rs:FindFirstChild("1Playe1rTrigge1rEven1t") 
+        or rs:FindFirstChild("1PlayerTriggerEvent")
+
+    -- 2. Local Verileri Güncelle
     local playersBag = plr:FindFirstChild("PlayersBag")
     if playersBag then
         local jobFolder = playersBag:FindFirstChild("Job")
         if jobFolder then
-            -- Job klasörünü aktif et
-            if jobFolder:IsA("BoolValue") then jobFolder.Value = true end
-            
-            -- Değerleri ekran görüntündeki gibi setle
-            if jobFolder:FindFirstChild("JobName") then
-                jobFolder.JobName.Value = "VIP"
-            end
-            if jobFolder:FindFirstChild("JobTitlePic") then
-                jobFolder.JobTitlePic.Value = "18458871100"
-            end
-            if jobFolder:FindFirstChild("JobOrStudent") then
+            pcall(function()
+                if jobFolder:IsA("BoolValue") then jobFolder.Value = true end
+                jobFolder.JobName.Value = jobName
+                jobFolder.JobTitlePic.Value = jobIcon
                 jobFolder.JobOrStudent.Value = true
-            end
+            end)
         end
     end
 
-    -- 2. SUNUCUYA BİLDİR (Diğerlerinin görmesi için)
+    -- 3. Sunucuya Gönder (Herkesin görmesi için)
     if trigger then
-        -- Brookhaven'ın iş seçme protokolleri
-        pcall(function()
-            trigger:FireServer("JobFeed", "VIP", "18458871100")
-            trigger:FireServer("JobTitle", "VIP")
-            -- Karakterin üstündeki Billboard'u güncellemesi için zorla
-            trigger:FireServer("SetJob", "VIP") 
-        end)
+        local events = {
+            {"JobFeed", jobName, jobIcon},
+            {"JobTitle", jobName},
+            {"JobChange", jobName, jobIcon},
+            {"SetJob", jobName}
+        }
+        for _, args in ipairs(events) do
+            pcall(function() trigger:FireServer(unpack(args)) end)
+        end
     end
-    
-    -- 3. KARAKTER ÜZERİNDEKİ BILLBOARD'U BUL VE GÜNCELLE (Zorunlu güncelleme)
+
+    -- 4. Billboard (Kafa Üstü Yazı) Güncelleme
     local char = plr.Character
     if char and char:FindFirstChild("Head") then
         for _, v in ipairs(char.Head:GetChildren()) do
-            if v:IsA("BillboardGui") and v.Name == "JobGui" then -- Brookhaven özel billboard adı
+            if v:IsA("BillboardGui") then
                 local label = v:FindFirstChildWhichIsA("TextLabel")
-                if label then label.Text = "VIP" end
+                local icon = v:FindFirstChildWhichIsA("ImageLabel")
+                if label then label.Text = jobName end
+                if icon then icon.Image = "rbxassetid://" .. jobIcon end
             end
         end
     end
-end)
+    
+    print("Seçilen İş: " .. jobName)
+    JobMenu.Visible = false -- Seçince menüyü kapat
+end
+
+-- Listedeki Butonları Oluşturma
+for i, data in ipairs(JobsData) do
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(1, -10, 0, 30)
+    btn.Position = UDim2.new(0, 5, 0, (i-1) * 35)
+    btn.BackgroundColor3 = (data.Name == "VIP") and Color3.fromRGB(255, 180, 0) or Color3.fromRGB(50, 50, 50)
+    btn.Text = data.Name
+    btn.TextColor3 = Color3.new(1, 1, 1)
+    btn.Font = Enum.Font.Gotham
+    btn.TextSize = 12
+    btn.Parent = JobMenu
+    Instance.new("UICorner", btn)
+
+    btn.MouseButton1Click:Connect(function()
+        SetJob(data.Name, data.Icon)
+    end)
+end
 
         -- 6. ARAÇLAR (Car Spawner - Daha Küçük Liste)
 
