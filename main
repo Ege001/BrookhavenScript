@@ -5609,15 +5609,30 @@ Tab:AddButton({
 })
 
 Tab:AddButton({
-    Title = "🍭 Peppermint Lollipop",
+    Title = "🍭 Lollipop Peppermint",
     Locked = false,
     Callback = function()
-        local args = {
-            [1] = "AcceptedToolToServer",
-            [2] = "Lollipop",
-            [3] = game.Players.LocalPlayer
+        local Players = game:GetService("Players")
+        local ReplicatedStorage = game:GetService("ReplicatedStorage")
+        local LocalPlayer = Players.LocalPlayer
+
+        -- olası item adları (Brookhaven’de görünüşleri farklı olabilir)
+        local possibleNames = {
+            "LollipopPeppermint",
+            "Lollipop_Peppermint",
+            "Lollipop",
+            "PeppermintLollipop"
         }
-        game:GetService("ReplicatedStorage").RE["1Playe1rTrigge1rEven1t"]:FireServer(unpack(args))
+
+        local re = ReplicatedStorage:FindFirstChild("RE")
+        local trigger = re and re:FindFirstChild("1Playe1rTrigge1rEven1t")
+        if not trigger then return end
+
+        for _, itemName in ipairs(possibleNames) do
+            pcall(function()
+                trigger:FireServer("AcceptedToolToServer", itemName, LocalPlayer)
+            end)
+        end
     end
 })
 
@@ -5684,32 +5699,85 @@ Tab:AddButton({
 })
 
 Tab:AddButton({
-    Title = "🤍 White Stick / Rod",
+    Title = "💎 Crystals",
     Locked = false,
     Callback = function()
         local Players = game:GetService("Players")
         local ReplicatedStorage = game:GetService("ReplicatedStorage")
         local LocalPlayer = Players.LocalPlayer
 
-        local possibleNames = {
-            "WhiteStick",
-            "WhiteRod",
-            "Rod",
-            "Stick"
+        local args = {
+            [1] = "AcceptedToolToServer",
+            [2] = "Crystals",
+            [3] = LocalPlayer
         }
 
         local re = ReplicatedStorage:FindFirstChild("RE")
-        local trigger = re and re:FindFirstChild("1Playe1rTrigge1rEven1t")
-        if not trigger then return end
+        if re and re:FindFirstChild("1Playe1rTrigge1rEven1t") then
+            re["1Playe1rTrigge1rEven1t"]:FireServer(unpack(args))
+        end
+    end
+})
 
-        for _, itemName in ipairs(possibleNames) do
-            pcall(function()
-                trigger:FireServer(
-                    "AcceptedToolToServer",
-                    itemName,
-                    LocalPlayer
-                )
-            end)
+Tab:AddButton({
+    Title = "📖 Agency Book",
+    Locked = false,
+    Callback = function()
+        local Players = game:GetService("Players")
+        local ReplicatedStorage = game:GetService("ReplicatedStorage")
+        local LocalPlayer = Players.LocalPlayer
+
+        local args = {
+            [1] = "AcceptedToolToServer",
+            [2] = "AgencyBook",
+            [3] = LocalPlayer
+        }
+
+        local re = ReplicatedStorage:FindFirstChild("RE")
+        if re and re:FindFirstChild("1Playe1rTrigge1rEven1t") then
+            re["1Playe1rTrigge1rEven1t"]:FireServer(unpack(args))
+        end
+    end
+})
+
+Tab:AddButton({
+    Title = "🔑 Power Key Card",
+    Locked = false,
+    Callback = function()
+        local Players = game:GetService("Players")
+        local ReplicatedStorage = game:GetService("ReplicatedStorage")
+        local LocalPlayer = Players.LocalPlayer
+
+        local args = {
+            [1] = "AcceptedToolToServer",
+            [2] = "PowerKeyCard",
+            [3] = LocalPlayer
+        }
+
+        local re = ReplicatedStorage:FindFirstChild("RE")
+        if re and re:FindFirstChild("1Playe1rTrigge1rEven1t") then
+            re["1Playe1rTrigge1rEven1t"]:FireServer(unpack(args))
+        end
+    end
+})
+
+Tab:AddButton({
+    Title = "⚡ 005 Arch Power Expired",
+    Locked = false,
+    Callback = function()
+        local Players = game:GetService("Players")
+        local ReplicatedStorage = game:GetService("ReplicatedStorage")
+        local LocalPlayer = Players.LocalPlayer
+
+        local args = {
+            [1] = "AcceptedToolToServer",
+            [2] = "005_ArchPowerExpired",
+            [3] = LocalPlayer
+        }
+
+        local re = ReplicatedStorage:FindFirstChild("RE")
+        if re and re:FindFirstChild("1Playe1rTrigge1rEven1t") then
+            re["1Playe1rTrigge1rEven1t"]:FireServer(unpack(args))
         end
     end
 })
