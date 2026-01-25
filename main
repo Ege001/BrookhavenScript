@@ -5416,13 +5416,14 @@ Tab:AddButton({
 --[[
     BROOKHAVEN SELECTABLE JOB SYSTEM (ADVANCED VISUAL VERSION)
     Açıklama: Meslekleri ikonlarıyla birlikte listeler.
-    Jobs2.txt verileriyle tam uyumludur ve sunucu senkronizasyonu içerir.
+    Karakter ismini değiştirmez, sadece Brookhaven Job sistemini tetikler.
+    Jobs2.txt verileriyle tam uyumludur.
 ]]
 
 local plr = game:GetService("Players").LocalPlayer
 local rs = game:GetService("ReplicatedStorage")
 
--- İş Listesi (İkonlarıyla birlikte)
+-- İş Listesi (Jobs2.txt verilerinden derlenmiştir)
 local JobsData = {
     {Name = "VIP", Icon = "18458871100"},
     {Name = "S.W.A.T.", Icon = "5214218197"},
@@ -5469,7 +5470,7 @@ local MainBtn = Instance.new("TextButton")
 MainBtn.Name = "OpenJobMenuBtn"
 MainBtn.Size = UDim2.new(0.96, 0, 0, 42)
 MainBtn.BackgroundColor3 = Color3.fromRGB(255, 170, 0)
-MainBtn.Text = "💼 MESLEK SEÇİMİ"
+MainBtn.Text = "💼 MESLEK SEÇİMİ (JOB)"
 MainBtn.TextColor3 = Color3.new(1, 1, 1)
 MainBtn.Font = Enum.Font.GothamBold
 MainBtn.TextSize = 14
@@ -5485,19 +5486,22 @@ local function SetJob(jobName, jobIcon)
     local trigger = rs:FindFirstChild("1Playe1rTrigge1rEven1t") 
         or rs:FindFirstChild("1PlayerTriggerEvent")
 
-    -- 1. Local Verileri Değiştir
+    -- 1. Local Verileri Değiştir (Sadece Job değerlerini hedefle)
     local pb = plr:FindFirstChild("PlayersBag")
     if pb and pb:FindFirstChild("Job") then
-        local job = pb.Job
+        local jobVal = pb.Job
         pcall(function()
-            job.Value = true
-            job.JobName.Value = jobName
-            job.JobTitlePic.Value = jobIcon
-            job.JobOrStudent.Value = true
+            -- Job aktiflik durumu
+            if jobVal:IsA("BoolValue") then jobVal.Value = true end
+            
+            -- Job özel değerleri
+            if jobVal:FindFirstChild("JobName") then jobVal.JobName.Value = jobName end
+            if jobVal:FindFirstChild("JobTitlePic") then jobVal.JobTitlePic.Value = jobIcon end
+            if jobVal:FindFirstChild("JobOrStudent") then jobVal.JobOrStudent.Value = true end
         end)
     end
 
-    -- 2. Sunucuya Gönder (Görünürlük)
+    -- 2. Sunucuya Senkronize Et (Diğer oyuncuların Billboard'unda değişmesi için)
     if trigger then
         local remoteCalls = {
             {"JobFeed", jobName, jobIcon},
@@ -5510,15 +5514,18 @@ local function SetJob(jobName, jobIcon)
         end
     end
 
-    -- 3. Billboard Güncelleme
+    -- 3. Billboard (Kafa Yazısı) Zorla Güncelleme
     local char = plr.Character
     if char and char:FindFirstChild("Head") then
         for _, gui in ipairs(char.Head:GetChildren()) do
             if gui:IsA("BillboardGui") then
-                local textLabel = gui:FindFirstChildWhichIsA("TextLabel")
-                local imageLabel = gui:FindFirstChildWhichIsA("ImageLabel")
+                -- Brookhaven'da meslek tabelası genellikle 'JobGui', 'RankGui' veya 'NameGui' içindeki alt labellar olur
+                -- Sadece mesleğe ait labelları güncelliyoruz, DisplayName'e dokunmuyoruz.
+                local textLabel = gui:FindFirstChild("JobText") or gui:FindFirstChild("RankText") or gui:FindFirstChildWhichIsA("TextLabel")
+                local imageLabel = gui:FindFirstChild("JobIcon") or gui:FindFirstChild("RankIcon") or gui:FindFirstChildWhichIsA("ImageLabel")
                 
-                if gui.Name == "JobGui" or gui.Name == "RankGui" or textLabel then
+                -- Eğer BillboardGui meslek ile alakalıysa
+                if gui.Name:lower():find("job") or gui.Name:lower():find("rank") then
                     if textLabel then textLabel.Text = jobName end
                     if imageLabel then imageLabel.Image = "rbxassetid://" .. jobIcon end
                 end
@@ -5536,7 +5543,7 @@ for i, data in ipairs(JobsData) do
     container.Position = UDim2.new(0, 7, 0, (i-1) * 40)
     container.BackgroundColor3 = (data.Name == "VIP") and Color3.fromRGB(180, 140, 0) or Color3.fromRGB(40, 40, 40)
     container.BorderSizePixel = 0
-    container.Text = "" -- Metni içerideki label ile yazacağız
+    container.Text = "" 
     container.Parent = JobMenu
     Instance.new("UICorner", container).CornerRadius = UDim.new(0, 6)
 
