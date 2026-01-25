@@ -4852,10 +4852,10 @@ local LocalPlayer = Players.LocalPlayer
 
 -- UI Kütüphanesine Ekle
 Tab:AddButton({
-    Title = "VIP & PREMIUM & ADSTORE BYPASS (NO WAIT)",
+    Title = "ADS & GAMEPASS BYPASS (FINAL)",
     Locked = false,
     Callback = function()
-        -- 1. ADIM: REKLAM KONTROLCÜSÜNÜ VE SÜRE BEKLEMESİNİ EZ
+        -- 1. ADIM: REKLAM KONTROLCÜSÜNÜ KÖKTEN KIR (MOBİL UYUMLU)
         spawn(function()
             local success, AdvertisementsController = pcall(function()
                 return require(ReplicatedStorage.Modules.Client.Ads.AdvertisementsController)
@@ -4864,52 +4864,47 @@ Tab:AddButton({
             if success and AdvertisementsController then
                 local Promise = require(ReplicatedStorage.Packages.Promise)
                 
-                -- Reklam süresini sınırsız yap (24 saatlik buffer)
+                -- Reklam süresini sınırsız yap ve her zaman hazır döndür
                 AdvertisementsController.GetUnlockedDuration = function() return 86400 end
                 AdvertisementsController.IsEligibleForRewardedVideoAd = function() return true end
                 AdvertisementsController.IsRewardedVideoAdReady = function()
                     return Promise.resolve(Enum.AdAvailabilityResult.IsAvailable)
                 end
+                
+                -- Mobilde butonun gelmesini sağlayan sahte reklam sinyali
+                if AdvertisementsController.FakeVideoAdToggled then
+                    AdvertisementsController.FakeVideoAdToggled:Fire(true)
+                end
 
-                -- Tüm veri çekme flaglerini 'true' yap
                 AdvertisementsController.AllPassesFetched = true
                 AdvertisementsController.AdsFetched = true
             end
         end)
 
-        -- 2. ADIM: TÜM PREMIUM VE VIP GAMEPASSLERİ AÇ
+        -- 2. ADIM: TÜM GAMEPASS KONTROLLERİNİ "SAHİP" OLARAK AYARLA
         spawn(function()
-            -- Gamepass Modülleri
-            local successG, GamepassUnlockController = pcall(function()
-                return require(ReplicatedStorage.Modules.Client.UI.GamepassUnlockController)
-            end)
             local successGC, GamepassController = pcall(function()
                 return require(ReplicatedStorage.Modules.Client.UI.Gamepass.GamepassController)
             end)
+            local successData, ReplicatedData = pcall(function()
+                return require(ReplicatedStorage.Modules.Client.Data.ReplicatedDataController)
+            end)
 
-            if successG then GamepassUnlockController.AllPassesFetched = true end
             if successGC then
-                -- Tüm gamepass sorgularına "EVET" cevabı ver
                 GamepassController.IsPermanentlyOwned = function() return true end
                 GamepassController.OwnsGamepass = function() return true end
             end
 
-            -- REPLICATED DATA BYPASS (Sunucu verisini kandır)
-            local successData, ReplicatedData = pcall(function()
-                return require(ReplicatedStorage.Modules.Client.Data.ReplicatedDataController)
-            end)
-            
             if successData and ReplicatedData then
                 local oldGetData = ReplicatedData.GetReplicatedData
                 ReplicatedData.GetReplicatedData = function(self, ...)
                     local data = oldGetData(self, ...)
                     if type(data) == "table" and data.session then
-                        -- VIP, Premium ve Tüm Gamepass ID'lerini aktif et
                         data.session.isVip = true
                         data.session.hasPremium = true
                         data.session.gamepasses = data.session.gamepasses or {}
                         
-                        -- Metatable ile olmayan ID'leri bile 'true' döndür
+                        -- Tüm ID'leri aktif et (Araçlar, Evler vb.)
                         setmetatable(data.session.gamepasses, {
                             __index = function() return true end
                         })
@@ -4919,51 +4914,49 @@ Tab:AddButton({
             end
         end)
 
-        -- 3. ADIM: ADSTORE X BUTONU VE BEKLETME SÜRELERİNİ KALDIR
+        -- 3. ADIM: SADECE ADS BUTONLARI VE X BUTONU YAMASI
         local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
         
-        -- Sürekli kontrol döngüsü (X butonlarını ve görünürlüğü yönetir)
         RunService.Heartbeat:Connect(function()
-            local MainGUIHandler = PlayerGui:FindFirstChild("MainGUIHandler")
-            local NoResetGUIHandler = PlayerGui:FindFirstChild("NoResetGUIHandler")
-            
-            local handlers = {MainGUIHandler, NoResetGUIHandler}
+            local handlers = {
+                PlayerGui:FindFirstChild("MainGUIHandler"),
+                PlayerGui:FindFirstChild("NoResetGUIHandler")
+            }
             
             for _, handler in pairs(handlers) do
                 if handler then
                     for _, obj in pairs(handler:GetDescendants()) do
                         local name = string.lower(obj.Name)
                         
-                        -- 1. Bekleme Sürelerini (Timer) ve Kilitleri Atla
-                        if obj:IsA("TextLabel") and (name:find("timer") or name:find("wait") or name:find("loading")) then
-                            obj.Text = "READY!"
-                            obj.Visible = false
-                        end
-
-                        -- 2. X (Kapatma) Butonlarını Beklemeden Aktif Et
+                        -- X (Kapatma) Butonlarını beklemesiz aktif et
                         if (name == "close" or name == "exit" or name == "x") and obj:IsA("GuiObject") then
                             obj.Visible = true
                             if obj:IsA("ImageButton") or obj:IsA("TextButton") then
                                 obj.Active = true
-                                obj.Interactable = true -- Bazı yeni sürümlerde bu özellik var
+                                obj.Interactable = true
+                                if obj:IsA("CanvasGroup") then obj.BlocksRaycasts = true end
                             end
                         end
 
-                        -- 3. AdStore ve Premium Panellerini Düzenle
-                        if name:find("adstore") or name:find("premium") or name:find("productunlock") then
-                            obj.Visible = obj.Visible -- Görünürlüğü koru ama içeriği düzelt
-                            
+                        -- Reklam (Ads) ve AdStore butonlarını zorla göster
+                        if name:find("adstore") or name:find("productunlock") or name:find("ads") then
+                            obj.Visible = true
                             for _, child in pairs(obj:GetDescendants()) do
-                                -- Fiyatları BEDAVA yap
-                                if child:IsA("TextLabel") and (child.Text:find("R$") or child.Text:find("%d+")) then
-                                    if not child.Parent:FindFirstChild("Icon") then -- Sadece fiyat etiketleri
-                                        child.Text = "FREE"
-                                    end
+                                -- Sayaçları ve kilitleri gizle
+                                if child:IsA("TextLabel") and (name:find("timer") or name:find("wait")) then
+                                    child.Visible = false
                                 end
-                                -- Butonları tıklanabilir yap
+                                -- Fiyatları "FREE" yap
+                                if child:IsA("TextLabel") and child.Text:find("R$") then
+                                    child.Text = "FREE"
+                                end
+                                -- Butonları ve ikonları aktif et
                                 if child:IsA("ImageButton") or child:IsA("TextButton") then
                                     child.Active = true
                                     child.Visible = true
+                                end
+                                if child.Name == "Lock" or child.Name == "Locked" then
+                                    child.Visible = false
                                 end
                             end
                         end
@@ -4972,21 +4965,10 @@ Tab:AddButton({
             end
         end)
 
-        -- 4. ADIM: AUTOMATIC UNLOCKER (DEX Tarzı Zorlama)
-        spawn(function()
-            local successExtend, ExtendUnlockController = pcall(function()
-                return require(ReplicatedStorage.Modules.Client.Ads.ExtendUnlockController)
-            end)
-            if successExtend then
-                -- Panel açıldığında bekleme callback'lerini temizle
-                debug.setconstant(ExtendUnlockController.ShowExtendCurrentHousePanel, 1, 0) 
-            end
-        end)
-
         -- Bildirim
         StarterGui:SetCore("SendNotification", {
-            Title = "PREMIUM & VIP UNLOCKED",
-            Text = "Tüm kilitler açıldı, X butonları beklemesiz aktif!",
+            Title = "FINAL BYPASS ACTIVE",
+            Text = "Reklam butonları ve Gamepassler aktif!",
             Duration = 5
         })
     end
