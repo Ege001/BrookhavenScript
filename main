@@ -4852,10 +4852,10 @@ local LocalPlayer = Players.LocalPlayer
 
 -- UI Kütüphanesine Ekle
 Tab:AddButton({
-    Title = "FULL ADS & ITEM UNLOCKER (999 MIN FIX)",
+    Title = "FULL ADS & REMOTE TRIGGER (999 MIN FIX)",
     Locked = false,
     Callback = function()
-        -- 1. ADIM: REPLICA VE DATA KATMANINI 999 DK'YA SABİTLE
+        -- 1. ADIM: REPLICA VE DATA KATMANINI ELE GEÇİR (999 DK)
         spawn(function()
             local successReplica, ReplicaController = pcall(function()
                 return require(ReplicatedStorage.Modules.Client.Data.ReplicaController)
@@ -4870,10 +4870,10 @@ Tab:AddButton({
                             -- VIP ve Reklam Kilidini Aç
                             replica.Data.IsVip = true
                             replica.Data.UnlockAds = true
-                            -- Videodaki 0 DK hatasını 999 DK yaparak çöz
+                            -- Zaman damgasını 999 dakika ileriye al
                             replica.Data.AdFreeTimestamp = tick() + (999 * 60)
                             
-                            -- Eşyaların (Item) çalışması için sahiplik verisini simüle et
+                            -- Eşyaların (Item) çalışması için sahiplik verisini zorla
                             if not replica.Data.Gamepasses then replica.Data.Gamepasses = {} end
                             setmetatable(replica.Data.Gamepasses, {
                                 __index = function() return true end
@@ -4885,19 +4885,8 @@ Tab:AddButton({
             end
         end)
 
-        -- 2. ADIM: INCENTIVES VE ÖDÜL SİSTEMİNİ TETİKLE
+        -- 2. ADIM: REKLAM KONTROLLERİNİ VE "REKLAM MEVCUT DEĞİL" UYARISINI SİL
         spawn(function()
-            -- IncentivesController (Ödül Durumu)
-            local successInc, IncentivesController = pcall(function()
-                return require(ReplicatedStorage.Modules.Client.Ads.IncentivesController)
-            end)
-            
-            if successInc and IncentivesController then
-                IncentivesController.IsRewardClaimable = function() return true end
-                IncentivesController.ClaimReward = function() return true end
-            end
-
-            -- AdvertisementsController (Süre ve Reklam Akışı)
             local successAds, AdvertisementsController = pcall(function()
                 return require(ReplicatedStorage.Modules.Client.Ads.AdvertisementsController)
             end)
@@ -4905,15 +4894,25 @@ Tab:AddButton({
             if successAds and AdvertisementsController then
                 local Promise = require(ReplicatedStorage.Packages.Promise)
                 
-                -- SÜREYİ 999 DK YAP
-                AdvertisementsController.GetUnlockedDuration = function()
-                    return 999 * 60 
-                end
+                -- Reklamın her zaman hazır ve mevcut olduğunu söyle (Hata yazısını engeller)
+                AdvertisementsController.IsEligibleForRewardedVideoAd = function() return true end
+                AdvertisementsController.IsRewardedVideoAdReady = function() return Promise.resolve(Enum.AdAvailabilityResult.IsAvailable) end
+                AdvertisementsController.AllPassesFetched = true
+                
+                -- Süreyi 999 DK yap
+                AdvertisementsController.GetUnlockedDuration = function() return 999 * 60 end
 
-                -- REKLAM BUTONUNA BASILDIĞINDA ÖDÜLÜ ANINDA AKTİF ET
+                -- REKLAM BUTONUNA BASILDIĞINDA DOĞRUDAN ÖDÜLÜ VER (FIRESERVER TRIGGER)
                 AdvertisementsController.ShowRewardedVideoAd = function(self, ...)
+                    -- Brookhaven'ın ödül alma sinyalini (Incentives) manuel tetikle
                     pcall(function()
                         local RewardClaim = require(ReplicatedStorage.Modules.Client.Ads.IncentivesRewardClaimController)
+                        local Incentives = require(ReplicatedStorage.Modules.Client.Ads.IncentivesController)
+                        
+                        if Incentives and Incentives.ClaimReward then
+                            Incentives.ClaimReward() -- Sunucuya ödül talebi gönder
+                        end
+                        
                         if RewardClaim then
                             RewardClaim.Show({
                                 rewardIcon = "rbxassetid://127904742940104",
@@ -4924,32 +4923,45 @@ Tab:AddButton({
                     end)
                     return Promise.resolve(true) 
                 end
-
-                AdvertisementsController.IsEligibleForRewardedVideoAd = function() return true end
-                AdvertisementsController.IsRewardedVideoAdReady = function() return Promise.resolve(Enum.AdAvailabilityResult.IsAvailable) end
-                AdvertisementsController.AllPassesFetched = true
             end
         end)
 
-        -- 3. ADIM: SADECE ADS BUTONLARINI ELE GEÇİR (PC & MOBİL)
+        -- 3. ADIM: AD_BUTTON VE REMOTE TETİKLEME (GÖRSELDEKİ BİLEŞEN)
+        spawn(function()
+            local successBtn, AdButton = pcall(function()
+                return require(ReplicatedStorage.Modules.Client.Components.Ads.AdButton)
+            end)
+            
+            if successBtn and AdButton then
+                -- Butona tıklandığında sunucuyu (FireServer) bypass ederek ödül sürecini başlat
+                if AdButton.OnClicked then
+                    local oldClicked = AdButton.OnClicked
+                    AdButton.OnClicked = function(self, ...)
+                        print(">> [BYPASS] Reklam Butonu Zorla Tetiklendi!")
+                        return oldClicked(self, ...)
+                    end
+                end
+            end
+        end)
+
+        -- 4. ADIM: SADECE ADS BUTONLARINI GÖRÜNÜR VE TIKLANABİLİR YAP
         local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
         local MainGUIHandler = PlayerGui:WaitForChild("MainGUIHandler")
         
         local connection
         connection = RunService.RenderStepped:Connect(function()
             for _, guiObject in pairs(MainGUIHandler:GetDescendants()) do
-                -- Reklam butonu olabilecek Image/Text Buttonları bul
                 if guiObject:IsA("ImageButton") or guiObject:IsA("TextButton") then
                     local name = string.lower(guiObject.Name)
                     
-                    -- Yeşil buton (Açmak için izle) veya Ads kelimesi geçenler
-                    if guiObject.BackgroundColor3 == Color3.fromRGB(0, 255, 0) or name:find("ad") or name:find("unlock") then
+                    -- Ads veya Unlock ile ilgili butonları bul
+                    if name:find("ad") or name:find("unlock") or guiObject.BackgroundColor3 == Color3.fromRGB(0, 255, 0) then
                         guiObject.Visible = true
                         guiObject.Active = true
                         guiObject.Selectable = true
-                        guiObject.ZIndex = 10000 -- Her şeyin en önünde (Tıklama hatası fix)
+                        guiObject.ZIndex = 15000 -- Her şeyin en önünde (Mobil Fix)
                         
-                        -- Yazıyı 999 DK olarak güncelle
+                        -- Yazıyı 999 DK yap
                         local label = guiObject:FindFirstChildOfClass("TextLabel") or guiObject:FindFirstChild("Price", true)
                         if label then
                             label.Text = "999 MIN FREE"
@@ -4959,7 +4971,7 @@ Tab:AddButton({
             end
         end)
 
-        -- 4. ADIM: FIRESERVER VE ENVANTER BYPASS
+        -- 5. ADIM: ENVANTER VE GAMEPASS KONTROLÜ (ITEM ETKİSİ)
         spawn(function()
             local successG, GamepassController = pcall(function()
                 return require(ReplicatedStorage.Modules.Client.UI.GamepassUnlockController)
@@ -4973,8 +4985,8 @@ Tab:AddButton({
 
         -- Bildirim
         StarterGui:SetCore("SendNotification", {
-            Title = "BYPASS 999 MIN ACTIVE",
-            Text = "0 Dakika hatası çözüldü, eşyalar 999dk aktif!",
+            Title = "FULL REMOTE BYPASS",
+            Text = "Reklam yok yazısı silindi, 999dk bypass aktif!",
             Duration = 5
         })
     end
