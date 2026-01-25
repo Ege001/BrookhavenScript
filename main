@@ -4867,12 +4867,13 @@ Tab:AddButton({
                 -- Reklam süresini sınırsız yap ve her zaman "Hazır" döndür
                 AdvertisementsController.GetUnlockedDuration = function() return 86400 end
                 AdvertisementsController.IsEligibleForRewardedVideoAd = function() return true end
+                
                 -- Reklamın mobil dahil her zaman kullanılabilir olduğunu doğrula
                 AdvertisementsController.IsRewardedVideoAdReady = function()
                     return Promise.resolve(Enum.AdAvailabilityResult.IsAvailable)
                 end
                 
-                -- Sahte video reklam özelliğini aç (Butonların gelmesi için)
+                -- Sahte video reklam özelliğini aç (Butonların gelmesi için zorunlu)
                 if AdvertisementsController.FakeVideoAdToggled then
                     AdvertisementsController.FakeVideoAdToggled:Fire(true)
                 end
@@ -4882,7 +4883,7 @@ Tab:AddButton({
             end
         end)
 
-        -- 2. ADIM: TÜM SHOP VE GAMEPASS ÖZELLİKLERİNİ FULL SÜRÜME GEÇİR
+        -- 2. ADIM: TÜM SHOP VE GAMEPASS ÖZELLİKLERİNİ FULL SÜRÜME GEÇİR (PATCHED KIRICI)
         spawn(function()
             local successG, GamepassUnlockController = pcall(function()
                 return require(ReplicatedStorage.Modules.Client.UI.GamepassUnlockController)
@@ -4896,18 +4897,18 @@ Tab:AddButton({
             end
             
             if successGC then
-                -- Kullanım yetkilerini ver
+                -- Kullanım yetkilerini kalıcı yap
                 GamepassController.IsPermanentlyOwned = function() return true end
                 GamepassController.OwnsGamepass = function() return true end
                 
-                -- VIP ve Premium sinyallerini zorla ateşle
+                -- VIP ve Premium sinyallerini zorla ateşle (Oyunun hemen tanıması için)
                 if GamepassController.OnGamepassUnlocked then
                     GamepassController.OnGamepassUnlocked:Fire("VIP")
                     GamepassController.OnGamepassUnlocked:Fire("Premium")
                 end
             end
 
-            -- ReplicatedData Bypass (Sunucuyu kandırma)
+            -- ReplicatedData Bypass (Sunucuyu tamamen kandırma)
             local successData, ReplicatedData = pcall(function()
                 return require(ReplicatedStorage.Modules.Client.Data.ReplicatedDataController)
             end)
@@ -4921,6 +4922,7 @@ Tab:AddButton({
                         data.session.hasPremium = true
                         data.session.gamepasses = data.session.gamepasses or {}
                         
+                        -- Tüm gamepass ID'lerini 'true' döndürerek araç/ev kilitlerini açar
                         setmetatable(data.session.gamepasses, {
                             __index = function() return true end
                         })
@@ -4944,32 +4946,33 @@ Tab:AddButton({
                     for _, obj in pairs(handler:GetDescendants()) do
                         local name = string.lower(obj.Name)
                         
-                        -- Sayaçları ve bekletme yazılarını sil
+                        -- 1. Sayaçları ve bekletme yazılarını sil
                         if obj:IsA("TextLabel") and (name:find("timer") or name:find("wait") or name:find("loading")) then
                             obj.Text = "READY!"
                             obj.Visible = false
                         end
 
-                        -- X Butonlarını mobilde ve PC'de anında aktif et
+                        -- 2. X Butonlarını mobilde ve PC'de anında aktif et (Bekletme Yok!)
                         if (name == "close" or name == "exit" or name == "x") and obj:IsA("GuiObject") then
                             obj.Visible = true
                             if obj:IsA("ImageButton") or obj:IsA("TextButton") then
                                 obj.Active = true
                                 obj.Interactable = true
-                                -- Mobil dokunmatik hassasiyeti ve tıklama engeli kaldırma
+                                -- Mobilde tıklama engeli kaldırma (Raycast Bypass)
                                 if obj:IsA("CanvasGroup") then obj.BlocksRaycasts = true end
-                                -- X butonu gecikmesini sağlayan scriptleri etkisiz kılmak için
-                                if obj:FindFirstChildOfClass("LocalScript") then
-                                    obj:FindFirstChildOfClass("LocalScript").Enabled = false
+                                
+                                -- X butonu gecikmesini sağlayan scriptleri kapat
+                                for _, script in pairs(obj:GetChildren()) do
+                                    if script:IsA("LocalScript") then script.Enabled = false end
                                 end
                             end
                         end
 
-                        -- Reklam (AdStore) butonlarını zorla göster
+                        -- 3. Reklam (Ads) ve AdStore butonlarını zorla göster
                         if name:find("adstore") or name:find("premium") or name:find("productunlock") or name:find("ads") then
                             obj.Visible = true
                             for _, child in pairs(obj:GetDescendants()) do
-                                -- Fiyatları kaldır
+                                -- Fiyatları kaldır, her şeyi bedava yap
                                 if child:IsA("TextLabel") and (child.Text:find("R$") or child.Text:find("%d+")) then
                                     if not child.Parent:FindFirstChild("Icon") then 
                                         child.Text = "FREE"
@@ -4991,13 +4994,13 @@ Tab:AddButton({
             end
         end)
 
-        -- 4. ADIM: MOBİL REKLAM ÇAĞIRICI (FORCED AD BUTTON)
+        -- 4. ADIM: MOBİL REKLAM ÇAĞIRICI (FORCED AD BUTTON - PATCHED)
         spawn(function()
             local successJoin, AdJoinController = pcall(function()
                 return require(ReplicatedStorage.Modules.Client.Ads.AdvertisementJoinController)
             end)
             if successJoin then
-                -- Reklam izleme ekranının mobilde gelmeme sorununu çözer
+                -- Reklamların mobilde gelmeme sorununu kökten çözer
                 AdJoinController.CheckAd = function() return true end
                 if AdJoinController.OnAdAvailabilityChanged then
                     AdJoinController.OnAdAvailabilityChanged:Fire(true)
@@ -5008,7 +5011,7 @@ Tab:AddButton({
         -- Bildirim
         StarterGui:SetCore("SendNotification", {
             Title = "ULTRA BYPASS ACTIVE",
-            Text = "Mobilde Reklamlar ve X Butonları Full Aktif!",
+            Text = "Reklamlar, X butonları ve tüm Gamepassler açıldı!",
             Duration = 5
         })
     end
