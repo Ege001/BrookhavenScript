@@ -5414,15 +5414,15 @@ Tab:AddButton({
         end)
 
 --[[
-    BROOKHAVEN SELECTABLE JOB SYSTEM (FULL VERSION)
-    Açıklama: Jobs2.txt dosyasındaki tüm meslekleri içerir. 
-    Karakterin üzerindeki Job Billboard'u günceller ve sunucuya senkronizasyon gönderir.
+    BROOKHAVEN SELECTABLE JOB SYSTEM (ADVANCED VISUAL VERSION)
+    Açıklama: Meslekleri ikonlarıyla birlikte listeler.
+    Jobs2.txt verileriyle tam uyumludur ve sunucu senkronizasyonu içerir.
 ]]
 
 local plr = game:GetService("Players").LocalPlayer
 local rs = game:GetService("ReplicatedStorage")
 
--- İş Listesi (Jobs2.txt ve Jobs.txt verileriyle güncellendi)
+-- İş Listesi (İkonlarıyla birlikte)
 local JobsData = {
     {Name = "VIP", Icon = "18458871100"},
     {Name = "S.W.A.T.", Icon = "5214218197"},
@@ -5433,7 +5433,6 @@ local JobsData = {
     {Name = "Starbrooks", Icon = "7607407475"},
     {Name = "Spy", Icon = "6241338674"},
     {Name = "Hospital", Icon = "5183367120"},
-    {Name = "Doctor", Icon = "5183367120"},
     {Name = "Firefighter", Icon = "5183368146"},
     {Name = "Bank", Icon = "5183368649"},
     {Name = "Actor", Icon = "5220910709"},
@@ -5441,7 +5440,6 @@ local JobsData = {
     {Name = "Singer", Icon = "5288270536"},
     {Name = "Teacher", Icon = "5183367647"},
     {Name = "Student", Icon = "5183367956"},
-    {Name = "Principal", Icon = "5288302265"},
     {Name = "Bodyguard", Icon = "5650351950"},
     {Name = "Grocery Store", Icon = "5183368377"},
     {Name = "Burger Barn", Icon = "6241436839"},
@@ -5453,25 +5451,25 @@ local JobsData = {
     {Name = "UTuber", Icon = "52882719"}
 }
 
--- Ana Panel (Kaydırılabilir Liste İçin)
+-- Ana Panel
 local JobMenu = Instance.new("ScrollingFrame")
 JobMenu.Name = "JobSelectorMenu"
-JobMenu.Size = UDim2.new(0, 200, 0, 250)
+JobMenu.Size = UDim2.new(0, 220, 0, 300)
 JobMenu.Position = UDim2.new(1, 10, 0, 0)
-JobMenu.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+JobMenu.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
 JobMenu.BorderSizePixel = 0
-JobMenu.CanvasSize = UDim2.new(0, 0, 0, #JobsData * 32)
-JobMenu.ScrollBarThickness = 5
+JobMenu.CanvasSize = UDim2.new(0, 0, 0, #JobsData * 40)
+JobMenu.ScrollBarThickness = 6
 JobMenu.Visible = false
-JobMenu.Parent = LeftFrame -- GUI panelinizin adı
-Instance.new("UICorner", JobMenu)
+JobMenu.Parent = LeftFrame -- GUI panelinizin yolu
+Instance.new("UICorner", JobMenu).CornerRadius = UDim.new(0, 10)
 
 -- Ana Aç/Kapat Butonu
 local MainBtn = Instance.new("TextButton")
 MainBtn.Name = "OpenJobMenuBtn"
-MainBtn.Size = UDim2.new(0.96, 0, 0, 38)
+MainBtn.Size = UDim2.new(0.96, 0, 0, 42)
 MainBtn.BackgroundColor3 = Color3.fromRGB(255, 170, 0)
-MainBtn.Text = "MESLEK LİSTESİ (JOB)"
+MainBtn.Text = "💼 MESLEK SEÇİMİ"
 MainBtn.TextColor3 = Color3.new(1, 1, 1)
 MainBtn.Font = Enum.Font.GothamBold
 MainBtn.TextSize = 14
@@ -5499,7 +5497,7 @@ local function SetJob(jobName, jobIcon)
         end)
     end
 
-    -- 2. Sunucuya Senkronize Et
+    -- 2. Sunucuya Gönder (Görünürlük)
     if trigger then
         local remoteCalls = {
             {"JobFeed", jobName, jobIcon},
@@ -5512,7 +5510,7 @@ local function SetJob(jobName, jobIcon)
         end
     end
 
-    -- 3. Kafa Üstündeki Billboard'u Güncelle
+    -- 3. Billboard Güncelleme
     local char = plr.Character
     if char and char:FindFirstChild("Head") then
         for _, gui in ipairs(char.Head:GetChildren()) do
@@ -5520,7 +5518,6 @@ local function SetJob(jobName, jobIcon)
                 local textLabel = gui:FindFirstChildWhichIsA("TextLabel")
                 local imageLabel = gui:FindFirstChildWhichIsA("ImageLabel")
                 
-                -- Billboard ismi genellikle JobGui veya RankGui olur
                 if gui.Name == "JobGui" or gui.Name == "RankGui" or textLabel then
                     if textLabel then textLabel.Text = jobName end
                     if imageLabel then imageLabel.Image = "rbxassetid://" .. jobIcon end
@@ -5532,22 +5529,38 @@ local function SetJob(jobName, jobIcon)
     JobMenu.Visible = false
 end
 
--- Butonları Listeye Ekle
+-- Butonları Oluşturma (İkonlu)
 for i, data in ipairs(JobsData) do
-    local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(1, -10, 0, 28)
-    btn.Position = UDim2.new(0, 5, 0, (i-1) * 32)
-    btn.BackgroundColor3 = (data.Name == "VIP") and Color3.fromRGB(180, 140, 0) or Color3.fromRGB(40, 40, 40)
-    btn.BorderSizePixel = 0
-    btn.Text = "  " .. data.Name
-    btn.TextXAlignment = Enum.TextXAlignment.Left
-    btn.TextColor3 = Color3.new(1, 1, 1)
-    btn.Font = Enum.Font.Gotham
-    btn.TextSize = 11
-    btn.Parent = JobMenu
-    Instance.new("UICorner", btn)
+    local container = Instance.new("TextButton")
+    container.Size = UDim2.new(1, -15, 0, 35)
+    container.Position = UDim2.new(0, 7, 0, (i-1) * 40)
+    container.BackgroundColor3 = (data.Name == "VIP") and Color3.fromRGB(180, 140, 0) or Color3.fromRGB(40, 40, 40)
+    container.BorderSizePixel = 0
+    container.Text = "" -- Metni içerideki label ile yazacağız
+    container.Parent = JobMenu
+    Instance.new("UICorner", container).CornerRadius = UDim.new(0, 6)
 
-    btn.MouseButton1Click:Connect(function()
+    -- Meslek İkonu
+    local iconImg = Instance.new("ImageLabel")
+    iconImg.Size = UDim2.new(0, 25, 0, 25)
+    iconImg.Position = UDim2.new(0, 5, 0.5, -12)
+    iconImg.BackgroundTransparency = 1
+    iconImg.Image = "rbxassetid://" .. data.Icon
+    iconImg.Parent = container
+
+    -- Meslek Metni
+    local jobText = Instance.new("TextLabel")
+    jobText.Size = UDim2.new(1, -40, 1, 0)
+    jobText.Position = UDim2.new(0, 35, 0, 0)
+    jobText.BackgroundTransparency = 1
+    jobText.Text = data.Name
+    jobText.TextColor3 = Color3.new(1, 1, 1)
+    jobText.Font = Enum.Font.GothamMedium
+    jobText.TextSize = 12
+    jobText.TextXAlignment = Enum.TextXAlignment.Left
+    jobText.Parent = container
+
+    container.MouseButton1Click:Connect(function()
         SetJob(data.Name, data.Icon)
     end)
 end
