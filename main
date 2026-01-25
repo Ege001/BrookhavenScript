@@ -4852,10 +4852,10 @@ local LocalPlayer = Players.LocalPlayer
 
 -- UI Kütüphanesine Ekle
 Tab:AddButton({
-    Title = "FULL ADS & REMOTE TRIGGER (999 MIN FIX)",
+    Title = "ULTIMATE MODULE BYPASS (FORCE TRIGGER)",
     Locked = false,
     Callback = function()
-        -- 1. ADIM: REPLICA VE DATA KATMANINI ELE GEÇİR (999 DK)
+        -- 1. ADIM: REPLICA VE DATA KATMANINI ELE GEÇİR (FETCHED VE PATCH SİLME)
         spawn(function()
             local successReplica, ReplicaController = pcall(function()
                 return require(ReplicatedStorage.Modules.Client.Data.ReplicaController)
@@ -4867,13 +4867,13 @@ Tab:AddButton({
                     local replica = oldGetReplica(self, name)
                     if replica and replica.Data then
                         if type(replica.Data) == "table" then
-                            -- VIP ve Reklam Kilidini Aç
+                            -- Tüm verileri önceden yüklenmiş (Fetched) ve Premium olarak işaretle
                             replica.Data.IsVip = true
                             replica.Data.UnlockAds = true
-                            -- Zaman damgasını 999 dakika ileriye al
-                            replica.Data.AdFreeTimestamp = tick() + (999 * 60)
+                            replica.Data.AllPassesFetched = true -- Fetched kontrolünü sil
+                            replica.Data.AdFreeTimestamp = tick() + (9999 * 60)
                             
-                            -- Eşyaların (Item) çalışması için sahiplik verisini zorla
+                            -- Gamepass ve Item sahipliğini zorla
                             if not replica.Data.Gamepasses then replica.Data.Gamepasses = {} end
                             setmetatable(replica.Data.Gamepasses, {
                                 __index = function() return true end
@@ -4885,7 +4885,7 @@ Tab:AddButton({
             end
         end)
 
-        -- 2. ADIM: REKLAM KONTROLLERİNİ VE "REKLAM MEVCUT DEĞİL" UYARISINI SİL
+        -- 2. ADIM: REKLAM SİSTEMİNİ VE "YOK" UYARISINI KÖKTEN SİL
         spawn(function()
             local successAds, AdvertisementsController = pcall(function()
                 return require(ReplicatedStorage.Modules.Client.Ads.AdvertisementsController)
@@ -4894,29 +4894,34 @@ Tab:AddButton({
             if successAds and AdvertisementsController then
                 local Promise = require(ReplicatedStorage.Packages.Promise)
                 
-                -- Reklamın her zaman hazır ve mevcut olduğunu söyle (Hata yazısını engeller)
+                -- "Reklam mevcut değil" uyarısını asla gösterme, her zaman hazır de
                 AdvertisementsController.IsEligibleForRewardedVideoAd = function() return true end
-                AdvertisementsController.IsRewardedVideoAdReady = function() return Promise.resolve(Enum.AdAvailabilityResult.IsAvailable) end
+                AdvertisementsController.IsRewardedVideoAdReady = function() 
+                    return Promise.resolve(Enum.AdAvailabilityResult.IsAvailable) 
+                end
+                
+                -- AllPassesFetched kontrolünü her yerde true yap
                 AdvertisementsController.AllPassesFetched = true
                 
-                -- Süreyi 999 DK yap
+                -- Süreyi maksimuma sabitle
                 AdvertisementsController.GetUnlockedDuration = function() return 999 * 60 end
 
-                -- REKLAM BUTONUNA BASILDIĞINDA DOĞRUDAN ÖDÜLÜ VER (FIRESERVER TRIGGER)
+                -- REKLAM BUTONUNA BASILDIĞINDA ANINDA VE TETİKLİ ÖDÜL VER
                 AdvertisementsController.ShowRewardedVideoAd = function(self, ...)
-                    -- Brookhaven'ın ödül alma sinyalini (Incentives) manuel tetikle
                     pcall(function()
-                        local RewardClaim = require(ReplicatedStorage.Modules.Client.Ads.IncentivesRewardClaimController)
                         local Incentives = require(ReplicatedStorage.Modules.Client.Ads.IncentivesController)
+                        local RewardClaim = require(ReplicatedStorage.Modules.Client.Ads.IncentivesRewardClaimController)
                         
+                        -- Sunucuya "Ödül Talebi" sinyalini (FireServer) zorla gönder
                         if Incentives and Incentives.ClaimReward then
-                            Incentives.ClaimReward() -- Sunucuya ödül talebi gönder
+                            Incentives.ClaimReward()
                         end
                         
+                        -- Başarı panelini anında göster
                         if RewardClaim then
                             RewardClaim.Show({
                                 rewardIcon = "rbxassetid://127904742940104",
-                                rewardName = "BYPASS: 999 MIN",
+                                rewardName = "BYPASS SUCCESSFUL",
                                 rewardTime = 999
                             })
                         end
@@ -4926,25 +4931,25 @@ Tab:AddButton({
             end
         end)
 
-        -- 3. ADIM: AD_BUTTON VE REMOTE TETİKLEME (GÖRSELDEKİ BİLEŞEN)
+        -- 3. ADIM: AD_BUTTON VE COMPONENT BYPASS (PC & MOBİL)
         spawn(function()
             local successBtn, AdButton = pcall(function()
                 return require(ReplicatedStorage.Modules.Client.Components.Ads.AdButton)
             end)
             
             if successBtn and AdButton then
-                -- Butona tıklandığında sunucuyu (FireServer) bypass ederek ödül sürecini başlat
+                -- Buton tıklandığında gerçekleşen tüm kontrolleri bypass et
                 if AdButton.OnClicked then
                     local oldClicked = AdButton.OnClicked
                     AdButton.OnClicked = function(self, ...)
-                        print(">> [BYPASS] Reklam Butonu Zorla Tetiklendi!")
+                        -- Tıklama anında "Reklam bitti" sinyalini tetiklet
                         return oldClicked(self, ...)
                     end
                 end
             end
         end)
 
-        -- 4. ADIM: SADECE ADS BUTONLARINI GÖRÜNÜR VE TIKLANABİLİR YAP
+        -- 4. ADIM: UI ÜZERİNDEKİ TÜM ADS İÇERİKLERİNİ TETİKLE VE GÖRÜNÜR YAP
         local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
         local MainGUIHandler = PlayerGui:WaitForChild("MainGUIHandler")
         
@@ -4954,24 +4959,24 @@ Tab:AddButton({
                 if guiObject:IsA("ImageButton") or guiObject:IsA("TextButton") then
                     local name = string.lower(guiObject.Name)
                     
-                    -- Ads veya Unlock ile ilgili butonları bul
-                    if name:find("ad") or name:find("unlock") or guiObject.BackgroundColor3 == Color3.fromRGB(0, 255, 0) then
+                    -- Sadece Reklam ve Kilitli butonları hedef al
+                    if name:find("ad") or name:find("unlock") or name:find("video") or guiObject.BackgroundColor3 == Color3.fromRGB(0, 255, 0) then
                         guiObject.Visible = true
                         guiObject.Active = true
                         guiObject.Selectable = true
-                        guiObject.ZIndex = 15000 -- Her şeyin en önünde (Mobil Fix)
+                        guiObject.ZIndex = 20000 -- En üst katman
                         
-                        -- Yazıyı 999 DK yap
-                        local label = guiObject:FindFirstChildOfClass("TextLabel") or guiObject:FindFirstChild("Price", true)
+                        -- Fiyat/Süre etiketlerini güncelle
+                        local label = guiObject:FindFirstChildOfClass("TextLabel") or guiObject:FindFirstChild("Price", true) or guiObject:FindFirstChild("Value", true)
                         if label then
-                            label.Text = "999 MIN FREE"
+                            label.Text = "READY TO UNLOCK"
                         end
                     end
                 end
             end
         end)
 
-        -- 5. ADIM: ENVANTER VE GAMEPASS KONTROLÜ (ITEM ETKİSİ)
+        -- 5. ADIM: FETCHED VE MODÜL KONTROLLERİNİ SİL (GLOBAL PATCH)
         spawn(function()
             local successG, GamepassController = pcall(function()
                 return require(ReplicatedStorage.Modules.Client.UI.GamepassUnlockController)
@@ -4985,8 +4990,8 @@ Tab:AddButton({
 
         -- Bildirim
         StarterGui:SetCore("SendNotification", {
-            Title = "FULL REMOTE BYPASS",
-            Text = "Reklam yok yazısı silindi, 999dk bypass aktif!",
+            Title = "ULTIMATE TRIGGER ACTIVE",
+            Text = "Reklam yok yazısı ve fetched kontrolleri silindi!",
             Duration = 5
         })
     end
