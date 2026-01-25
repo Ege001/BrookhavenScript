@@ -5414,14 +5414,17 @@ Tab:AddButton({
         end)
 
 --[[
-    BROOKHAVEN SELECTABLE JOB SYSTEM (ADVANCED VISUAL VERSION)
-    Açıklama: Meslekleri ikonlarıyla birlikte listeler.
-    Karakter ismini değiştirmez, sadece Brookhaven Job sistemini tetikler.
-    Jobs2.txt verileriyle tam uyumludur.
+    BROOKHAVEN SELECTABLE JOB SYSTEM (OFFICIAL COMPATIBILITY VERSION)
+    Açıklama: Brookhaven'ın orijinal meslek menüsü (Job Menu) mantığıyla çalışır.
+    İsim (DisplayName) değiştirmez, sadece resmi Job sistemini tetikler.
+    Jobs2.txt ve jobnam.txt verileriyle tam uyumludur.
 ]]
 
 local plr = game:GetService("Players").LocalPlayer
 local rs = game:GetService("ReplicatedStorage")
+
+-- Brookhaven'ın resmi Remote yapısı (jobnam.txt baz alınarak)
+local Remotes = require(rs:WaitForChild("Packages"):WaitForChild("Remotes"))
 
 -- İş Listesi (Jobs2.txt verilerinden derlenmiştir)
 local JobsData = {
@@ -5462,7 +5465,7 @@ JobMenu.BorderSizePixel = 0
 JobMenu.CanvasSize = UDim2.new(0, 0, 0, #JobsData * 40)
 JobMenu.ScrollBarThickness = 6
 JobMenu.Visible = false
-JobMenu.Parent = LeftFrame -- GUI panelinizin yolu
+JobMenu.Parent = LeftFrame -- GUI panelinizin yolu (Script'in çalıştığı yerdeki ana frame)
 Instance.new("UICorner", JobMenu).CornerRadius = UDim.new(0, 10)
 
 -- Ana Aç/Kapat Butonu
@@ -5481,58 +5484,33 @@ MainBtn.MouseButton1Click:Connect(function()
     JobMenu.Visible = not JobMenu.Visible
 end)
 
--- Meslek Ayarlama Fonksiyonu
+-- Meslek Ayarlama Fonksiyonu (Resmi Remotelar kullanılarak)
 local function SetJob(jobName, jobIcon)
-    local trigger = rs:FindFirstChild("1Playe1rTrigge1rEven1t") 
-        or rs:FindFirstChild("1PlayerTriggerEvent")
+    -- Brookhaven'ın orijinal iş verme ve çıkma sistemini tetikler
+    -- jobnam.txt'deki Remotes.fireServer("GiveJobUIMenu", jobName) mantığı
+    
+    pcall(function()
+        -- Önce varsa mevcut işten çık (Temiz geçiş için)
+        Remotes.fireServer("QuitJob", jobName)
+        task.wait(0.1)
+        -- Yeni işi resmi olarak al
+        Remotes.fireServer("GiveJobUIMenu", jobName)
+    end)
 
-    -- 1. Local Verileri Değiştir (Sadece Job değerlerini hedefle)
-    local pb = plr:FindFirstChild("PlayersBag")
-    if pb and pb:FindFirstChild("Job") then
-        local jobVal = pb.Job
-        pcall(function()
-            -- Job aktiflik durumu
-            if jobVal:IsA("BoolValue") then jobVal.Value = true end
-            
-            -- Job özel değerleri
-            if jobVal:FindFirstChild("JobName") then jobVal.JobName.Value = jobName end
-            if jobVal:FindFirstChild("JobTitlePic") then jobVal.JobTitlePic.Value = jobIcon end
-            if jobVal:FindFirstChild("JobOrStudent") then jobVal.JobOrStudent.Value = true end
-        end)
-    end
-
-    -- 2. Sunucuya Senkronize Et (Diğer oyuncuların Billboard'unda değişmesi için)
-    if trigger then
-        local remoteCalls = {
-            {"JobFeed", jobName, jobIcon},
-            {"JobTitle", jobName},
-            {"SetJob", jobName},
-            {"JobChange", jobName, jobIcon}
-        }
-        for _, args in ipairs(remoteCalls) do
-            pcall(function() trigger:FireServer(unpack(args)) end)
-        end
-    end
-
-    -- 3. Billboard (Kafa Yazısı) Zorla Güncelleme
+    -- Ek görsel güncelleme (Billboard/Kafa Yazısı için ekstra kontrol)
     local char = plr.Character
     if char and char:FindFirstChild("Head") then
         for _, gui in ipairs(char.Head:GetChildren()) do
-            if gui:IsA("BillboardGui") then
-                -- Brookhaven'da meslek tabelası genellikle 'JobGui', 'RankGui' veya 'NameGui' içindeki alt labellar olur
-                -- Sadece mesleğe ait labelları güncelliyoruz, DisplayName'e dokunmuyoruz.
-                local textLabel = gui:FindFirstChild("JobText") or gui:FindFirstChild("RankText") or gui:FindFirstChildWhichIsA("TextLabel")
-                local imageLabel = gui:FindFirstChild("JobIcon") or gui:FindFirstChild("RankIcon") or gui:FindFirstChildWhichIsA("ImageLabel")
-                
-                -- Eğer BillboardGui meslek ile alakalıysa
-                if gui.Name:lower():find("job") or gui.Name:lower():find("rank") then
-                    if textLabel then textLabel.Text = jobName end
-                    if imageLabel then imageLabel.Image = "rbxassetid://" .. jobIcon end
-                end
+            if gui:IsA("BillboardGui") and (gui.Name:lower():find("job") or gui.Name:lower():find("rank")) then
+                local textLabel = gui:FindFirstChildWhichIsA("TextLabel")
+                local imageLabel = gui:FindFirstChildWhichIsA("ImageLabel")
+                if textLabel then textLabel.Text = jobName end
+                if imageLabel then imageLabel.Image = "rbxassetid://" .. jobIcon end
             end
         end
     end
     
+    print("Resmi Brookhaven Mesleği Seçildi: " .. jobName)
     JobMenu.Visible = false
 end
 
