@@ -5762,7 +5762,7 @@ Tab:AddButton({
 })
 
 Tab:AddButton({
-    Title = "⚡ 005 Arch Power Expired",
+    Title = "Arch Power Expired",
     Locked = false,
     Callback = function()
         local Players = game:GetService("Players")
@@ -5771,7 +5771,7 @@ Tab:AddButton({
 
         local args = {
             [1] = "AcceptedToolToServer",
-            [2] = "005_ArchPowerExpired",
+            [2] = "ArchPowerExpired",
             [3] = LocalPlayer
         }
 
