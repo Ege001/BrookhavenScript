@@ -4852,10 +4852,10 @@ local LocalPlayer = Players.LocalPlayer
 
 -- UI Kütüphanesine Ekle
 Tab:AddButton({
-    Title = "ADS & ADSTORE BYPASS (ONLY)",
+    Title = "MAX EXPLOIT BYPASS (ADS & GAMEPASS)",
     Locked = false,
     Callback = function()
-        -- 1. ADIM: REPLICA ÜZERİNDEN REKLAM VERİLERİNİ FORCE ET
+        -- 1. ADIM: DATA VE REPLICA CONTROLLER KIRICI (DATABASE BYPASS)
         spawn(function()
             local successReplica, ReplicaController = pcall(function()
                 return require(ReplicatedStorage.Modules.Client.Data.ReplicaController)
@@ -4867,10 +4867,25 @@ Tab:AddButton({
                     local replica = oldGetReplica(self, name)
                     if replica and replica.Data then
                         if type(replica.Data) == "table" then
-                            -- Sadece Reklam ve AdStore Verileri
-                            replica.Data.UnlockAds = true
-                            replica.Data.AdFreeTimestamp = tick() + (999999 * 60)
+                            -- Tüm Fetch Kontrollerini Devre Dışı Bırak
                             replica.Data.AllPassesFetched = true
+                            replica.Data.AdsFetched = true
+                            
+                            -- Reklam ve Premium Verilerini Enjekte Et
+                            replica.Data.UnlockAds = true
+                            replica.Data.IsVip = true
+                            replica.Data.HasPremium = true
+                            replica.Data.AdFreeTimestamp = tick() + (999999 * 60)
+                            
+                            -- Eşya ve Prop Limitini Kır (9999 Props)
+                            replica.Data.PropLimit = 9999
+                            replica.Data.PropGamepass = true
+                            
+                            -- GAMEPASS TABLOSUNU ELE GEÇİR (OWNED BY DEFAULT)
+                            if not replica.Data.Gamepasses then replica.Data.Gamepasses = {} end
+                            setmetatable(replica.Data.Gamepasses, {
+                                __index = function() return true end -- Her sorguya 'sahipsin' cevabı ver
+                            })
                         end
                     end
                     return replica
@@ -4878,7 +4893,30 @@ Tab:AddButton({
             end
         end)
 
-        -- 2. ADIM: ADSTORE VE REKLAM CONTROLLER BYPASS
+        -- 2. ADIM: GAMEPASS & ROBUX CONTROLLER PATCH KIRICI
+        spawn(function()
+            -- GamepassController (IsPermanentlyOwned bypass)
+            local successGC, GC = pcall(function()
+                return require(ReplicatedStorage.Modules.Client.UI.Gamepass.GamepassController)
+            end)
+            if successGC and GC then
+                GC.IsPermanentlyOwned = function() return true end
+                GC.OwnsGamepass = function() return true end
+                if GC.OnGamepassUnlocked then
+                    GC.OnGamepassUnlocked:Fire("ALL_BYPASS")
+                end
+            end
+
+            -- Robux Panelini Kapat ve Otomatik Onayla
+            local successRGU, RGU = pcall(function()
+                return require(ReplicatedStorage.Modules.Client.UI.RobuxGamepassUnlockedController)
+            end)
+            if successRGU and RGU then
+                RGU.Show = function() return end -- Paneli gösterme, zaten açıldı
+            end
+        end)
+
+        -- 3. ADIM: ADS & ADSTORE TETİKLEME (REKLAMSIZ ERİŞİM)
         spawn(function()
             local successAds, AdvertisementsController = pcall(function()
                 return require(ReplicatedStorage.Modules.Client.Ads.AdvertisementsController)
@@ -4887,67 +4925,49 @@ Tab:AddButton({
             if successAds and AdvertisementsController then
                 local Promise = require(ReplicatedStorage.Packages.Promise)
                 
-                -- Reklam uygunluğunu ve hazırlığını her zaman 'true' yap
+                -- Patch: Reklam bekleme süresi ve uygunluk kontrollerini sil
                 AdvertisementsController.IsEligibleForRewardedVideoAd = function() return true end
                 AdvertisementsController.IsRewardedVideoAdReady = function() 
                     return Promise.resolve(Enum.AdAvailabilityResult.IsAvailable) 
                 end
-                
-                -- Kilidin açık kalma süresini maksimize et
                 AdvertisementsController.GetUnlockedDuration = function() return 9999 * 60 end
+                AdvertisementsController.AllPassesFetched = true
 
-                -- REKLAM BUTONUNA BASILDIĞINDA DOĞRUDAN ÖDÜLÜ VER VE ADSTORE'U AÇ
+                -- REKLAM BUTONU TETİKLEYİCİ
                 AdvertisementsController.ShowRewardedVideoAd = function(self, ...)
                     pcall(function()
+                        -- Reklam izlemeden ödülü claim et
                         local Incentives = require(ReplicatedStorage.Modules.Client.Ads.IncentivesController)
                         local AdStore = require(ReplicatedStorage.Modules.Client.Ads.AdStoreController)
-                        
-                        -- Sunucuya reklam izlendi sinyali gönder (Ödül talebi)
-                        if Incentives and Incentives.ClaimReward then
-                            Incentives.ClaimReward()
-                        end
-                        
-                        -- AdStore panelini anında kullanıcıya göster
-                        if AdStore then
-                            AdStore.Show()
-                        end
+                        if Incentives and Incentives.ClaimReward then Incentives.ClaimReward() end
+                        if AdStore then AdStore.Show() end
                     end)
                     return Promise.resolve(true) 
                 end
             end
         end)
 
-        -- 3. ADIM: ADLIST VE MAĞAZA İÇERİĞİNİ GÖRÜNÜR YAP
-        spawn(function()
-            local successAdList, AdListProvider = pcall(function()
-                return require(ReplicatedStorage.Modules.Client.Ads.AdListProvider)
-            end)
-            if successAdList and AdListProvider then
-                -- AdStore listesindeki tüm öğeleri erişilebilir yap
-                AdListProvider.IsItemUnlocked = function() return true end
-            end
-        end)
-
-        -- 4. ADIM: UI ÜZERİNDEKİ SADECE REKLAM BUTONLARINI GÜNCELLE
+        -- 4. ADIM: UI RENDERER - TÜM KİLİTLERİ VE YAZILARI GÜNCELLE
         local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
         local MainGUIHandler = PlayerGui:WaitForChild("MainGUIHandler")
         
-        local connection
-        connection = RunService.RenderStepped:Connect(function()
+        RunService.RenderStepped:Connect(function()
             for _, guiObject in pairs(MainGUIHandler:GetDescendants()) do
                 if guiObject:IsA("GuiObject") then
                     local name = string.lower(guiObject.Name)
                     
-                    -- Sadece reklam (ad), video ve adstore butonlarını hedefle
-                    if name:find("ad") or name:find("video") or name:find("adstore") then
+                    -- Ads, Gamepass, Prop, VIP, Unlock kelimelerini yakala
+                    if name:find("ad") or name:find("pass") or name:find("unlock") or name:find("prop") or name:find("vip") then
                         guiObject.Visible = true
                         guiObject.Active = true
-                        guiObject.Selectable = true
                         
-                        -- Buton metnini güncelle
-                        local label = guiObject:FindFirstChildOfClass("TextLabel") or guiObject:FindFirstChild("Value", true)
-                        if label and not label.Text:find("BYPASS") then
-                            label.Text = "ADS UNLOCKED"
+                        -- Fiyat etiketlerini ve kilit yazılarını temizle
+                        local label = guiObject:FindFirstChildOfClass("TextLabel") or guiObject:FindFirstChild("Value", true) or guiObject:FindFirstChild("Price", true)
+                        if label and not label.Text:find("OWNED") then
+                            label.Text = "OWNED / FREE"
+                            if guiObject:IsA("TextButton") then
+                                guiObject.BackgroundColor3 = Color3.fromRGB(0, 200, 0) -- Yeşil yap (Açık olduğunu belli et)
+                            end
                         end
                     end
                 end
@@ -4956,8 +4976,8 @@ Tab:AddButton({
 
         -- Bildirim
         StarterGui:SetCore("SendNotification", {
-            Title = "ADS BYPASS ACTIVE",
-            Text = "Only Ads and AdStore system fully unlocked!",
+            Title = "MAX BYPASS UNLOCKED",
+            Text = "Tüm Gamepassler, Props ve Reklamlar Kırıldı!",
             Duration = 5
         })
     end
