@@ -2555,7 +2555,7 @@ game:GetService("ReplicatedStorage").Remotes.PlayerSpawnedVehicle.OnClientEvent:
 end)
 
 CarTab:AddTextBox({
-    Name = "🛞 Decal ID",
+    Name = "Decal",
     Description = "ID do decal",
     Default = "",
     PlaceholderText = "Xeno",
@@ -2571,7 +2571,7 @@ CarTab:AddTextBox({
 })
 
 CarTab:AddButton({
-    Name = "✅ Aplicar Decal",
+    Name = "Aplicar",
     Callback = function()
         if CurrentDecal and CurrentDecal:len() > 0 then
             ApplyDecal(CurrentDecal)
